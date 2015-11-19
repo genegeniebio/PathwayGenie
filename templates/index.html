@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block body %}
+   <form action="{{ url_for('submit') }}" method="post" class="add-entry">
+     <dl>
+       <dt>Protein ids: <input type="text" size="30" name="protein_ids"></dt>
+       <!--
+       <dt>Taxonomy id: <input type="text" size="30" name="taxonomy_id"></dt>
+       -->
+       <dt>Target length: <input type="text" size="30" name="len_target"></dt>
+       <dt>Target TIR: <input type="text" size="30" name="tir_target"></dt>
+       <dt>Protein ids: <input type="submit" value="Submit">
+     </dl>
+   </form>
+{% endblock %}
