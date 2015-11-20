@@ -10,6 +10,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import math
 import random
 import sys
+from threading import Thread
 
 import RBS_Calculator
 import RBS_MC_Design
@@ -226,6 +227,24 @@ class RBSSolution(object):
                 self.__seqs[0] + '\t' + self.__seqs[1] + '\t' + cds + '\t' + \
                 self.__seqs[3] + '\t' + \
                 ('' if self.__seqs[4] is None else self.__seqs[4])
+
+
+class RBSThread(Thread):
+    '''Wraps a RBS optimisation job into a thread.'''
+
+    def __init__(self, protein_ids, taxonomy_id, len_target, tir_target):
+        self.__protein_ids = protein_ids
+        self.__taxonomy_id = taxonomy_id
+        self.__len_target = len_target
+        self.__tir_target = tir_target
+        Thread.__init__(self)
+
+    def run(self):
+        sim_ann.optimise(RBSSolution(self.__protein_ids,
+                                     self.__taxonomy_id,
+                                     self.__len_target,
+                                     self.__tir_target),
+                         verbose=True)
 
 
 def _get_tirs(dgs):
