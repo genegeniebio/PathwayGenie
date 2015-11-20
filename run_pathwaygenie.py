@@ -3,20 +3,20 @@ Created on 19 Nov 2015
 
 @author: neilswainston
 '''
-import ast
+# import ast
 import time
 import uuid
 
-from flask import Flask, Response, render_template, request
+from flask import Flask, Response, render_template, session
 
-from rbs import RBSThread
+import job
 
 
-# configuration
+# Configuration:
 DEBUG = True
 SECRET_KEY = str(uuid.uuid4())
 
-# create our little application :)
+# Create application:
 app = Flask(__name__)
 app.config.from_object(__name__)
 
@@ -30,13 +30,16 @@ def home():
 @app.route('/submit', methods=['POST'])
 def submit():
     '''Responds to submission.'''
-    protein_ids = ast.literal_eval(request.form['protein_ids'])
-    taxonomy_id = '83333'
-    len_target = int(request.form['len_target'])
-    tir_target = float(request.form['tir_target'])
+    # protein_ids = ast.literal_eval(request.form['protein_ids'])
+    # taxonomy_id = '83333'
+    # len_target = int(request.form['len_target'])
+    # tir_target = float(request.form['tir_target'])
 
     # Do job in new thread, return result when completed:
-    thread = RBSThread(protein_ids, taxonomy_id, len_target, tir_target)
+    session['progress'] = 0
+    listener = Listener()
+    thread = job.JobThread()
+    thread.add_listener(listener)
     thread.start()
 
     return render_template('submitted.html')
@@ -45,18 +48,23 @@ def submit():
 @app.route('/progress')
 def get_progress():
     '''Returns job progress.'''
-    in_progress = True
+    return Response(_check_progress(), mimetype='text/event-stream')
 
-    def check_progress():
-        '''Checks job progress.'''
-        prog = 0
-        while in_progress:
-            print prog
-            prog = (prog + 10) % 100
-            time.sleep(1)
-            yield "data:" + str(prog) + "\n\n"
 
-    return Response(check_progress(), mimetype='text/event-stream')
+def _check_progress():
+    '''Checks job progress.'''
+    while True:
+        print session['progress']
+        time.sleep(0.1)
+        yield "data:" + str(session['progress']) + "\n\n"
+
+
+class Listener(object):
+    '''Simple event listener.'''
+
+    def event_fired(self, event):
+        '''Responds to event being fired.'''
+        session['progress'] = event
 
 
 if __name__ == '__main__':
