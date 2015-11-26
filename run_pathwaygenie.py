@@ -6,8 +6,8 @@ Created on 19 Nov 2015
 # import ast
 import time
 import uuid
-
-from flask import Flask, Response, render_template, session
+from flask import Flask, Response, copy_current_request_context, \
+    render_template, session
 
 import job
 
@@ -36,11 +36,13 @@ def submit():
     # tir_target = float(request.form['tir_target'])
 
     # Do job in new thread, return result when completed:
-    session['progress'] = 0
-    listener = Listener()
-    thread = job.JobThread()
-    thread.add_listener(listener)
-    thread.start()
+    session['progress'] = 13
+
+    with app.test_request_context():
+        listener = Listener()
+        thread = job.JobThread()
+        thread.add_listener(listener)
+        thread.start()
 
     return render_template('submitted.html')
 
@@ -48,15 +50,15 @@ def submit():
 @app.route('/progress')
 def get_progress():
     '''Returns job progress.'''
+    @copy_current_request_context
+    def _check_progress():
+        '''Checks job progress.'''
+        while True:
+            print session['progress']
+            time.sleep(0.1)
+            yield "data:" + str(session['progress']) + "\n\n"
+
     return Response(_check_progress(), mimetype='text/event-stream')
-
-
-def _check_progress():
-    '''Checks job progress.'''
-    while True:
-        print session['progress']
-        time.sleep(0.1)
-        yield "data:" + str(session['progress']) + "\n\n"
 
 
 class Listener(object):

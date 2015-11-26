@@ -31,7 +31,7 @@ class JobThread(Thread):
         progress = 0
 
         while progress < 100:
-            time.sleep(1)
+            time.sleep(5)
             self._fire_event(progress)
             progress += 1
 
