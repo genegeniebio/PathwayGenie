@@ -1,14 +1,58 @@
-{% extends "layout.html" %}
-{% block body %}
-   <form action="{{ url_for('submit') }}" method="post" class="add-entry">
-     <dl>
-       <dt>Protein ids: <input type="text" size="30" name="protein_ids"></dt>
-       <!--
+{% extends "layout.html" %} {% block body %}
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		$('#form').on('submit', function(ev) {
+			
+			ev.preventDefault();
+			
+			$('#progress-modal').modal('show'); 
+			
+			$.post("{{ url_for('submit') }}", $(this).serialize(), function(response) { // Required Callback Function
+	             $("#model-content").html(response);//"response" receives - whatever written in echo of above PHP script.
+	          });
+		});
+	});
+</script>
+
+<form id="form">
+	<dl>
+		<dt>
+			Protein ids: <input type="text" size="30" name="protein_ids">
+		</dt>
+		<!--
        <dt>Taxonomy id: <input type="text" size="30" name="taxonomy_id"></dt>
        -->
-       <dt>Target length: <input type="text" size="30" name="len_target"></dt>
-       <dt>Target TIR: <input type="text" size="30" name="tir_target"></dt>
-       <dt>Protein ids: <input type="submit" value="Submit">
-     </dl>
-   </form>
+		<dt>
+			Target length: <input type="text" size="30" name="len_target">
+		</dt>
+		<dt>
+			Target TIR: <input type="text" size="30" name="tir_target">
+		</dt>
+		<dt>
+			Protein ids: <input type="submit" value="Submit">
+		</dt>
+	</dl>
+</form>
+
+<!-- Modal -->
+<div id="progress-modal" class="modal fade" role="dialog">
+	<div class="modal-dialog">
+
+		<!-- Modal content-->
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">PathwayGenie dashboard</h4>
+			</div>
+			<div class="modal-body">
+				<div id="model-content"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+
+	</div>
+</div>
 {% endblock %}

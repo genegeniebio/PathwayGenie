@@ -51,10 +51,11 @@ def get_progress(job_id):
     '''Returns job progress.'''
     def _check_progress(job_id):
         '''Checks job progress.'''
-        while True:
-            print _PROGRESS[job_id]
+        while _PROGRESS[job_id] < 100:
             time.sleep(5)
             yield "data:" + str(_PROGRESS[job_id]) + "\n\n"
+
+        yield "data:" + str(_PROGRESS[job_id]) + "\n\n"
 
     return Response(_check_progress(job_id), mimetype='text/event-stream')
 
