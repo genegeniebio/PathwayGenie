@@ -1,39 +1,57 @@
 {% extends "layout.html" %} {% block body %}
 
 <script type="text/javascript">
-	$(document).ready(function() {
-		$('#form').on('submit', function(ev) {
-			
-			ev.preventDefault();
-			
-			$('#progress-modal').modal('show'); 
-			
-			$.post("{{ url_for('submit') }}", $(this).serialize(), function(response) { // Required Callback Function
-	             $("#model-content").html(response);//"response" receives - whatever written in echo of above PHP script.
-	          });
-		});
-	});
+	$(document).ready(
+			function() {
+				$('#form').on(
+						'submit',
+						function(ev) {
+
+							ev.preventDefault();
+
+							$('#progress-modal').modal('show');
+
+							$.post("{{ url_for('submit') }}", $(this)
+									.serialize(), function(response) {
+								$("#model-content").html(response);
+							});
+						});
+			});
 </script>
 
-<form id="form">
-	<dl>
-		<dt>
-			Protein ids: <input type="text" size="30" name="protein_ids">
-		</dt>
-		<!--
-       <dt>Taxonomy id: <input type="text" size="30" name="taxonomy_id"></dt>
-       -->
-		<dt>
-			Target length: <input type="text" size="30" name="len_target">
-		</dt>
-		<dt>
-			Target TIR: <input type="text" size="30" name="tir_target">
-		</dt>
-		<dt>
-			Protein ids: <input type="submit" value="Submit">
-		</dt>
-	</dl>
-</form>
+<div class="container">
+	<form id="form" class="form-horizontal" role="form">
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="protein_ids">Protein
+				ids:</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" id="protein_ids"
+					placeholder="Enter protein ids">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="len_target">Target
+				length:</label>
+			<div class="col-sm-10">
+				<input type="number" class="form-control" id="len_target"
+					placeholder="Enter target length">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-sm-2" for="tir_target">Target
+				TIR:</label>
+			<div class="col-sm-10">
+				<input type="number" class="form-control" id="tir_target"
+					placeholder="Enter target TIR">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="submit" class="btn btn-default">Submit</button>
+			</div>
+		</div>
+	</form>
+</div>
 
 <!-- Modal -->
 <div id="progress-modal" class="modal fade" role="dialog">

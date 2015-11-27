@@ -1,7 +1,11 @@
 '''
-Created on 20 Nov 2015
+PathwayGenie (c) University of Manchester 2015
 
-@author: neilswainston
+PathwayGenie is licensed under the MIT License.
+
+To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
+
+@author:  neilswainston
 '''
 from threading import Thread
 

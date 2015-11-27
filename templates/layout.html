@@ -1,9 +1,20 @@
 <!doctype html>
+
 <title>PathwayGenie</title>
+
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-<div class="page">
-	<h1>PathwayGenie</h1>
-	{% block body %}{% endblock %}
-</div>
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="http://www.synbiochem.co.uk">
+        <span><img alt="Brand" src="{{ url_for('static', filename='synbiochem.png') }}"></span>
+        PathwayGenie
+      </a>
+    </div>
+  </div>
+</nav>
+
+{% block body %}{% endblock %}

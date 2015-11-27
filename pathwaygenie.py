@@ -1,8 +1,15 @@
 '''
-Created on 19 Nov 2015
+PathwayGenie (c) University of Manchester 2015
 
-@author: neilswainston
+PathwayGenie is licensed under the MIT License.
+
+To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
+
+@author:  neilswainston
 '''
+# pylint: disable=no-self-use
+# pylint: disable=too-few-public-methods
+
 import time
 import uuid
 from flask import Flask, Response, render_template
