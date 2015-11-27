@@ -3,11 +3,9 @@ Created on 19 Nov 2015
 
 @author: neilswainston
 '''
-# import ast
 import time
 import uuid
-from flask import Flask, Response, copy_current_request_context, \
-    render_template, session
+from flask import Flask, Response, render_template
 
 import job
 
@@ -17,17 +15,19 @@ DEBUG = True
 SECRET_KEY = str(uuid.uuid4())
 
 # Create application:
-app = Flask(__name__)
-app.config.from_object(__name__)
+_APP = Flask(__name__)
+_APP.config.from_object(__name__)
+
+_PROGRESS = {}
 
 
-@app.route('/')
+@_APP.route('/')
 def home():
     '''Renders homepage.'''
     return render_template('index.html')
 
 
-@app.route('/submit', methods=['POST'])
+@_APP.route('/submit', methods=['POST'])
 def submit():
     '''Responds to submission.'''
     # protein_ids = ast.literal_eval(request.form['protein_ids'])
@@ -36,29 +36,27 @@ def submit():
     # tir_target = float(request.form['tir_target'])
 
     # Do job in new thread, return result when completed:
-    session['progress'] = 13
+    job_id = str(uuid.uuid4())
+    _PROGRESS[job_id] = 0
+    listener = Listener()
+    thread = job.JobThread(job_id)
+    thread.add_listener(listener)
+    thread.start()
 
-    with app.test_request_context():
-        listener = Listener()
-        thread = job.JobThread()
-        thread.add_listener(listener)
-        thread.start()
-
-    return render_template('submitted.html')
+    return render_template('submitted.html', job_id=job_id)
 
 
-@app.route('/progress')
-def get_progress():
+@_APP.route('/progress/<job_id>')
+def get_progress(job_id):
     '''Returns job progress.'''
-    @copy_current_request_context
-    def _check_progress():
+    def _check_progress(job_id):
         '''Checks job progress.'''
         while True:
-            print session['progress']
-            time.sleep(0.1)
-            yield "data:" + str(session['progress']) + "\n\n"
+            print _PROGRESS[job_id]
+            time.sleep(5)
+            yield "data:" + str(_PROGRESS[job_id]) + "\n\n"
 
-    return Response(_check_progress(), mimetype='text/event-stream')
+    return Response(_check_progress(job_id), mimetype='text/event-stream')
 
 
 class Listener(object):
@@ -66,8 +64,8 @@ class Listener(object):
 
     def event_fired(self, event):
         '''Responds to event being fired.'''
-        session['progress'] = event
+        _PROGRESS[event.get_job_id()] = event.get_progress()
 
 
 if __name__ == '__main__':
-    app.run()
+    _APP.run()
