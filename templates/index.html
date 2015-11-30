@@ -7,17 +7,27 @@
 		{
 			event.preventDefault();
 
-			$('#progress-modal').modal('show');
-
-			$.post("{{ url_for('submit') }}", $(this).serialize(), function(event)
+			$.post("{{ url_for('submit') }}", $(this).serialize(), function(job_id)
 			{
-				document.getElementById("demo").innerHTML = event;
-				$('.progress-bar').css('width', event.data + '%').attr('aria-valuenow', event.data);
+				listen(job_id)
 			});
 		});
+		
+		function listen(job_id)
+		{
+			$('#progress-modal').modal('show');
+			
+			var source = new EventSource("/progress/" + job_id);
+			
+			source.onmessage = function(event)
+			{
+				$('.progress-bar').css('width', event.data + '%').attr('aria-valuenow', event.data);
+			}
+		}
 	});
 </script>
 
+<!-- Submission Form -->
 <div class="container">
 	<form id="form" class="form-horizontal" role="form">
 		<div class="form-group">
@@ -46,7 +56,7 @@
 	</form>
 </div>
 
-<!-- Modal -->
+<!-- Progress Modal -->
 <div id="progress-modal" class="modal fade" role="dialog">
 	<div class="modal-dialog">
 
@@ -67,7 +77,6 @@
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 			</div>
 		</div>
-
 	</div>
 </div>
 {% endblock %}

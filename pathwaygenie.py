@@ -50,6 +50,12 @@ def submit():
     thread.add_listener(listener)
     thread.start()
 
+    return job_id
+
+
+@_APP.route('/progress/<job_id>')
+def progress(job_id):
+    '''Returns progress of job.'''
     def _check_progress(job_id):
         '''Checks job progress.'''
         while _PROGRESS[job_id] < 100:
