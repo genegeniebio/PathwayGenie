@@ -50,16 +50,11 @@ def submit():
     thread.add_listener(listener)
     thread.start()
 
-    return render_template('submitted.html', job_id=job_id)
-
-
-@_APP.route('/progress/<job_id>')
-def get_progress(job_id):
-    '''Returns job progress.'''
     def _check_progress(job_id):
         '''Checks job progress.'''
         while _PROGRESS[job_id] < 100:
-            time.sleep(5)
+            print _PROGRESS[job_id]
+            time.sleep(1)
             yield "data:" + str(_PROGRESS[job_id]) + "\n\n"
 
         yield "data:" + str(_PROGRESS[job_id]) + "\n\n"

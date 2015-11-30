@@ -36,12 +36,13 @@ class JobThread(Thread):
         progress = 0
 
         while progress < 100:
-            time.sleep(1)
+            time.sleep(0.1)
             evt = Event(self.__job_id, progress)
             self._fire_event(evt)
             progress += 1
 
-        return 'Done!!'
+        evt = Event(self.__job_id, progress)
+        self._fire_event(evt)
 
     def _fire_event(self, event):
         '''Fires an event to event listeners.'''
