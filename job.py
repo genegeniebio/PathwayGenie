@@ -37,35 +37,14 @@ class JobThread(Thread):
 
         while progress < 100:
             time.sleep(0.1)
-            evt = Event(self.__job_id, progress)
+            evt = {'job_id': self.__job_id, 'progress': progress}
             self._fire_event(evt)
             progress += 1
 
-        evt = Event(self.__job_id, progress)
+        evt = {'job_id': self.__job_id, 'progress': progress}
         self._fire_event(evt)
 
     def _fire_event(self, event):
         '''Fires an event to event listeners.'''
         for listener in self.__listeners:
             listener.event_fired(event)
-
-
-class Event(object):
-    '''Class to represent a simple event.'''
-
-    def __init__(self, job_id, progress, value=None):
-        self.__job_id = job_id
-        self.__progress = progress
-        self.__value = value
-
-    def get_job_id(self):
-        '''Gets job id.'''
-        return self.__job_id
-
-    def get_progress(self):
-        '''Gets progress.'''
-        return self.__progress
-
-    def get_value(self):
-        '''Gets value.'''
-        return self.__value

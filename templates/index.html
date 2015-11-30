@@ -21,7 +21,8 @@
 			
 			source.onmessage = function(event)
 			{
-				$('.progress-bar').css('width', event.data + '%').attr('aria-valuenow', event.data);
+				json = JSON.parse(event.data);
+				$('.progress-bar').css('width', json.progress + '%').attr('aria-valuenow', json.progress);
 			}
 		}
 	});
@@ -67,7 +68,6 @@
 				<h4 class="modal-title">PathwayGenie dashboard</h4>
 			</div>
 			<div class="modal-body">
-			<p id="demo"></p>
 				<div class="progress">
 					<div class="progress-bar" role="progressbar" aria-valuenow="0"
 							aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>

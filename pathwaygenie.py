@@ -10,6 +10,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=no-self-use
 # pylint: disable=too-few-public-methods
 
+import json
 import time
 import uuid
 from flask import Flask, Response, render_template
@@ -25,7 +26,7 @@ SECRET_KEY = str(uuid.uuid4())
 _APP = Flask(__name__)
 _APP.config.from_object(__name__)
 
-_PROGRESS = {}
+_STATUS = {}
 
 
 @_APP.route('/')
@@ -44,7 +45,7 @@ def submit():
 
     # Do job in new thread, return result when completed:
     job_id = str(uuid.uuid4())
-    _PROGRESS[job_id] = 0
+    _STATUS[job_id] = {'job_id': job_id, 'progress': 0}
     listener = Listener()
     thread = job.JobThread(job_id)
     thread.add_listener(listener)
@@ -58,14 +59,20 @@ def progress(job_id):
     '''Returns progress of job.'''
     def _check_progress(job_id):
         '''Checks job progress.'''
-        while _PROGRESS[job_id] < 100:
-            print _PROGRESS[job_id]
+        while _STATUS[job_id]['progress'] < 100:
+            print _STATUS[job_id]['progress']
             time.sleep(1)
-            yield "data:" + str(_PROGRESS[job_id]) + "\n\n"
+            yield "data:" + _get_response(job_id) + "\n\n"
 
-        yield "data:" + str(_PROGRESS[job_id]) + "\n\n"
+        print _STATUS[job_id]['progress']
+        yield "data:" + _get_response(job_id) + "\n\n"
 
     return Response(_check_progress(job_id), mimetype='text/event-stream')
+
+
+def _get_response(job_id):
+    '''Returns current progress for job id.'''
+    return json.dumps(_STATUS[job_id])
 
 
 class Listener(object):
@@ -73,7 +80,7 @@ class Listener(object):
 
     def event_fired(self, event):
         '''Responds to event being fired.'''
-        _PROGRESS[event.get_job_id()] = event.get_progress()
+        _STATUS[event['job_id']] = event
 
 
 if __name__ == '__main__':
