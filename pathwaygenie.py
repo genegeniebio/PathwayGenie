@@ -27,6 +27,7 @@ _APP = Flask(__name__)
 _APP.config.from_object(__name__)
 
 _STATUS = {}
+_THREADS = {}
 
 
 @_APP.route('/')
@@ -49,6 +50,7 @@ def submit():
     listener = Listener()
     thread = job.JobThread(job_id)
     thread.add_listener(listener)
+    _THREADS[job_id] = thread
     thread.start()
 
     return job_id
@@ -60,14 +62,18 @@ def progress(job_id):
     def _check_progress(job_id):
         '''Checks job progress.'''
         while _STATUS[job_id]['progress'] < 100:
-            print _STATUS[job_id]['progress']
             time.sleep(1)
             yield "data:" + _get_response(job_id) + "\n\n"
 
-        print _STATUS[job_id]['progress']
         yield "data:" + _get_response(job_id) + "\n\n"
 
     return Response(_check_progress(job_id), mimetype='text/event-stream')
+
+
+@_APP.route('/cancel/<job_id>')
+def cancel(job_id):
+    '''Cancels job.'''
+    _THREADS[job_id].cancel()
 
 
 def _get_response(job_id):

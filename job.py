@@ -16,7 +16,12 @@ class JobThread(Thread):
     def __init__(self, job_id):
         Thread.__init__(self)
         self.__job_id = job_id
+        self.__cancelled = False
         self.__listeners = set()
+
+    def cancel(self):
+        '''Cancels the current job.'''
+        self.__cancelled = True
 
     def add_listener(self, listener):
         '''Adds an event listener.'''
@@ -35,13 +40,17 @@ class JobThread(Thread):
 
         progress = 0
 
-        while progress < 100:
+        while not self.__cancelled and progress < 100:
             time.sleep(0.1)
             evt = {'job_id': self.__job_id, 'progress': progress}
             self._fire_event(evt)
             progress += 1
 
-        evt = {'job_id': self.__job_id, 'progress': progress}
+        if self.__cancelled:
+            evt = {'job_id': self.__job_id, 'progress': progress}
+        else:
+            evt = {'job_id': self.__job_id, 'progress': progress}
+
         self._fire_event(evt)
 
     def _fire_event(self, event):
