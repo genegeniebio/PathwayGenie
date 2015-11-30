@@ -1,5 +1,4 @@
 {% extends "layout.html" %} {% block body %}
-
 <script>
 	$(document).ready( function()
 	{
@@ -12,41 +11,86 @@
 				listen(job_id)
 			});
 		});
-		
+
 		function listen(job_id)
 		{
 			$('#progress-modal').modal('show');
-			
+
 			var source = new EventSource("/progress/" + job_id);
-			
+
 			source.onmessage = function(event)
 			{
 				json = JSON.parse(event.data);
+
 				$('.progress-bar').css('width', json.progress + '%').attr('aria-valuenow', json.progress);
 			}
 		}
-	});
+	} );
 </script>
-
+<script>
+	google.load("visualization", "1", {packages: ["gauge"]});
+	google.setOnLoadCallback(drawChart);
+	
+	function drawChart()
+	{
+		var gaugeData = google.visualization.arrayToDataTable([
+				['Label', 'Value'], ['CAI', 0], ['TIR', 0], ['Invalid', 0]
+				]);
+	
+		var options = {
+			width : 400,
+			height : 120,
+			redFrom : 90,
+			redTo : 100,
+			yellowFrom : 75,
+			yellowTo : 90,
+			minorTicks : 5
+		};
+	
+		var chart = new google.visualization.Gauge(document.getElementById('progress-gauges'));
+		chart.draw(gaugeData, options);
+	
+		setInterval(function()
+		{
+			gaugeData.setValue(0, 1, 40 + Math.round(60 * Math.random()));
+			chart.draw(gaugeData, options);
+		}, 13000);
+		
+		setInterval(function()
+		{
+			gaugeData.setValue(1, 1, 40 + Math.round(60 * Math.random()));
+			chart.draw(gaugeData, options);
+		}, 5000);
+		
+		setInterval(function()
+		{
+			gaugeData.setValue(2, 1, 60 + Math.round(20 * Math.random()));
+			chart.draw(gaugeData, options);
+		}, 26000);
+	}
+</script>
 <!-- Submission Form -->
 <div class="container">
 	<form id="form" class="form-horizontal" role="form">
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="protein_ids">Protein ids:</label>
 			<div class="col-sm-10">
-				<input type="text" class="form-control" id="protein_ids" placeholder="Enter protein ids">
+				<input type="text" class="form-control" id="protein_ids"
+					placeholder="Enter protein ids">
 			</div>
 		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="len_target">Target length:</label>
 			<div class="col-sm-10">
-				<input type="number" class="form-control" id="len_target" placeholder="Enter target length">
+				<input type="number" class="form-control" id="len_target"
+					placeholder="Enter target length">
 			</div>
 		</div>
 		<div class="form-group">
 			<label class="control-label col-sm-2" for="tir_target">Target TIR:</label>
 			<div class="col-sm-10">
-				<input type="number" class="form-control" id="tir_target" placeholder="Enter target TIR">
+				<input type="number" class="form-control" id="tir_target"
+					placeholder="Enter target TIR">
 			</div>
 		</div>
 		<div class="form-group">
@@ -68,9 +112,10 @@
 				<h4 class="modal-title">PathwayGenie dashboard</h4>
 			</div>
 			<div class="modal-body">
+				<div id="progress-gauges"></div>
 				<div class="progress">
 					<div class="progress-bar" role="progressbar" aria-valuenow="0"
-							aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+						aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
 				</div>
 			</div>
 			<div class="modal-footer">
