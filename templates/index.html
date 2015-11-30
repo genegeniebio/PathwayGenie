@@ -2,28 +2,31 @@
 <script>
 	$(document).ready( function()
 	{
+		var currentJobId;
+		
 		$("#form").on('submit', function(event)
 		{
 			event.preventDefault();
 
-			$.post("{{ url_for('submit') }}", $(this).serialize(), function(job_id)
+			$.post("{{ url_for('submit') }}", $(this).serialize(), function(jobId)
 			{
-				listen(job_id)
+				currentJobId = jobId
+				listen(jobId)
 			});
 		});
 		
-		$(".progress-cancel").click( function(event)
+		$(".progress-cancel").click(function(event)
 		{
-			 alert("Cancel")
-		} );
+			$.get("/cancel/" + currentJobId);
+		});
 
-		function listen(job_id)
+		function listen(jobId)
 		{
 			$("#progress-ok").attr("disabled", true);
 			$("#progress-cancel").attr("disabled", false);
 			$("#progress-modal").modal('show');
 
-			var source = new EventSource("/progress/" + job_id);
+			var source = new EventSource("/progress/" + jobId);
 
 			source.onmessage = function(event)
 			{

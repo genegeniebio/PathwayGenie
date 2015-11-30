@@ -41,7 +41,7 @@ class JobThread(Thread):
         progress = 0
 
         while not self.__cancelled and progress < 100:
-            time.sleep(0.1)
+            time.sleep(1)
             evt = {'job_id': self.__job_id, 'progress': progress}
             self._fire_event(evt)
             progress += 1

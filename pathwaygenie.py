@@ -63,9 +63,9 @@ def progress(job_id):
         '''Checks job progress.'''
         while _STATUS[job_id]['progress'] < 100:
             time.sleep(1)
-            yield "data:" + _get_response(job_id) + "\n\n"
+            yield 'data:' + _get_response(job_id) + '\n\n'
 
-        yield "data:" + _get_response(job_id) + "\n\n"
+        yield 'data:' + _get_response(job_id) + '\n\n'
 
     return Response(_check_progress(job_id), mimetype='text/event-stream')
 
@@ -74,6 +74,7 @@ def progress(job_id):
 def cancel(job_id):
     '''Cancels job.'''
     _THREADS[job_id].cancel()
+    return 'Cancelled: ' + job_id
 
 
 def _get_response(job_id):
@@ -90,4 +91,4 @@ class Listener(object):
 
 
 if __name__ == '__main__':
-    _APP.run()
+    _APP.run(threaded=True)
