@@ -42,6 +42,11 @@ class PartsSolution(object):
     '''Solution for RBS optimisation.'''
 
     def __init__(self, protein_ids, taxonomy_id, len_target, tir_target):
+        self.__query = {'query': {'protein_ids': protein_ids,
+                                  'taxonomy_id': taxonomy_id,
+                                  'len_target': len_target,
+                                  'tir_target': tir_target}}
+
         # Check if dg_total or TIR (translation initiation rate) was specified.
         # If TIR, then convert to dg_total.
         self.__dg_target = _RBS_CALC.RT_eff * \
@@ -72,15 +77,23 @@ class PartsSolution(object):
         self.__seqs_new = [None, None, cds, self.__seqs[3], self.__seqs[4]]
         self.__dgs_new = None
 
-    def get_json(self):
-        '''Return details of solution in json.'''
-        return {'mean_cai': mean([self.__cod_opt.get_cai(cds)
-                                  for cds in self.__seqs[2]]),
-                'mean_tir': 0 if self.__dgs is None
-                else mean(_get_tirs(self.__dgs)),
-                'invalid_patterns':
-                str(sum(flatten([seq_utils.count_pattern(seq, _INVALID_PATTERN)
-                                 for seq in self.__seqs])))}
+    def get_status(self):
+        '''Return status of solution.'''
+        mean_cai = mean([self.__cod_opt.get_cai(cds)
+                         for cds in self.__seqs[2]])
+        mean_tir = 0 if self.__dgs is None else mean(_get_tirs(self.__dgs))
+        inv_patt = sum(flatten([seq_utils.count_pattern(seq, _INVALID_PATTERN)
+                                for seq in self.__seqs]))
+
+        status = {'status': {'mean_cai': mean_cai,
+                             'mean_tir': mean_tir,
+                             'invalid_patterns': inv_patt}}
+
+        return dict(self.__query.items() + status.items())
+
+    def get_result(self):
+        '''Return result of solution.'''
+        return {'result': {'seqs': self.__seqs}}
 
     def get_energy(self, dgs=None, cdss=None):
         '''Gets the (simulated annealing) energy.'''
@@ -248,20 +261,14 @@ class PartsThread(JobThread):
 
     def __init__(self, job_id, protein_ids, taxonomy_id, len_target,
                  tir_target):
-        self.__protein_ids = protein_ids
-        self.__taxonomy_id = taxonomy_id
-        self.__len_target = len_target
-        self.__tir_target = tir_target
+        self.__solution = PartsSolution(protein_ids, taxonomy_id, len_target,
+                                        tir_target)
         JobThread.__init__(self, job_id)
 
     def run(self):
-        sim_ann = SimulatedAnnealer(verbose=True)
+        sim_ann = SimulatedAnnealer(self.__solution, verbose=True)
         sim_ann.add_listener(self)
-
-        sim_ann.optimise(PartsSolution(self.__protein_ids,
-                                       self.__taxonomy_id,
-                                       self.__len_target,
-                                       self.__tir_target))
+        sim_ann.optimise()
 
 
 def _get_tirs(dgs):
@@ -281,11 +288,12 @@ def _rand_nuc():
 
 def main(argv):
     '''main method.'''
-    sim_ann = SimulatedAnnealer(verbose=True)
-    print sim_ann.optimise(PartsSolution(argv[5:], argv[1],
-                                         len_target=int(argv[2]),
-                                         tir_target=float(argv[3])),
-                           acceptance=float(argv[4]))
+    sim_ann = SimulatedAnnealer(PartsSolution(argv[5:], argv[1],
+                                              len_target=int(argv[2]),
+                                              tir_target=float(argv[3])),
+                                acceptance=float(argv[4]),
+                                verbose=True)
+    print sim_ann.optimise()
 
 
 if __name__ == '__main__':

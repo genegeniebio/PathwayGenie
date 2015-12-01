@@ -1,186 +1,214 @@
-{% extends "layout.html" %} {% block body %}
-<script>
-	$(document).ready( function()
-	{
-		var currentJobId;
-		
-		$("#form").submit(function()
+<!doctype html>
+<head>
+	<title>PathwayGenie</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+	<script	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+	<script src="https://www.google.com/jsapi"></script>
+	<script>
+		$(document).ready( function()
 		{
-			event.preventDefault();
-
-			$.post("{{ url_for('submit') }}", $(this).serialize(), function(jobId)
+			var currentJobId;
+			
+			$("#form").submit(function()
 			{
-				currentJobId = jobId
-				listen(jobId)
+				event.preventDefault();
+	
+				$.post("{{ url_for('submit') }}", $(this).serialize(), function(jobId)
+				{
+					currentJobId = jobId
+					listen(jobId)
+				});
 			});
-		});
-		
-		$(".progress-cancel").click(function(event)
-		{
-			$.get("/cancel/" + currentJobId);
-		});
-
-		function listen(jobId)
-		{
-			$("#progress-ok").attr("disabled", true);
-			$("#progress-cancel").attr("disabled", false);
-			$("#progress-modal").modal('show');
-
-			var source = new EventSource("/progress/" + jobId);
-
-			source.onmessage = function(event)
+			
+			$(".progress-cancel").click(function(event)
 			{
-				json = JSON.parse(event.data);
-				
-				if(json.progress == 100)
+				$.get("/cancel/" + currentJobId);
+			});
+	
+			function listen(jobId)
+			{
+				$("#progress-ok").attr("disabled", true);
+				$("#progress-cancel").attr("disabled", false);
+				$("#progress-modal").modal('show');
+	
+				var source = new EventSource("/progress/" + jobId);
+	
+				source.onmessage = function(event)
 				{
-					source.close()
-					$("#progress-ok").attr("disabled", false);
-					$("#progress-cancel").attr("disabled", true);
-				}
-				
-				$(".progress-bar").css("width", json.progress + "%").attr("aria-valuenow", json.progress);
-				$("#progress-text").text(json.progress);
-				
-				if(json.mean_cai)
-				{
-					drawCaiChart(Math.round(json.mean_cai * 100) / 100)
-				}
-				if(json.mean_tir)
-				{
-					drawTirChart(Math.round(json.mean_tir * 10) / 10, 1500)
+					json = JSON.parse(event.data);
+					
+					$(".progress-bar").css("width", json.progress + "%").attr("aria-valuenow", json.progress);
+					
+					if(json.iteration && json.max_iter)
+					{
+						$("#progress-text").text(json.iteration + " / " + json.max_iter);
+					}
+					else
+					{
+						$("#progress-text").text("");
+					}
+					
+					if(json.query && json.status)
+					{
+						drawCaiChart(Math.round(json.status.mean_cai * 100) / 100)
+						drawTirChart(Math.round(json.status.mean_tir * 10) / 10, json.query.tir_target)
+						drawInvalidChart(json.status.invalid_patterns)
+					}
+					
+					if(json.result)
+					{
+						source.close()
+						$("#progress-ok").attr("disabled", false);
+						$("#progress-cancel").attr("disabled", true);
+						$(".progress-bar").css("width", "100%").attr("aria-valuenow", 100);
+						$(".progress-bar").css("background-color", "green");
+					}
 				}
 			}
+		} );
+	</script>
+	<script>
+		google.load("visualization", "1", {packages: ["gauge"]});
+		google.setOnLoadCallback(drawCharts);
+		
+		function drawCharts()
+		{
+			drawCaiChart(0);
+			drawTirChart(0, 1000);
+			drawInvalidChart(0);
 		}
-	} );
-</script>
-<script>
-	google.load("visualization", "1", {packages: ["gauge"]});
-	google.setOnLoadCallback(drawCharts);
-	
-	function drawCharts()
-	{
-		drawCaiChart(0);
-		drawTirChart(0, 1000);
-		drawInvalidChart(0);
-	}
-	
-	function drawCaiChart(value)
-	{
-		var caiData = google.visualization.arrayToDataTable([['Label', 'Value'],
-		                                                     ['CAI', value]]);                                     	
-   		var caiOptions = {
-   			width: 400,
-   			height: 120,
-   			minorTicks: 5,
-   			max: 1.0,
-   			redFrom: 0.0,
-   			redTo: 0.05,
-   			greenFrom: 0.95,
-   			greenTo: 1.0
-   		};
-   	
-   		var caiChart = new google.visualization.Gauge(document.getElementById("cai-gauge"));
-   		caiChart.draw(caiData, caiOptions);
-	}
-	
-	function drawTirChart(value, target)
-	{
-		var tirData = google.visualization.arrayToDataTable([['Label', 'Value'],
-		                                                     ['TIR', value]]);
-		var tirOptions = {
-			width : 400,
-			height : 120,
-			minorTicks: 5,
-			greenFrom: value - 10,
-			greenTo: value + 10,
-			max: 10000,
-		};
-	
-		var tirChart = new google.visualization.Gauge(document.getElementById("tir-gauge"));
-		tirChart.draw(tirData, tirOptions);
-	}
-	
-	function drawInvalidChart(value)
-	{
-		var invalidData = google.visualization.arrayToDataTable([['Label', 'Value'],
-		                                                         ['Invalid', value]]);
-		var invalidOptions = {
-			width : 400,
-			height : 120,
-			minorTicks: 5,
-			max: 100,
-			greenFrom: 0,
-   			greenTo: 5
-		};
-	
-		var invalidChart = new google.visualization.Gauge(document.getElementById("invalid-gauge"));
-		invalidChart.draw(invalidData, invalidOptions);
-	}
-</script>
+		
+		function drawCaiChart(value)
+		{
+			var caiData = google.visualization.arrayToDataTable([['Label', 'Value'],
+			                                                     ['CAI', value]]);                                     	
+	   		var caiOptions = {
+	   			width: 400,
+	   			height: 120,
+	   			minorTicks: 5,
+	   			max: 1.0,
+	   			redFrom: 0.0,
+	   			redTo: 0.025,
+	   			greenFrom: 0.975,
+	   			greenTo: 1.0
+	   		};
+	   	
+	   		var caiChart = new google.visualization.Gauge(document.getElementById("cai-gauge"));
+	   		caiChart.draw(caiData, caiOptions);
+		}
+		
+		function drawTirChart(value, target)
+		{
+			var tirData = google.visualization.arrayToDataTable([['Label', 'Value'],
+			                                                     ['TIR', value]]);
+			var tirOptions = {
+				width : 400,
+				height : 120,
+				minorTicks: 5,
+				greenFrom: target * 0.975,
+				greenTo: target * 1.025,
+				max: target * 1.2
+			};
+		
+			var tirChart = new google.visualization.Gauge(document.getElementById("tir-gauge"));
+			tirChart.draw(tirData, tirOptions);
+		}
+		
+		function drawInvalidChart(value)
+		{
+			var invalidData = google.visualization.arrayToDataTable([['Label', 'Value'],
+			                                                         ['Invalid', value]]);
+			var invalidOptions = {
+				width : 400,
+				height : 120,
+				minorTicks: 5,
+				max: 100,
+				greenFrom: 0,
+	   			greenTo: 2.5
+			};
+		
+			var invalidChart = new google.visualization.Gauge(document.getElementById("invalid-gauge"));
+			invalidChart.draw(invalidData, invalidOptions);
+		}
+	</script>
+</head>
+<body>
+	<!-- Navigation bar -->
+	<nav class="navbar navbar-default">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="http://www.synbiochem.co.uk">
+					<span><img alt="Brand" src="{{ url_for('static', filename='favicon.ico') }}"></span>
+					PathwayGenie
+				</a>
+			</div>
+		</div>
+	</nav>
 
-<!-- Submission Form -->
-<div class="container">
-	<form id="form" class="form-horizontal" role="form">
-		<div class="form-group">
-			<label class="control-label col-sm-2" for="protein_ids">Protein ids:</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" id="protein_ids"
-					name="protein_ids" placeholder="Enter protein ids">
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="control-label col-sm-2" for="len_target">Target length:</label>
-			<div class="col-sm-10">
-				<input type="number" class="form-control" id="len_target"
-					name="len_target" placeholder="Enter target length">
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="control-label col-sm-2" for="tir_target">Target TIR:</label>
-			<div class="col-sm-10">
-				<input type="number" class="form-control" id="tir_target"
-					name="tir_target" placeholder="Enter target TIR">
-			</div>
-		</div>
-		<div class="form-group">
-			<div class="col-sm-offset-2 col-sm-10">
-				<button type="submit" class="btn btn-default">Submit</button>
-			</div>
-		</div>
-	</form>
-</div>
-
-<!-- Progress Modal -->
-<div id="progress-modal" class="modal fade" role="dialog">
-	<div class="modal-dialog">
-		<!-- Modal content-->
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close progress-cancel"
-					data-dismiss="modal">&times;</button>
-				<h4 class="modal-title">PathwayGenie dashboard</h4>
-			</div>
-			<div class="modal-body">
-				<div class="centered">
-					<div id="cai-gauge" class="progress-gauge"></div>
-					<div id="tir-gauge" class="progress-gauge"></div>
-					<div id="invalid-gauge" class="progress-gauge"></div>
+	<!-- Submission form -->
+	<div class="container">
+		<form id="form" class="form-horizontal" role="form">
+			<div class="form-group">
+				<label class="control-label col-sm-2" for="protein_ids">Protein ids:</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" id="protein_ids"
+						name="protein_ids" placeholder="Enter protein ids">
 				</div>
-				<div class="progress">
-					<div class="progress-bar" role="progressbar" aria-valuenow="0"
-						aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-						<span id="progress-text"></span>	
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2" for="len_target">Target length:</label>
+				<div class="col-sm-10">
+					<input type="number" class="form-control" id="len_target"
+						name="len_target" placeholder="Enter target length">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2" for="tir_target">Target TIR:</label>
+				<div class="col-sm-10">
+					<input type="number" class="form-control" id="tir_target"
+						name="tir_target" placeholder="Enter target TIR">
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-default">Submit</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+	<!-- Progress modal -->
+	<div id="progress-modal" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close progress-cancel"
+						data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">PathwayGenie dashboard</h4>
+				</div>
+				<div class="modal-body">
+					<div class="centered">
+						<div id="cai-gauge" class="progress-gauge"></div>
+						<div id="tir-gauge" class="progress-gauge"></div>
+						<div id="invalid-gauge" class="progress-gauge"></div>
+					</div>
+					<div class="progress">
+						<div class="progress-bar" role="progressbar" aria-valuenow="0"
+							aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+							<span id="progress-text"></span>	
+						</div>
 					</div>
 				</div>
-			</div>
-			<div class="modal-footer">
-			 	<button type="button" class="btn btn-default progress-cancel"
-			 		data-dismiss="modal">Cancel</button>
-				<button type="button" class="btn btn-primary" id="progress-ok"
-					data-dismiss="modal">OK</button>
+				<div class="modal-footer">
+				 	<button type="button" class="btn btn-default progress-cancel"
+				 		data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary" id="progress-ok"
+						data-dismiss="modal">OK</button>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
-{% endblock %}
+</body>
