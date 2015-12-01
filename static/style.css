@@ -21,3 +21,13 @@
     width: 100%;
     color: black;
 }
+
+.progress-bar-success
+{
+	background-color: green;
+}
+
+.progress-bar-failure
+{
+	background-color: red;
+}

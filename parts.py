@@ -216,6 +216,8 @@ class PartsSolution(object):
 
     def __get_valid_rand_seq(self, length, attempts=0, max_attempts=1000):
         '''Returns a valid random sequence of supplied length.'''
+        sys.setrecursionlimit(max_attempts)
+
         if attempts > max_attempts - 1:
             raise ValueError('Unable to generate valid random sequence of ' +
                              'length ' + str(length))
@@ -261,14 +263,19 @@ class PartsThread(JobThread):
 
     def __init__(self, job_id, protein_ids, taxonomy_id, len_target,
                  tir_target):
-        self.__solution = PartsSolution(protein_ids, taxonomy_id, len_target,
-                                        tir_target)
+        solution = PartsSolution(protein_ids, taxonomy_id, len_target,
+                                 tir_target)
+        self.__sim_ann = SimulatedAnnealer(solution, verbose=True)
+        self.__sim_ann.add_listener(self)
+
         JobThread.__init__(self, job_id)
 
+    def cancel(self):
+        '''Cancels the current job.'''
+        self.__sim_ann.cancel()
+
     def run(self):
-        sim_ann = SimulatedAnnealer(self.__solution, verbose=True)
-        sim_ann.add_listener(self)
-        sim_ann.optimise()
+        self.__sim_ann.optimise()
 
 
 def _get_tirs(dgs):

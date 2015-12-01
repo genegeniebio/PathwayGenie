@@ -68,7 +68,10 @@ def progress(job_id):
 
         yield 'data:' + _get_response(job_id) + '\n\n'
 
-    return Response(_check_progress(job_id), mimetype='text/event-stream')
+    if job_id in _STATUS:
+        return Response(_check_progress(job_id), mimetype='text/event-stream')
+    else:
+        return 'Job ' + job_id + ' unknown or finished.'
 
 
 @_APP.route('/cancel/<job_id>')
