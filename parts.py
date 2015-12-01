@@ -7,15 +7,17 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+from compiler.ast import flatten
 import math
+from numpy import mean
 import random
 import sys
-from threading import Thread
 
 import RBS_Calculator
 import RBS_MC_Design
-import synbiochemdev.optimisation.simulated_annealing as sim_ann
-import synbiochemdev.utils.sequence_utils as seq_utils
+from synbiochem.optimisation.sim_ann import SimulatedAnnealer
+from synbiochem.utils import sequence_utils as seq_utils
+from synbiochem.utils.job import JobThread
 
 
 # Necessary to get constants hidden as class variables in RBS_Calculator:
@@ -36,7 +38,7 @@ _INVALID_PATTERN = '|'.join(['GGTCTC', 'GAGACC',
 _START_CODON_PATTERN = '[ACGT]TG'
 
 
-class RBSSolution(object):
+class PartsSolution(object):
     '''Solution for RBS optimisation.'''
 
     def __init__(self, protein_ids, taxonomy_id, len_target, tir_target):
@@ -69,6 +71,16 @@ class RBSSolution(object):
         self.__dgs = self.__calc_dgs(rbs)
         self.__seqs_new = [None, None, cds, self.__seqs[3], self.__seqs[4]]
         self.__dgs_new = None
+
+    def get_json(self):
+        '''Return details of solution in json.'''
+        return {'mean_cai': mean([self.__cod_opt.get_cai(cds)
+                                  for cds in self.__seqs[2]]),
+                'mean_tir': 0 if self.__dgs is None
+                else mean(_get_tirs(self.__dgs)),
+                'invalid_patterns':
+                str(sum(flatten([seq_utils.count_pattern(seq, _INVALID_PATTERN)
+                                 for seq in self.__seqs])))}
 
     def get_energy(self, dgs=None, cdss=None):
         '''Gets the (simulated annealing) energy.'''
@@ -211,8 +223,10 @@ class RBSSolution(object):
         start_codons = [seq_utils.count_pattern(seq, _START_CODON_PATTERN)
                         for seq in self.__seqs]
 
-        return str(cai) + '\t' + str(invalid_patterns) + '\t' + \
-            str(start_codons) + '\t' + str(_get_tirs(self.__dgs)) + '\t' + \
+        return str(cai) + '\t' + \
+            str(invalid_patterns) + '\t' + \
+            str(start_codons) + '\t' + \
+            '' if self.__dgs is None else str(_get_tirs(self.__dgs)) + '\t' + \
             self.__seqs[0] + ' ' + self.__seqs[1] + ' ' + \
             str(len(self.__seqs[2])) + ' '
 
@@ -229,22 +243,25 @@ class RBSSolution(object):
                 ('' if self.__seqs[4] is None else self.__seqs[4])
 
 
-class RBSThread(Thread):
-    '''Wraps a RBS optimisation job into a thread.'''
+class PartsThread(JobThread):
+    '''Wraps a Parts optimisation job into a thread.'''
 
-    def __init__(self, protein_ids, taxonomy_id, len_target, tir_target):
+    def __init__(self, job_id, protein_ids, taxonomy_id, len_target,
+                 tir_target):
         self.__protein_ids = protein_ids
         self.__taxonomy_id = taxonomy_id
         self.__len_target = len_target
         self.__tir_target = tir_target
-        Thread.__init__(self)
+        JobThread.__init__(self, job_id)
 
     def run(self):
-        sim_ann.optimise(RBSSolution(self.__protein_ids,
-                                     self.__taxonomy_id,
-                                     self.__len_target,
-                                     self.__tir_target),
-                         verbose=True)
+        sim_ann = SimulatedAnnealer(verbose=True)
+        sim_ann.add_listener(self)
+
+        sim_ann.optimise(PartsSolution(self.__protein_ids,
+                                       self.__taxonomy_id,
+                                       self.__len_target,
+                                       self.__tir_target))
 
 
 def _get_tirs(dgs):
@@ -264,9 +281,10 @@ def _rand_nuc():
 
 def main(argv):
     '''main method.'''
-    print sim_ann.optimise(RBSSolution(argv[5:], argv[1],
-                                       len_target=int(argv[2]),
-                                       tir_target=float(argv[3])),
+    sim_ann = SimulatedAnnealer(verbose=True)
+    print sim_ann.optimise(PartsSolution(argv[5:], argv[1],
+                                         len_target=int(argv[2]),
+                                         tir_target=float(argv[3])),
                            acceptance=float(argv[4]))
 
 

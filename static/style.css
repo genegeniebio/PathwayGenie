@@ -1,0 +1,23 @@
+.centered
+{
+	width: 100%;
+	margin: 0 auto;
+}
+ 
+.progress-gauge
+{
+ 	display: inline-block;
+}
+
+.progress
+{
+    position: relative;
+}
+
+.progress span
+{
+    position: absolute;
+    display: block;
+    width: 100%;
+    color: black;
+}

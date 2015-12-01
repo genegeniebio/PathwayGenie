@@ -9,13 +9,13 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 # pylint: disable=no-self-use
 # pylint: disable=too-few-public-methods
-
+import ast
 import json
 import time
 import uuid
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, request
 
-import job
+import parts
 
 
 # Configuration:
@@ -39,16 +39,17 @@ def home():
 @_APP.route('/submit', methods=['POST'])
 def submit():
     '''Responds to submission.'''
-    # protein_ids = ast.literal_eval(request.form['protein_ids'])
-    # taxonomy_id = '83333'
-    # len_target = int(request.form['len_target'])
-    # tir_target = float(request.form['tir_target'])
+    protein_ids = ast.literal_eval(request.form['protein_ids'])
+    taxonomy_id = '83333'
+    len_target = int(request.form['len_target'])
+    tir_target = float(request.form['tir_target'])
 
     # Do job in new thread, return result when completed:
     job_id = str(uuid.uuid4())
     _STATUS[job_id] = {'job_id': job_id, 'progress': 0}
     listener = Listener()
-    thread = job.JobThread(job_id)
+    thread = parts.PartsThread(job_id, protein_ids, taxonomy_id, len_target,
+                               tir_target)
     thread.add_listener(listener)
     _THREADS[job_id] = thread
     thread.start()
