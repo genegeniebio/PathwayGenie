@@ -9,7 +9,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 # pylint: disable=no-self-use
 # pylint: disable=too-few-public-methods
-import ast
 import json
 import time
 import uuid
@@ -39,7 +38,7 @@ def home():
 @_APP.route('/submit', methods=['POST'])
 def submit():
     '''Responds to submission.'''
-    protein_ids = ast.literal_eval(request.form['protein_ids'])
+    protein_ids = [x.strip() for x in request.form['protein_ids'].split(',')]
     taxonomy_id = '83333'
     len_target = int(request.form['len_target'])
     tir_target = float(request.form['tir_target'])
