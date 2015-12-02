@@ -86,11 +86,15 @@ class PartsSolution(object):
         mean_cai = mean([self.__cod_opt.get_cai(cds)
                          for cds in self.__seqs[2]])
         mean_tir = 0 if self.__dgs is None else mean(_get_tirs(self.__dgs))
-        inv_patt = sum(flatten([seq_utils.count_pattern(seq, _INVALID_PATTERN)
-                                for seq in self.__seqs]))
+        inv_seq = sum(flatten([seq_utils.count_pattern(seq, _INVALID_PATTERN)
+                               for seq in self.__seqs]))
+        stcod_seqs = sum(flatten([seq_utils.count_pattern(seq,
+                                                          _START_CODON_PATTERN)
+                                  for seq in self.__seqs]))
 
         return {'update': {'mean_cai': mean_cai, 'mean_tir': mean_tir,
-                           'invalid_patterns': inv_patt}}
+                           'invalid_seqs': inv_seq,
+                           'start_codon_seqs': stcod_seqs}}
 
     def get_result(self):
         '''Return result of solution.'''
