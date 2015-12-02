@@ -2,9 +2,10 @@
 <head>
 	<title>PathwayGenie</title>
 	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-	<script	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+	<script	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script src="https://www.google.com/jsapi"></script>
 	<script>
 		$(document).ready( function()
@@ -32,7 +33,9 @@
 				drawCharts()
 				$("#progress-ok").attr("disabled", true);
 				$(".progress-cancel").attr("disabled", false);
-				$("#progress-bar").removeClass("progress-bar-success");
+				$("#progress-message").hide();
+				$("#progress-message").removeClass("alert-success");
+				$("#progress-message").removeClass("alert-danger");
 				$("#progress-modal").modal('show');
 	
 				var source = new EventSource("/progress/" + jobId);
@@ -52,13 +55,24 @@
 						$("#progress-text").text("");
 					}
 					
-					if(json.query && json.status)
+					if(json.query && json.update)
 					{
-						drawCaiChart(Math.round(json.status.mean_cai * 100) / 100)
-						drawTirChart(Math.round(json.status.mean_tir * 10) / 10, json.query.tir_target)
-						drawInvalidChart(json.status.invalid_patterns)
+						drawCaiChart(Math.round(json.update.mean_cai * 100) / 100)
+						drawTirChart(Math.round(json.update.mean_tir * 10) / 10, json.query.tir_target)
+						drawInvalidChart(json.update.invalid_patterns)
 					}
-
+					
+					if(json.message)
+					{
+						$("#progress-message").show();
+						$("#progress-message").text(json.message);
+					}
+					else
+					{
+						$("#progress-message").hide();
+					}
+					
+	
 					if(json.status == "cancelled" || json.status == "error" || json.status == "finished")
 					{
 						source.close()
@@ -68,11 +82,11 @@
 					
 					if(json.status == "error")
 					{
-						$("#progress-bar").addClass("progress-bar-failure");
+						$("#progress-message").addClass("alert-danger");
 					}
 					else if(json.status == "finished")
 					{
-						$("#progress-bar").addClass("progress-bar-success");
+						$("#progress-message").addClass("alert-success");
 						
 						if(json.result)
 						{
@@ -81,7 +95,6 @@
 					}
 				}
 			}
-			
 		} );
 	</script>
 	<script>
@@ -195,7 +208,8 @@
 	</div>
 	
 	<!-- Progress modal -->
-	<div id="progress-modal" class="modal fade" role="dialog">
+	<div id="progress-modal" class="modal fade" role="dialog"
+		data-backdrop="static" data-keyboard="false">
 		<div class="modal-dialog">
 			<!-- Modal content-->
 			<div class="modal-content">
@@ -205,6 +219,7 @@
 					<h4 class="modal-title">PathwayGenie dashboard</h4>
 				</div>
 				<div class="modal-body">
+					<div id="progress-message" class="alert"></div>
 					<div class="centered">
 						<div id="cai-gauge" class="progress-gauge"></div>
 						<div id="tir-gauge" class="progress-gauge"></div>

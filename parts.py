@@ -77,19 +77,20 @@ class PartsSolution(object):
         self.__seqs_new = [None, None, cds, self.__seqs[3], self.__seqs[4]]
         self.__dgs_new = None
 
-    def get_status(self):
-        '''Return status of solution.'''
+    def get_query(self):
+        '''Return query.'''
+        return self.__query
+
+    def get_update(self):
+        '''Return update of in-progress solution.'''
         mean_cai = mean([self.__cod_opt.get_cai(cds)
                          for cds in self.__seqs[2]])
         mean_tir = 0 if self.__dgs is None else mean(_get_tirs(self.__dgs))
         inv_patt = sum(flatten([seq_utils.count_pattern(seq, _INVALID_PATTERN)
                                 for seq in self.__seqs]))
 
-        status = {'status': {'mean_cai': mean_cai,
-                             'mean_tir': mean_tir,
-                             'invalid_patterns': inv_patt}}
-
-        return dict(self.__query.items() + status.items())
+        return {'update': {'mean_cai': mean_cai, 'mean_tir': mean_tir,
+                           'invalid_patterns': inv_patt}}
 
     def get_result(self):
         '''Return result of solution.'''
