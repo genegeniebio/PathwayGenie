@@ -12,10 +12,12 @@
 		{
 			var currentJobId;
 			
+			$("#result-panel").hide();
+			
 			$("#form").submit(function()
 			{
 				event.preventDefault();
-	
+
 				$.post("{{ url_for("submit") }}", $(this).serialize(), function(jobId)
 				{
 					currentJobId = jobId
@@ -37,6 +39,7 @@
 				$("#progress-message").removeClass("alert-success");
 				$("#progress-message").removeClass("alert-danger");
 				$("#progress-modal").modal("show");
+				$("#result-panel").hide()
 	
 				var source = new EventSource("/progress/" + jobId);
 	
@@ -91,7 +94,8 @@
 						
 						if(json.result)
 						{
-							// Show result...
+							$("#result").html("<pre>" + JSON.stringify(json, null, ' ') + "</pre>")
+							$("#result-panel").show();
 						}
 					}
 				}
@@ -102,15 +106,14 @@
 		
 		function drawCharts(values, jobTirTarget)
 		{
-			drawChart("cai-gauge", "CAI", values[0], 1, 0, 0.025, 0.975, 1);
-			drawChart("tir-gauge", "TIR", values[1], jobTirTarget * 1.2, 0, 0,
+			drawChart("cai-gauge", "CAI", values[0], 1, 0, 0);
+			drawChart("tir-gauge", "TIR", values[1], jobTirTarget * 1.2,
 					jobTirTarget * 0.9, jobTirTarget * 1.1);
-			drawChart("invalid-gauge", "Invalid seqs", values[2], 100, 0, 0, 0, 2.5);
-			drawChart("start-codon-gauge", "Start codons", values[3], 100, 0, 0, 0, 2.5);
+			drawChart("invalid-gauge", "Invalid seqs", values[2], 100, 0, 0);
+			drawChart("start-codon-gauge", "Start codons", values[3], 100, 0, 0);
 		}
 		
-		function drawChart(element_id, title, value, max,
-				redFrom, redTo, greenFrom, greenTo)
+		function drawChart(element_id, title, value, max, greenFrom, greenTo)
 		{
 			var data = google.visualization.arrayToDataTable([["Label", "Value"],
 			                                                  [title, value]]);                                     	
@@ -119,8 +122,6 @@
 	   			height: 120,
 	   			minorTicks: 5,
 	   			max: max,
-	   			redFrom: redFrom,
-	   			redTo: redTo,
 	   			greenFrom: greenFrom,
 	   			greenTo: greenTo
 	   		};
@@ -209,6 +210,14 @@
 						data-dismiss="modal">OK</button>
 				</div>
 			</div>
+		</div>
+	</div>
+	
+	<!-- Temporary results panel. -->
+	<div class="container">
+		<div id="result-panel" class="panel panel-default">
+	  		<div class="panel-heading">Result</div>
+	  		<div id="result" class="panel-body"></div>
 		</div>
 	</div>
 </body>

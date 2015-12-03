@@ -38,17 +38,17 @@ def home():
 @_APP.route('/submit', methods=['POST'])
 def submit():
     '''Responds to submission.'''
-    protein_ids = [x.strip() for x in request.form['protein_ids'].split(',')]
-    taxonomy_id = '83333'
-    len_target = int(request.form['len_target'])
-    tir_target = float(request.form['tir_target'])
+    query = {'protein_ids': [x.strip()
+                             for x in request.form['protein_ids'].split(',')],
+             'taxonomy_id': '83333',
+             'len_target': int(request.form['len_target']),
+             'tir_target': float(request.form['tir_target'])}
 
     # Do job in new thread, return result when completed:
     job_id = str(uuid.uuid4())
     _STATUS[job_id] = {'job_id': job_id, 'progress': 0}
     listener = Listener()
-    thread = parts.PartsThread(job_id, protein_ids, taxonomy_id, len_target,
-                               tir_target)
+    thread = parts.PartsThread(job_id, query)
     thread.add_listener(listener)
     _THREADS[job_id] = thread
     thread.start()

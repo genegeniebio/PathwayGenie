@@ -7,9 +7,10 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=no-member
 from compiler.ast import flatten
 import math
-from numpy import mean
+import numpy
 import random
 import sys
 
@@ -41,20 +42,17 @@ _START_CODON_PATTERN = '[ACGT]TG'
 class PartsSolution(object):
     '''Solution for RBS optimisation.'''
 
-    def __init__(self, protein_ids, taxonomy_id, len_target, tir_target):
-        self.__query = {'query': {'protein_ids': protein_ids,
-                                  'taxonomy_id': taxonomy_id,
-                                  'len_target': len_target,
-                                  'tir_target': tir_target}}
+    def __init__(self, query):
+        self.__query = query
 
         # Check if dg_total or TIR (translation initiation rate) was specified.
         # If TIR, then convert to dg_total.
         self.__dg_target = _RBS_CALC.RT_eff * \
-            (_RBS_CALC.logK - math.log(float(tir_target)))
+            (_RBS_CALC.logK - math.log(float(query['tir_target'])))
 
-        self.__cod_opt = seq_utils.CodonOptimiser(taxonomy_id)
+        self.__cod_opt = seq_utils.CodonOptimiser(query['taxonomy_id'])
 
-        self.__prot_seqs = seq_utils.get_sequences(protein_ids)
+        self.__prot_seqs = seq_utils.get_sequences(query['protein_ids'])
         cds = [self.__cod_opt.get_codon_optimised_seq(prot_seq,
                                                       _INVALID_PATTERN)
                for prot_seq in self.__prot_seqs.values()]
@@ -66,8 +64,8 @@ class PartsSolution(object):
         rbs = self.__get_init_rbs(cds[0])
 
         post_seq_length = 30
-        self.__seqs = [self.__get_valid_rand_seq(max(0,
-                                                     len_target - len(rbs))),
+        self.__seqs = [self.__get_valid_rand_seq(max(0, query['len_target'] -
+                                                     len(rbs))),
                        rbs,
                        cds,
                        stop_codon,
@@ -79,13 +77,14 @@ class PartsSolution(object):
 
     def get_query(self):
         '''Return query.'''
-        return self.__query
+        return {'query': self.__query}
 
     def get_update(self):
         '''Return update of in-progress solution.'''
-        mean_cai = mean([self.__cod_opt.get_cai(cds)
-                         for cds in self.__seqs[2]])
-        mean_tir = 0 if self.__dgs is None else mean(_get_tirs(self.__dgs))
+        mean_cai = numpy.mean([self.__cod_opt.get_cai(cds)
+                               for cds in self.__seqs[2]])
+        mean_tir = 0 if self.__dgs is None \
+            else numpy.mean(_get_tirs(self.__dgs))
         inv_seq = sum(flatten([seq_utils.count_pattern(seq, _INVALID_PATTERN)
                                for seq in self.__seqs]))
         stcod_seqs = sum(flatten([seq_utils.count_pattern(seq,
@@ -98,7 +97,10 @@ class PartsSolution(object):
 
     def get_result(self):
         '''Return result of solution.'''
-        return {'result': {'seqs': self.__seqs}}
+        return {'result': {'seqs': [self.__seqs[0] + self.__seqs[1],
+                                    [cds + self.__seqs[3]
+                                     for cds in self.__seqs[2]],
+                                    self.__seqs[4]]}}
 
     def get_energy(self, dgs=None, cdss=None):
         '''Gets the (simulated annealing) energy.'''
@@ -266,10 +268,8 @@ class PartsSolution(object):
 class PartsThread(JobThread):
     '''Wraps a Parts optimisation job into a thread.'''
 
-    def __init__(self, job_id, protein_ids, taxonomy_id, len_target,
-                 tir_target):
-        solution = PartsSolution(protein_ids, taxonomy_id, len_target,
-                                 tir_target)
+    def __init__(self, job_id, query):
+        solution = PartsSolution(query)
         self.__sim_ann = SimulatedAnnealer(solution, verbose=True)
         self.__sim_ann.add_listener(self)
 
@@ -300,9 +300,12 @@ def _rand_nuc():
 
 def main(argv):
     '''main method.'''
-    sim_ann = SimulatedAnnealer(PartsSolution(argv[5:], argv[1],
-                                              len_target=int(argv[2]),
-                                              tir_target=float(argv[3])),
+    query = {'query': {'protein_ids': argv[5:],
+                       'taxonomy_id': argv[1],
+                       'len_target': int(argv[2]),
+                       'tir_target': float(argv[3])}}
+
+    sim_ann = SimulatedAnnealer(PartsSolution(query),
                                 acceptance=float(argv[4]),
                                 verbose=True)
     print sim_ann.optimise()

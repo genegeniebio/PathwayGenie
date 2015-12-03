@@ -21,3 +21,8 @@
     width: 100%;
     color: black;
 }
+
+#result
+{
+	word-wrap: break-word;
+}
