@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<link rel="stylesheet" type="text/css" href="drag.css">
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
+<script>
+
+var correctCards = 0;
+$( init );
+
+function init()
+{
+  $('#cardPile').html( '' );
+  $('#cardSlots').html( '' );
+
+  
+  $('<div class="ribosome-entry-site"></div>').data( 'number', 0 ).appendTo( '#cardPile' ).draggable( {
+      containment: '#content',
+      stack: '#cardPile div',
+      cursor: 'move',
+      revert: true
+    } );
+  
+  $('<div class="cds"></div>').data( 'number', 1 ).appendTo( '#cardPile' ).draggable( {
+      containment: '#content',
+      stack: '#cardPile div',
+      cursor: 'move',
+      revert: true
+    } );
+  
+  $('<div class="user-defined"></div>').data( 'number', 2 ).appendTo( '#cardPile' ).draggable( {
+      containment: '#content',
+      stack: '#cardPile div',
+      cursor: 'move',
+      revert: true
+    } );
+  
+	addDropTarget()
+}
+
+function addDropTarget()
+{
+	$('<div></div>').appendTo( '#cardSlots' ).droppable({
+		accept: '#cardPile div',
+		hoverClass: 'hovered',
+		drop: handleDrop
+	});
+}
+
+
+function handleDrop(event, ui)
+{
+	ui.draggable.addClass('correct');
+	ui.draggable.position( { of: $(this), my: 'left top', at: 'left top' } );
+	ui.draggable.draggable('option', 'revert', false);
+	addDropTarget()
+}
+
+</script>
+
+</head>
+<body>
+	<div id="content">
+		<div id="cardPile"></div>
+		<div id="cardSlots"></div>
+	</div>
+</body>
+</html>
