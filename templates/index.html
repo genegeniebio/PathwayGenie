@@ -8,23 +8,40 @@
 	<script	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script src="https://www.google.com/jsapi"></script>
 	<script src="{{ url_for('static', filename='utils.js') }}"></script>
+	<script src="{{ url_for('static', filename='require.js') }}"></script>
 	<script>
 		$(document).ready(function()
 		{
+			/*
+			requirejs.config(
+			{
+				baseUrl: 'sboljs-1.0.0/lib',
+			    paths: {
+			        sbolDocument: 'SBOLDocument'
+			    }
+			});
+			*/
+			
 			var jobId;
 			
 			$("#result-panel").hide();
 			
 			$("#form").submit(function()
 			{
+				/*
+				var sbolDocument = new SBOLDocument()
+				var sequence = sbolDocument.sequence(guid())
+				sequence.set_encoding("")
+				alert(serializeJSON(sbolDocument))
+				*/
+				
 				event.preventDefault();
-				json = getJSON($(this))
 				
 				$.ajax(
 				{
 				    type: "POST",
 				    url: "/submit",
-				    data: json,
+				    data: getJSON($(this)),
 				    contentType: "application/json; charset=utf-8",
 				    dataType: "json",
 				    complete: listen
