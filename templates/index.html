@@ -7,31 +7,38 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 	<script	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script src="https://www.google.com/jsapi"></script>
+	<script src="{{ url_for('static', filename='utils.js') }}"></script>
 	<script>
 		$(document).ready(function()
 		{
-			var currentJobId;
+			var jobId;
 			
 			$("#result-panel").hide();
 			
 			$("#form").submit(function()
 			{
 				event.preventDefault();
-
-				$.post("{{ url_for("submit") }}", $(this).serialize(), function(jobId)
+				json = getJSON($(this))
+				
+				$.ajax(
 				{
-					currentJobId = jobId
-					listen(jobId)
+				    type: "POST",
+				    url: "/submit",
+				    data: json,
+				    contentType: "application/json; charset=utf-8",
+				    dataType: "json",
+				    complete: listen
 				});
 			});
 			
 			$(".progress-cancel").click(function(event)
 			{
-				$.get("/cancel/" + currentJobId);
+				$.get("/cancel/" + jobId);
 			});
 	
-			function listen(jobId)
+			function listen(response)
 			{
+				jobId = response.responseText;
 				drawCharts([0, 0, 0, 0], 1000)
 				$("#progress-ok").attr("disabled", true);
 				$(".progress-cancel").attr("disabled", false);
@@ -173,6 +180,7 @@
 					<button type="submit" class="btn btn-default">Submit</button>
 				</div>
 			</div>
+			<input type="hidden" name="taxonomy_id" value="83333">
 		</form>
 	</div>
 	
