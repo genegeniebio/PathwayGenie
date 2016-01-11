@@ -28,6 +28,9 @@ _APP.config.from_object(__name__)
 _STATUS = {}
 _THREADS = {}
 
+_ORGANISMS = [{'taxonomy_id': 83333, 'name': 'Saccharomyces'},
+              {'taxonomy_id': 100226, 'name': 'Streptomyces'}]
+
 
 @_APP.route('/')
 def home():
@@ -42,6 +45,10 @@ def submit():
     query['protein_ids'] = [x.strip() for x in query['protein_ids'].split(',')]
     query['len_target'] = int(query['len_target'])
     query['tir_target'] = float(query['tir_target'])
+
+    # Map organism to taxonomy id:
+    organism = query.pop('organism')
+    query['taxonomy_id'] = 83333
 
     # Do job in new thread, return result when completed:
     job_id = str(uuid.uuid4())
@@ -70,6 +77,14 @@ def progress(job_id):
         return Response(_check_progress(job_id), mimetype='text/event-stream')
     else:
         return 'Job ' + job_id + ' unknown or finished.'
+
+
+@_APP.route('/organisms/<term>')
+def get_organisms(term):
+    '''Gets organisms from search term.'''
+    term = term.lower()
+    return json.dumps([value for value in _ORGANISMS
+                       if term in value['name'].lower()])
 
 
 @_APP.route('/cancel/<job_id>')
