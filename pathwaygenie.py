@@ -28,8 +28,8 @@ _APP.config.from_object(__name__)
 _STATUS = {}
 _THREADS = {}
 
-_ORGANISMS = [{'taxonomy_id': 83333, 'name': 'Saccharomyces'},
-              {'taxonomy_id': 100226, 'name': 'Streptomyces'}]
+_ORGANISMS = {'Saccharomyces': '83333',
+              'Streptomyces': '100226'}
 
 
 @_APP.route('/')
@@ -48,7 +48,7 @@ def submit():
 
     # Map organism to taxonomy id:
     organism = query.pop('organism')
-    query['taxonomy_id'] = 83333
+    query['taxonomy_id'] = _ORGANISMS[organism]
 
     # Do job in new thread, return result when completed:
     job_id = str(uuid.uuid4())
@@ -83,8 +83,9 @@ def progress(job_id):
 def get_organisms(term):
     '''Gets organisms from search term.'''
     term = term.lower()
-    return json.dumps([value for value in _ORGANISMS
-                       if term in value['name'].lower()])
+    return json.dumps([{'name': k, 'taxonomy_id': v}
+                       for k, v in _ORGANISMS.iteritems()
+                       if term in k.lower()])
 
 
 @_APP.route('/cancel/<job_id>')
