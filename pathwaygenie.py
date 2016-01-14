@@ -12,6 +12,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import json
 import time
 import uuid
+
 from flask import Flask, Response, render_template, request
 
 import parts
@@ -42,9 +43,12 @@ def home():
 def submit():
     '''Responds to submission.'''
     query = json.loads(request.data)
-    query['protein_ids'] = [x.strip() for x in query['protein_ids'].split(',')]
+    query['protein_ids'] = list(set([x.strip()
+                                     for x in query['protein_ids'].split()]))
     query['len_target'] = int(query['len_target'])
     query['tir_target'] = float(query['tir_target'])
+    query['excl_codons'] = list(set([x.strip()
+                                     for x in query['excl_codons'].split()]))
 
     # Map organism to taxonomy id:
     organism = query.pop('organism')
@@ -59,7 +63,7 @@ def submit():
     _THREADS[job_id] = thread
     thread.start()
 
-    return job_id
+    return json.dumps({'job_id': job_id})
 
 
 @_APP.route('/progress/<job_id>')

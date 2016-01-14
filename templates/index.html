@@ -16,6 +16,20 @@
 			
 			$("#result-panel").hide();
 			
+			$('#excl_codons').keypress(function(event)
+			{
+			    var regex = new RegExp("^[ACGTacgt(,\\s)]+$");
+			    var str = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+			    
+			    if(regex.test(str))
+			    {
+			        return true;
+			    }
+
+			    event.preventDefault();
+			    return false;
+			});
+			
 			$("#form").submit(function()
 			{
 				event.preventDefault();
@@ -27,7 +41,12 @@
 				    data: getJSON($(this)),
 				    contentType: "application/json; charset=utf-8",
 				    dataType: "json",
-				    complete: listen
+				    success: listen,
+				    error: function(xhr, status, error)
+				    {
+				    	$("#error-modal-content").html(xhr.responseText);
+				    	$("#error-modal").modal("show");
+					}
 				});
 			});
 			
@@ -38,7 +57,7 @@
 	
 			function listen(response)
 			{
-				jobId = response.responseText;
+				jobId = response.job_id;
 				drawCharts([0, 0, 0, 0], 1000)
 				$("#progress-ok").attr("disabled", true);
 				$(".progress-cancel").attr("disabled", false);
@@ -120,7 +139,7 @@
 			    	url: '/organisms/%QUERY',
 					wildcard: '%QUERY',
 			    }
-			} );
+			});
 			
 			// Initialize the Bloodhound suggestion engine:
 			organisms.initialize();
@@ -130,8 +149,8 @@
 				name: 'organism',
 				display: 'name',
 				source: organisms.ttAdapter()
-			} );
-		} );
+			});
+		});
 
 		google.load("visualization", "1", {packages: ["gauge"]});
 		
@@ -188,23 +207,36 @@
 			<div class="form-group">
 				<label class="control-label col-sm-2" for="protein_ids">Protein ids:</label>
 				<div class="col-sm-10">
-					<input type="text" class="form-control" id="protein_ids"
-						name="protein_ids" placeholder="Enter protein ids">
+					<input type="text" class="form-control"
+						id="protein_ids" name="protein_ids"
+						pattern="((\s*)([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})(\s*))*"
+						placeholder="Enter protein ids" required>
 				</div>
 			</div>
 			<div class="form-group">
 				<label class="control-label col-sm-2" for="len_target">Target length:</label>
 				<div class="col-sm-10">
 					<input type="number" class="form-control" id="len_target"
-						name="len_target" placeholder="Enter target length">
+						name="len_target" value="60" min="35" max="10000"
+						placeholder="Enter target length" required>
 				</div>
 			</div>
 			<div class="form-group">
 				<label class="control-label col-sm-2" for="tir_target">Target TIR:</label>
 				<div class="col-sm-10">
 					<input type="number" class="form-control" id="tir_target"
-						name="tir_target" placeholder="Enter target TIR">
+						name="tir_target" value="15000" min="0" max="200000" step="100"
+						placeholder="Enter target TIR" required>
 				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2" for="excl_codons">Excluded codons:</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" style="text-transform:uppercase"
+						id="excl_codons" name="excl_codons" pattern="((\s*)([ACGT]{3})(\s*))*"
+						placeholder="Enter excluded codons">
+				</div>
+				<span class="glyphicon form-control-feedback" id="excl_codons_glyph"></span>
 			</div>
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
@@ -256,6 +288,25 @@
 		<div id="result-panel" class="panel panel-default">
 	  		<div class="panel-heading">Result</div>
 	  		<div id="result" class="panel-body"></div>
+		</div>
+	</div>
+	
+	<!-- Modal -->
+	<div id="error-modal" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+		        	<button type="button" class="close" data-dismiss="modal">&times;</button>
+		        	<h4 class="modal-title">Error</h4>
+		      	</div>
+		      	<div class="modal-body">
+		      		<div id="error-modal-content"></div>
+		     	</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
 		</div>
 	</div>
 </body>

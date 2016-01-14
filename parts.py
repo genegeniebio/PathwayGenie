@@ -14,15 +14,17 @@ import numpy
 import random
 import sys
 
-import RBS_Calculator
-import RBS_MC_Design
+from Bio.Seq import Seq
+
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import sequence_utils as seq_utils
 from synbiochem.utils.job import JobThread
+import RBS_Calculator
+import RBS_MC_Design
 
 
 # Necessary to get constants hidden as class variables in RBS_Calculator:
-_RBS_CALC = RBS_Calculator.RBS_Calculator('A', [0, 0])
+_RBS_CALC = RBS_Calculator.RBS_Calculator('A', [0, 0], 'A')
 
 # Invalid pattern is restriction sites | repeating nucleotides:
 _MAX_REPEATING_NUCS = 6
@@ -51,13 +53,15 @@ class PartsSolution(object):
             (_RBS_CALC.logK - math.log(float(query['tir_target'])))
 
         self.__cod_opt = seq_utils.CodonOptimiser(query['taxonomy_id'])
-
+        self.__r_rna = 'acctcctta'
         self.__prot_seqs = seq_utils.get_sequences(query['protein_ids'])
-        cds = [self.__cod_opt.get_codon_optimised_seq(prot_seq,
-                                                      _INVALID_PATTERN)
+        cds = [self.__cod_opt.get_codon_optim_seq(prot_seq,
+                                                  query['excl_codons'],
+                                                  _INVALID_PATTERN)
                for prot_seq in self.__prot_seqs.values()]
 
-        stop_codon = self.__cod_opt.get_codon_optimised_seq('*')
+        stop_codon = self.__cod_opt.get_codon_optim_seq('*',
+                                                        query['excl_codons'])
 
         # Randomly choose an RBS that is a decent starting point,
         # using the first CDS as the upstream sequence:
@@ -132,8 +136,9 @@ class PartsSolution(object):
         if attempts > max_attempts - 1:
             raise ValueError('Unable to generate valid initial RBS.')
 
-        (rbs, _) = RBS_MC_Design.GetInitialRBS('', cds,
-                                               self.__dg_target)
+        shine_delgano = Seq(self.__r_rna).reverse_complement()
+        (rbs, _) = RBS_MC_Design.GetInitialRBS(self.__r_rna, shine_delgano, '',
+                                               cds, self.__dg_target)
 
         if seq_utils.count_pattern(rbs, _INVALID_PATTERN) + \
                 seq_utils.count_pattern(rbs, _START_CODON_PATTERN) == 0:
@@ -143,7 +148,8 @@ class PartsSolution(object):
 
     def __calc_dgs(self, rbs, verbose=False):
         '''Calculates (simulated annealing) energies for given RBS.'''
-        return [RBS_MC_Design.Run_RBS_Calculator(self.__seqs[0],
+        return [RBS_MC_Design.Run_RBS_Calculator(self.__r_rna,
+                                                 self.__seqs[0],
                                                  cds,
                                                  rbs,
                                                  verbose).dG_total_list[0]
