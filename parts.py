@@ -26,18 +26,6 @@ import RBS_MC_Design
 # Necessary to get constants hidden as class variables in RBS_Calculator:
 _RBS_CALC = RBS_Calculator.RBS_Calculator('A', [0, 0], 'A')
 
-# Invalid pattern is restriction sites | repeating nucleotides:
-_MAX_REPEATING_NUCS = 6
-_INVALID_PATTERN = '|'.join(['GGTCTC', 'GAGACC',
-                             'CACCTGC', 'GCAGGTG',
-                             'GAATTC',
-                             'AGATCT',
-                             'GGATCC',
-                             'CTCGAG',
-                             'GAGTC[ACGT]{5}', '[ACGT]{5}GACTC'] +
-                            [x * _MAX_REPEATING_NUCS
-                             for x in ['A', 'C', 'G', 'T']])
-
 _START_CODON_PATTERN = '[ACGT]TG'
 
 
@@ -52,12 +40,19 @@ class PartsSolution(object):
         self.__dg_target = _RBS_CALC.RT_eff * \
             (_RBS_CALC.logK - math.log(float(query['tir_target'])))
 
+        # Invalid pattern is restriction sites | repeating nucleotides:
+        self._inv_patt = '|'.join(['GGTCTC', 'GAGACC', 'CACCTGC', 'GCAGGTG',
+                                   'GAATTC', 'AGATCT', 'GGATCC', 'CTCGAG',
+                                   'GAGTC[ACGT]{5}', '[ACGT]{5}GACTC'] +
+                                  [x * int(query['max_repeats'])
+                                   for x in ['A', 'C', 'G', 'T']])
+
         self.__cod_opt = seq_utils.CodonOptimiser(query['taxonomy_id'])
         self.__r_rna = 'acctcctta'
         self.__prot_seqs = seq_utils.get_sequences(query['protein_ids'])
         cds = [self.__cod_opt.get_codon_optim_seq(prot_seq,
                                                   query['excl_codons'],
-                                                  _INVALID_PATTERN)
+                                                  self._inv_patt)
                for prot_seq in self.__prot_seqs.values()]
 
         stop_codon = self.__cod_opt.get_codon_optim_seq('*',
@@ -89,7 +84,7 @@ class PartsSolution(object):
                                for cds in self.__seqs[2]])
         mean_tir = 0 if self.__dgs is None \
             else numpy.mean(_get_tirs(self.__dgs))
-        inv_seq = sum(flatten([seq_utils.count_pattern(seq, _INVALID_PATTERN)
+        inv_seq = sum(flatten([seq_utils.count_pattern(seq, self._inv_patt)
                                for seq in self.__seqs]))
         stcod_seqs = sum(flatten([seq_utils.count_pattern(seq,
                                                           _START_CODON_PATTERN)
@@ -113,7 +108,7 @@ class PartsSolution(object):
         return sum([abs(d_g - self.__dg_target) for d_g in dgs]) / \
             len(self.__seqs[2]) * \
             (1 + (sum(seq_utils.count_pattern([self.__seqs[1]] + cdss,
-                                              _INVALID_PATTERN)))**10)
+                                              self._inv_patt)))**10)
 
     def mutate(self, verbose=False):
         '''Mutates and scores whole design.'''
@@ -140,7 +135,7 @@ class PartsSolution(object):
         (rbs, _) = RBS_MC_Design.GetInitialRBS(self.__r_rna, shine_delgano, '',
                                                cds, self.__dg_target)
 
-        if seq_utils.count_pattern(rbs, _INVALID_PATTERN) + \
+        if seq_utils.count_pattern(rbs, self._inv_patt) + \
                 seq_utils.count_pattern(rbs, _START_CODON_PATTERN) == 0:
             return rbs
 
@@ -161,7 +156,7 @@ class PartsSolution(object):
         pre_seq_new = _replace(self.__seqs[0], pos, _rand_nuc())
 
         if seq_utils.count_pattern(pre_seq_new + self.__seqs[1],
-                                   _INVALID_PATTERN) + \
+                                   self._inv_patt) + \
                 seq_utils.count_pattern(pre_seq_new + self.__seqs[1],
                                         _START_CODON_PATTERN) == 0:
             self.__seqs_new[0] = pre_seq_new
@@ -195,7 +190,7 @@ class PartsSolution(object):
             pre_seq_new = self.__seqs_new[0]
             rbs_new = self.__seqs[1]
 
-        if seq_utils.count_pattern(pre_seq_new + rbs_new, _INVALID_PATTERN) + \
+        if seq_utils.count_pattern(pre_seq_new + rbs_new, self._inv_patt) + \
                 seq_utils.count_pattern(pre_seq_new + rbs_new,
                                         _START_CODON_PATTERN) == 0:
             self.__seqs_new[0] = pre_seq_new
@@ -212,7 +207,7 @@ class PartsSolution(object):
 
         self.__seqs_new[2] = [cds
                               if seq_utils.count_pattern(cds,
-                                                         _INVALID_PATTERN) == 0
+                                                         self._inv_patt) == 0
                               else self.__seqs_new[2][idx]
                               for idx, cds in enumerate(new_cds)]
 
@@ -224,7 +219,7 @@ class PartsSolution(object):
                                         3.0 * len(self.__seqs[2]) /
                                         len(self.__seqs[2][idx]))
 
-        if seq_utils.count_pattern(new_cds, _INVALID_PATTERN) == 0:
+        if seq_utils.count_pattern(new_cds, self._inv_patt) == 0:
             self.__seqs_new[2][idx] = new_cds
 
     def __get_valid_rand_seq(self, length, attempts=0, max_attempts=1000):
@@ -237,7 +232,7 @@ class PartsSolution(object):
 
         seq = ''.join([_rand_nuc() for _ in range(0, length)])
 
-        if seq_utils.count_pattern(seq, _INVALID_PATTERN) + \
+        if seq_utils.count_pattern(seq, self._inv_patt) + \
                 seq_utils.count_pattern(seq, _START_CODON_PATTERN) == 0:
             return seq
 
@@ -246,7 +241,7 @@ class PartsSolution(object):
     def __repr__(self):
         # return '%r' % (self.__dict__)
         cai = [self.__cod_opt.get_cai(prot_seq) for prot_seq in self.__seqs[2]]
-        invalid_patterns = [seq_utils.count_pattern(seq, _INVALID_PATTERN)
+        invalid_patterns = [seq_utils.count_pattern(seq, self._inv_patt)
                             for seq in self.__seqs]
         start_codons = [seq_utils.count_pattern(seq, _START_CODON_PATTERN)
                         for seq in self.__seqs]
