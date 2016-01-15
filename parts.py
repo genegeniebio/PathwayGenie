@@ -48,7 +48,7 @@ class PartsSolution(object):
                                    for x in ['A', 'C', 'G', 'T']])
 
         self.__cod_opt = seq_utils.CodonOptimiser(query['taxonomy_id'])
-        self.__r_rna = 'acctcctta'
+
         self.__prot_seqs = seq_utils.get_sequences(query['protein_ids'])
         cds = [self.__cod_opt.get_codon_optim_seq(prot_seq,
                                                   query['excl_codons'],
@@ -131,8 +131,9 @@ class PartsSolution(object):
         if attempts > max_attempts - 1:
             raise ValueError('Unable to generate valid initial RBS.')
 
-        shine_delgano = Seq(self.__r_rna).reverse_complement()
-        (rbs, _) = RBS_MC_Design.GetInitialRBS(self.__r_rna, shine_delgano, '',
+        shine_delgano = Seq(self.__query['r_rna']).reverse_complement()
+        (rbs, _) = RBS_MC_Design.GetInitialRBS(self.__query['r_rna'],
+                                               shine_delgano, '',
                                                cds, self.__dg_target)
 
         if seq_utils.count_pattern(rbs, self._inv_patt) + \
@@ -143,7 +144,7 @@ class PartsSolution(object):
 
     def __calc_dgs(self, rbs, verbose=False):
         '''Calculates (simulated annealing) energies for given RBS.'''
-        return [RBS_MC_Design.Run_RBS_Calculator(self.__r_rna,
+        return [RBS_MC_Design.Run_RBS_Calculator(self.__query['r_rna'],
                                                  self.__seqs[0],
                                                  cds,
                                                  rbs,

@@ -32,6 +32,9 @@ _THREADS = {}
 _ORGANISMS = {'Saccharomyces': '83333',
               'Streptomyces': '100226'}
 
+_R_RNA = {'83333': 'acctcctta',
+          '100226': 'acctccttt'}
+
 
 @_APP.route('/')
 def home():
@@ -53,6 +56,7 @@ def submit():
     # Map organism to taxonomy id:
     organism = query.pop('organism')
     query['taxonomy_id'] = _ORGANISMS[organism]
+    query['r_rna'] = _R_RNA[query['taxonomy_id']]
 
     # Do job in new thread, return result when completed:
     job_id = str(uuid.uuid4())
