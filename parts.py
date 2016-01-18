@@ -41,40 +41,7 @@ class PartsSolution(object):
             (_RBS_CALC.logK - math.log(float(query['tir_target'])))
 
         # Invalid pattern is restriction sites | repeating nucleotides:
-        self._inv_patt = '|'.join(list(set(['[ACGT]{5}GACTC'
-                                            'AAGCTT',
-                                            'ACACAC',
-                                            'ACGACGGCCAGT',
-                                            'AGAGAG',
-                                            'AGATCT',
-                                            'AGTCACGACGTT',
-                                            'ATATAT',
-                                            'CAATTTCACACAGG',
-                                            'CACACA',
-                                            'CACCTGC',
-                                            'CATATG',
-                                            'CGCGCG',
-                                            'CTCGAG',
-                                            'CTCTCT',
-                                            'CTGCAG',
-                                            'GAAGAC',
-                                            'GAATTC',
-                                            'GAGACC',
-                                            'GAGAGA',
-                                            'GAGTC[ACGT]{5}',
-                                            'GAGTC',
-                                            'GATATC',
-                                            'GCAGGTG',
-                                            'GCGCGC',
-                                            'GCGGCCGC',
-                                            'GGATCC',
-                                            'GGTCTC',
-                                            'GTGTGT',
-                                            'TATATA',
-                                            'TATGCTTCCGGC',
-                                            'TCTAGA',
-                                            'TCTCTC',
-                                            'TGTGTG'])) +
+        self._inv_patt = '|'.join(query['excl_seqs'] +
                                   [x * int(query['max_repeats'])
                                    for x in ['A', 'C', 'G', 'T']])
 

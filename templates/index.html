@@ -209,7 +209,7 @@
 				<div class="col-sm-10">
 					<input type="text" class="form-control"
 						id="protein_ids" name="protein_ids"
-						pattern="((\s*)([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})(\s*))*"
+						pattern="((\s*)(([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})|[ACDEFGHIKLMNPQRSTVWY]*)(\s*))*"
 						placeholder="Enter protein ids" required>
 				</div>
 			</div>
@@ -233,7 +233,7 @@
 				<label class="control-label col-sm-2" for="max_repeats">Max repeating nucleotides:</label>
 				<div class="col-sm-10">
 					<input type="number" class="form-control" id="max_repeats"
-						name="max_repeats" value="6" min="6" max="1e6" step="1"
+						name="max_repeats" value="6" min="5" max="1e6" step="1"
 						placeholder="Enter maximum repeating nucleotides" required>
 				</div>
 			</div>
@@ -244,7 +244,47 @@
 						id="excl_codons" name="excl_codons" pattern="((\s*)([ACGT]{3})(\s*))*"
 						placeholder="Enter excluded codons">
 				</div>
-				<span class="glyphicon form-control-feedback" id="excl_codons_glyph"></span>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2" for="excl_seqs">Excluded sequences:</label>
+				<div class="col-sm-10">
+					<select class="form-control" id="excl_seqs" name="excl_seqs" multiple>
+						<option value="[ACGT]{5}GACTC">[ACGT]{5}GACTC</option>
+						<option value="AAGCTT">AAGCTT</option>
+						<option value="ACACAC">ACACAC</option>
+						<option value="ACGACGGCCAGT">ACGACGGCCAGT</option>
+						<option value="AGAGAG">AGAGAG</option>
+						<option value="AGATCT">AGATCT</option>
+						<option value="AGTCACGACGTT">AGTCACGACGTT</option>
+						<option value="ATATAT">ATATAT</option>
+						<option value="CAATTTCACACAGG">CAATTTCACACAGG</option>
+						<option value="CACACA">CACACA</option>
+						<option value="CACCTGC">CACCTGC</option>
+						<option value="CATATG">CATATG</option>
+						<option value="CGCGCG">CGCGCG</option>
+						<option value="CTCGAG">CTCGAG</option>
+						<option value="CTCTCT">CTCTCT</option>
+						<option value="CTGCAG">CTGCAG</option>
+						<option value="GAAGAC">GAAGAC</option>
+						<option value="GAATTC">GAATTC</option>
+						<option value="GAGACC">GAGACC</option>
+						<option value="GAGAGA">GAGAGA</option>
+						<option value="GAGTC[ACGT]{5}">GAGTC[ACGT]{5}</option>
+						<option value="GAGTC">GAGTC</option>
+						<option value="GATATC">GATATC</option>
+						<option value="GCAGGTG">GCAGGTG</option>
+						<option value="GCGCGC">GCGCGC</option>
+						<option value="GCGGCCGC">GCGGCCGC</option>
+						<option value="GGATCC">GGATCC</option>
+						<option value="GGTCTC">GGTCTC</option>
+						<option value="GTGTGT">GTGTGT</option>
+						<option value="TATATA">TATATA</option>
+						<option value="TATGCTTCCGGC">TATGCTTCCGGC</option>
+						<option value="TCTAGA">TCTAGA</option>
+						<option value="TCTCTC">TCTCTC</option>
+						<option value="TGTGTG">TGTGTG</option>
+					</select>
+				</div>
 			</div>
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
