@@ -41,7 +41,8 @@ class PartsSolution(object):
             (_RBS_CALC.logK - math.log(float(query['tir_target'])))
 
         # Invalid pattern is restriction sites | repeating nucleotides:
-        self._inv_patt = '|'.join(query['excl_seqs'] +
+        self._inv_patt = '|'.join(query['excl_seqs']
+                                  if 'excl_seqs' in query else [] +
                                   [x * int(query['max_repeats'])
                                    for x in ['A', 'C', 'G', 'T']])
 
