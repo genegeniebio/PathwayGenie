@@ -29,8 +29,8 @@ _APP.config.from_object(__name__)
 _STATUS = {}
 _THREADS = {}
 
-_ORGANISMS = {'Saccharomyces': '83333',
-              'Streptomyces': '100226'}
+_ORGANISMS = {'Escherichia coli K-12': '83333',
+              'Streptomyces coelicolor A3(2)': '100226'}
 
 _R_RNA = {'83333': 'acctcctta',
           '100226': 'acctccttt'}
