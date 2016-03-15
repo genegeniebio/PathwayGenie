@@ -19,8 +19,8 @@ import synbiochem.utils.sequence_utils as seq_utils
 class DominoGenie(object):
     '''DominoGenie class for designing dominoes (bridging oligos) for LCR.'''
 
-    def __init__(self, ice_url, ice_username, ice_password):
-        self.__ice_client = ICEClient(ice_url, ice_username, ice_password)
+    def __init__(self, seq_source):
+        self.__seq_source = seq_source
 
     def get_dominoes(self, design_filename, melt_temp, restrict=None):
         '''Designs dominoes (bridging oligos) for LCR.'''
@@ -37,13 +37,12 @@ class DominoGenie(object):
                 pair_oligos.update({pair: oligo[2:]
                                     for pair, oligo in zip(pairs, oligos)})
 
-        _write_results(pair_oligos,
-                       os.path.splitext(design_filename)[0] + '_dominoes.xls')
+        return pair_oligos
 
     def __get_seq(self, seq_id, restrict):
         '''Gets sequence from sequence id, applying restriction site cleavage
         if necessary.'''
-        seq = self.__ice_client.get_sequence(seq_id)
+        seq = self.__seq_source.get_sequence(seq_id)
 
         if restrict is not None:
             seq = seq_utils.apply_restriction(seq, restrict)
@@ -70,17 +69,17 @@ def _get_dominoes(target_melt_temp, sequences, plasmid_seq=None,
     for ordering in orderings:
         pairs.extend(synbiochem.utils.pairwise(ordering))
 
-    return [_get_bridge(sequences, num_sequences, pair, target_melt_temp,
+    return [_get_domino(sequences, num_sequences, pair, target_melt_temp,
                         reagent_concs)
             for pair in sorted(set(pairs))]
 
 
-def _get_bridge(sequences, num_sequences, pair, target_melt_temp,
+def _get_domino(sequences, num_sequences, pair, target_melt_temp,
                 reagent_concs=None):
     '''Get bridging oligo for pair of sequences.'''
-    reverse, reverse_tm = _get_bridge_part(sequences[pair[0]], False,
+    reverse, reverse_tm = _get_domino_part(sequences[pair[0]], False,
                                            target_melt_temp, reagent_concs)
-    forward, forward_tm = _get_bridge_part(sequences[pair[1]], True,
+    forward, forward_tm = _get_domino_part(sequences[pair[1]], True,
                                            target_melt_temp, reagent_concs)
     return ['SEQ' + str(pair[0] + 1) if pair[0] is not num_sequences else 'P',
             'SEQ' +
@@ -90,7 +89,7 @@ def _get_bridge(sequences, num_sequences, pair, target_melt_temp,
             if reverse is not None and forward is not None else '']
 
 
-def _get_bridge_part(sequence, forward, target_melt_temp, reagent_concs=None):
+def _get_domino_part(sequence, forward, target_melt_temp, reagent_concs=None):
     '''Gets half of bridging oligo.'''
     for i in range(1, len(sequence)):
         subsequence = sequence[
@@ -104,7 +103,7 @@ def _get_bridge_part(sequence, forward, target_melt_temp, reagent_concs=None):
     return None, -float('inf')
 
 
-def _write_results(pair_oligos, filename):
+def _write_results(seq_source, pair_oligos, filename):
     '''Writes bridging oligos to file in Excel (tabbed) format.'''
     result_file = open(filename, 'w+')
 
@@ -123,18 +122,25 @@ def _write_results(pair_oligos, filename):
     result_file.write('\n')
 
     for oligo, pairs in oligo_pairs.iteritems():
-        result_file.write('\t'.join([oligo] + [pair[0] + '_' + pair[1]
-                                               for pair in pairs]) + '\n')
+        name = seq_source.get_name(
+            pairs[0][0]) + '_' + seq_source.get_name(pairs[0][1])
+        pairs_str = [pair[0] + '_' + pair[1] for pair in pairs]
+        result_file.write('\t'.join([name] + [oligo] + pairs_str) + '\n')
 
     result_file.close()
 
 
 def main(args):
     '''main method.'''
-    domino_genie = DominoGenie(args[2], args[3], args[4])
+    ice_client = ICEClient(args[2], args[3], args[4])
+    domino_genie = DominoGenie(ice_client)
 
     for filename in args[5:]:
-        domino_genie.get_dominoes(filename, float(args[0]), args[1])
+        pair_oligos = domino_genie.get_dominoes(filename, float(args[0]),
+                                                args[1])
+
+        _write_results(ice_client, pair_oligos,
+                       os.path.splitext(filename)[0] + '_dominoes.xls')
 
 
 if __name__ == '__main__':
