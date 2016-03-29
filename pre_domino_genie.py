@@ -10,8 +10,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import os
 import sys
 
-from synbiochem.utils import sbol_utils
-from synbiochem.utils.ice_utils import ICEClient
+from synbiochem.utils import sbol_utils, ice_utils
+from synbiochem.utils.ice_utils import ICEClient, ICEEntry
 import dominogenie
 import synbiochem.utils
 
@@ -28,7 +28,8 @@ def get_designs(filename):
 
 def get_dominoes(sbol_source, designs, melt_temp, restrict=None):
     '''Designs dominoes (bridging oligos) for LCR.'''
-    pair_oligos = {}
+    design_id_plasmid = {}
+    design_id_dominoes = {}
 
     for design_id, design in designs.iteritems():
         ids_docs = [(val, sbol_source.get_sbol_doc(val))
@@ -39,20 +40,21 @@ def get_dominoes(sbol_source, designs, melt_temp, restrict=None):
         # Apply restriction site digestion to PARTs not PLASMIDs.
         # (Assumes PLASMID at positions 1 and -1 - first and last).
         if restrict is not None:
-            ids_seqs = ids_docs[0] + \
+            ids_docs = [ids_docs[0]] + \
                 [(item[0], _apply_restrict(item[1], restrict))
                  for item in ids_docs[1:-1]] + \
-                ids_docs[-1:]
+                [ids_docs[-1]]
 
-        concat_doc = sbol_utils.concat([item[1] for item in ids_docs[:-1]])
+        design_id_plasmid[design_id] = \
+            sbol_utils.concat([item[1] for item in ids_docs[:-1]])
 
-        oligos = dominogenie.get_dominoes(melt_temp, ids_seqs)
+        oligos = dominogenie.get_dominoes(melt_temp, [item[1]
+                                                      for item in ids_seqs])
 
         pairs = [pair for pair in synbiochem.utils.pairwise(design)]
-        pair_oligos.update({pair: oligo[2:]
-                            for pair, oligo in zip(pairs, oligos)})
+        design_id_dominoes[design_id] = zip(pairs, oligos)
 
-    return pair_oligos
+    return design_id_plasmid, design_id_dominoes
 
 
 def _apply_restrict(sbol_doc, restrict):
@@ -68,10 +70,12 @@ def _apply_restrict(sbol_doc, restrict):
         # ...else return the digested Document that contains a CDS:
         for restrict_doc in restrict_docs:
             for annot in restrict_doc.annotations:
-                if annot.subcomponent.type == sbol_utils.CDS_SO:
+                if annot.subcomponent.type == sbol_utils.SO_CDS or \
+                        annot.subcomponent.type == sbol_utils.SO_PROM:
                     return restrict_doc
 
-    raise ValueError('No CDS found in restriction site cleaved sequence.')
+    raise ValueError('No CDS or promoter found in restriction site cleaved ' +
+                     'sequence.')
 
 
 def _write_results(seq_source, pair_oligos, filename):
@@ -107,13 +111,22 @@ def main(args):
 
     for filename in args[5:]:
         designs = get_designs(filename)
-        pair_oligos = get_dominoes(ice_client,
-                                   designs,
-                                   float(args[0]),
-                                   args[1])
+        design_id_plasmid, design_id_dominioes = get_dominoes(ice_client,
+                                                              designs,
+                                                              float(args[0]),
+                                                              args[1])
 
-        _write_results(ice_client, pair_oligos,
-                       os.path.splitext(filename)[0] + '_dominoes.xls')
+        for design_id, plasmid in design_id_plasmid.iteritems():
+            metadata = {'id': ice_utils.get_ice_number(design_id),
+                        'status': 'complete'}
+            ice_entry = ICEEntry(plasmid, 'PLASMID', metadata)
+            plasmid.write(
+                '/Users/neilswainston/Downloads/' + design_id + '.xml')
+            ice_client.set_ice_entry(ice_entry)
+            print design_id
+
+        # _write_results(ice_client, pair_oligos,
+        #               os.path.splitext(filename)[0] + '_dominoes.xls')
 
 if __name__ == '__main__':
     main(sys.argv[1:])
