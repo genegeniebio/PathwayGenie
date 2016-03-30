@@ -35,8 +35,6 @@ def get_dominoes(sbol_source, designs, melt_temp, restrict=None):
     for design_id, design in designs.iteritems():
         ids_docs = [(val, sbol_source.get_sbol_doc(val))
                     for val in design]
-        ids_seqs = [(item[0], sbol_utils.get_seq(item[1]))
-                    for item in ids_docs]
 
         # Apply restriction site digestion to PARTs not PLASMIDs.
         # (Assumes PLASMID at positions 1 and -1 - first and last).
@@ -48,6 +46,9 @@ def get_dominoes(sbol_source, designs, melt_temp, restrict=None):
 
         design_id_plasmid[design_id] = \
             sbol_utils.concat([item[1] for item in ids_docs[:-1]])
+
+        ids_seqs = [(item[0], sbol_utils.get_seq(item[1]))
+                    for item in ids_docs]
 
         oligos = dominogenie.get_dominoes(melt_temp, [item[1]
                                                       for item in ids_seqs])
@@ -95,7 +96,7 @@ def _write_plasmids(ice_client, design_id_plasmid):
                                        'plasmid',
                                        filename)
             print 'OK ' + filename
-        except NetworkError, err:
+        except NetworkError as err:
             # Error thrown if sequence exists: deleteSequence?
             print err
 
