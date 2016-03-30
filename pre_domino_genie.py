@@ -12,6 +12,7 @@ import sys
 
 from synbiochem.utils import sbol_utils, ice_utils
 from synbiochem.utils.ice_utils import ICEClient, ICEEntry
+from synbiochem.utils.net_utils import NetworkError
 import dominogenie
 import synbiochem.utils
 
@@ -117,13 +118,23 @@ def main(args):
                                                               args[1])
 
         for design_id, plasmid in design_id_plasmid.iteritems():
-            metadata = {'id': ice_utils.get_ice_number(design_id),
-                        'status': 'complete'}
-            ice_entry = ICEEntry(plasmid, 'PLASMID', metadata)
-            plasmid.write(
-                '/Users/neilswainston/Downloads/' + design_id + '.xml')
-            ice_client.set_ice_entry(ice_entry)
-            print design_id
+            # metadata = {'status': 'complete'}
+            # ice_entry = ICEEntry(plasmid, 'plasmid', metadata)
+            # ice_client.set_ice_entry(ice_entry)
+
+            ice_entry = ice_client.get_ice_entry(design_id)
+            metadata = ice_entry.get_metadata()
+            filename = '/Users/neilswainston/Downloads/' + design_id + '.xml'
+            plasmid.write(filename)
+
+            try:
+                ice_client.upload_seq_file(metadata['type']['recordId'],
+                                           'plasmid',
+                                           filename)
+                print 'OK ' + filename
+            except NetworkError, err:
+                # Error thrown if sequence exists: deleteSequence?
+                print err
 
         # _write_results(ice_client, pair_oligos,
         #               os.path.splitext(filename)[0] + '_dominoes.xls')
