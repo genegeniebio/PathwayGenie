@@ -11,7 +11,7 @@ import os
 import sys
 
 from synbiochem.utils import sbol_utils, ice_utils
-from synbiochem.utils.ice_utils import ICEClient, ICEEntry
+from synbiochem.utils.ice_utils import ICEClient
 from synbiochem.utils.net_utils import NetworkError
 import dominogenie
 import synbiochem.utils
@@ -79,31 +79,88 @@ def _apply_restrict(sbol_doc, restrict):
                      'sequence.')
 
 
-def _write_results(seq_source, pair_oligos, filename):
-    '''Writes bridging oligos to file in Excel (tabbed) format.'''
-    result_file = open(filename, 'w+')
+def _write_plasmids(ice_client, design_id_plasmid):
+    '''Writes plasmids to ICE.'''
+    for design_id, plasmid in design_id_plasmid.iteritems():
+        ice_entry = ice_client.get_ice_entry(design_id)
+        ice_entry.set_value('status', 'Complete')
+        ice_client.set_ice_entry(ice_entry)
 
-    oligo_pairs = {}
+        metadata = ice_entry.get_metadata()
+        filename = '/Users/neilswainston/Downloads/' + design_id + '.xml'
+        plasmid.write(filename)
 
-    for pair, oligo in pair_oligos.iteritems():
-        result_line = '\t'.join(list(pair) + oligo)
-        print result_line
-        result_file.write(result_line + '\n')
+        try:
+            ice_client.upload_seq_file(metadata['type']['recordId'],
+                                       'plasmid',
+                                       filename)
+            print 'OK ' + filename
+        except NetworkError, err:
+            # Error thrown if sequence exists: deleteSequence?
+            print err
 
-        if oligo[4] not in oligo_pairs:
-            oligo_pairs[oligo[4]] = [list(pair)]
-        else:
-            oligo_pairs[oligo[4]].append(list(pair))
 
-    result_file.write('\n')
+def _write_dominoes(design_id_dominoes, filename):
+    '''Writes dominoes (eventually to ICE), currently to file in Excel
+    (tabbed) format.'''
+    recipe_file = open(filename + '_recipes.xls', 'w+')
 
-    for oligo, pairs in oligo_pairs.iteritems():
-        name = seq_source.get_name(
-            pairs[0][0]) + '_' + seq_source.get_name(pairs[0][1])
-        pairs_str = [pair[0] + '_' + pair[1] for pair in pairs]
-        result_file.write('\t'.join([name] + [oligo] + pairs_str) + '\n')
+    domino_pairs = {}
 
-    result_file.close()
+    line = '\t'.join(['Plasmid id',
+                      'Part 1 id',
+                      'Part 2 id',
+                      'Domino id',
+                      'Domino seq',
+                      'Domino 1 seq',
+                      'Domino 1 Tm',
+                      'Domino 2 seq',
+                      'Domino 2 Tm'])
+
+    print line
+    recipe_file.write(line + '\n')
+
+    for design_id, dominoes in design_id_dominoes.iteritems():
+        for domino in dominoes:
+            pair = list(domino[0])
+            seq = domino[1][0][0] + domino[1][1][0]
+            line = '\t'.join([design_id] +
+                             pair +
+                             [_get_domino_id(seq, pair, domino_pairs)] +
+                             [seq] +
+                             [str(val) for sublist in list(domino[1])
+                              for val in list(sublist)])
+            print line
+            recipe_file.write(line + '\n')
+
+        recipe_file.write('\n')
+
+    recipe_file.close()
+
+    domino_file = open(filename + '_dominoes.xls', 'w+')
+    domino_file.write('\t'.join(['Domino id', 'Domino seq', 'Pairs']) + '\n')
+    for domino, pairs in domino_pairs.iteritems():
+        name = '_'.join(pairs[0])
+        pairs_str = ', '.join([pair[0] + '_' + pair[1] for pair in pairs])
+        domino_file.write('\t'.join([name, domino, pairs_str]) + '\n')
+
+    domino_file.close()
+
+
+def _get_domino_id(seq, pair, domino_pairs):
+    '''Gets a temporary domino id.'''
+    if seq not in domino_pairs:
+        domino_pairs[seq] = [pair]
+    else:
+        domino_pairs[seq].append(pair)
+
+    return '_'.join(domino_pairs[seq][0])
+
+
+def _get_ice_url(ice_id):
+    '''Returns an ICE url.'''
+    return 'https://ice.synbiochem.co.uk/entry/' + \
+        ice_utils.get_ice_number(ice_id)
 
 
 def main(args):
@@ -112,32 +169,14 @@ def main(args):
 
     for filename in args[5:]:
         designs = get_designs(filename)
-        design_id_plasmid, design_id_dominioes = get_dominoes(ice_client,
+        design_id_plasmids, design_id_dominoes = get_dominoes(ice_client,
                                                               designs,
                                                               float(args[0]),
                                                               args[1])
 
-        for design_id, plasmid in design_id_plasmid.iteritems():
-            # metadata = {'status': 'complete'}
-            # ice_entry = ICEEntry(plasmid, 'plasmid', metadata)
-            # ice_client.set_ice_entry(ice_entry)
+        _write_dominoes(design_id_dominoes, os.path.splitext(filename)[0])
 
-            ice_entry = ice_client.get_ice_entry(design_id)
-            metadata = ice_entry.get_metadata()
-            filename = '/Users/neilswainston/Downloads/' + design_id + '.xml'
-            plasmid.write(filename)
-
-            try:
-                ice_client.upload_seq_file(metadata['type']['recordId'],
-                                           'plasmid',
-                                           filename)
-                print 'OK ' + filename
-            except NetworkError, err:
-                # Error thrown if sequence exists: deleteSequence?
-                print err
-
-        # _write_results(ice_client, pair_oligos,
-        #               os.path.splitext(filename)[0] + '_dominoes.xls')
+        # _write_plasmids(ice_client, design_id_plasmids)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
