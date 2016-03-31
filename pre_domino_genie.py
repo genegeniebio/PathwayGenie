@@ -7,10 +7,11 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+import math
 import os
 import sys
 
-from synbiochem.utils import sbol_utils, ice_utils
+from synbiochem.utils import sbol_utils
 from synbiochem.utils.ice_utils import ICEClient
 from synbiochem.utils.net_utils import NetworkError
 import dominogenie
@@ -104,7 +105,18 @@ def _write_plasmids(ice_client, design_id_plasmid):
 def _write_dominoes(design_id_dominoes, filename):
     '''Writes dominoes (eventually to ICE), currently to file in Excel
     (tabbed) format.'''
-    recipe_file = open(filename + '_recipes.xls', 'w+')
+    domino_pairs = _write_overview(design_id_dominoes, filename)
+    name_well_pos = _write_order(domino_pairs, filename)
+    design_id_well_pos = _write_domino_pools(design_id_dominoes, domino_pairs,
+                                             name_well_pos, filename)
+    part_well_pos = _write_parts(design_id_dominoes, filename)
+    _write_plasmids_file(design_id_dominoes, design_id_well_pos, part_well_pos,
+                         filename)
+
+
+def _write_overview(design_id_dominoes, filename):
+    '''Writes an overview file.'''
+    overview_file = open(filename + '_overview.xls', 'w+')
 
     domino_pairs = {}
 
@@ -118,8 +130,7 @@ def _write_dominoes(design_id_dominoes, filename):
                       'Domino 2 seq',
                       'Domino 2 Tm'])
 
-    print line
-    recipe_file.write(line + '\n')
+    overview_file.write(line + '\n')
 
     for design_id, dominoes in design_id_dominoes.iteritems():
         for domino in dominoes:
@@ -131,21 +142,138 @@ def _write_dominoes(design_id_dominoes, filename):
                              [seq] +
                              [str(val) for sublist in list(domino[1])
                               for val in list(sublist)])
-            print line
-            recipe_file.write(line + '\n')
 
-        recipe_file.write('\n')
+            overview_file.write(line + '\n')
 
-    recipe_file.close()
+        overview_file.write('\n')
 
-    domino_file = open(filename + '_dominoes.xls', 'w+')
-    domino_file.write('\t'.join(['Domino id', 'Domino seq', 'Pairs']) + '\n')
+    overview_file.close()
+
+    return domino_pairs
+
+
+def _write_order(domino_pairs, filename):
+    '''Writes an order file.'''
+    order_file = open(filename + '.xls', 'w+')
+    order_file.write(
+        '\t'.join(['Well position', 'Name', 'Sequence', 'Notes']) + '\n')
+
+    name_well_pos = {}
+    pos = 0
+
     for domino, pairs in domino_pairs.iteritems():
+        well_pos = _get_well_pos(pos)
         name = '_'.join(pairs[0])
-        pairs_str = ', '.join([pair[0] + '_' + pair[1] for pair in pairs])
-        domino_file.write('\t'.join([name, domino, pairs_str]) + '\n')
+        name_well_pos[name] = well_pos
+        pairs_str = ', '.join(set([pair[0] + '_' + pair[1] for pair in pairs]))
+        order_file.write('\t'.join([well_pos, name, domino,
+                                    pairs_str]) + '\n')
+        pos += 1
+
+    order_file.close()
+    return name_well_pos
+
+
+def _write_domino_pools(design_id_dominoes, domino_pairs, name_well_pos,
+                        filename, vol=1.0):
+    '''Writes domino pools operation file.'''
+    design_id_well_pos = {}
+    domino_file = open(filename + '_domino_pools.xls', 'w+')
+    domino_file.write(
+        '\t'.join(['DestinationPlateBarcode',
+                   'DestinationPlateWell',
+                   'SourcePlateBarcode',
+                   'SourcePlateWell',
+                   'ComponentName',
+                   'Volume']) + '\n')
+
+    pos = 0
+
+    for design_id, dominoes in design_id_dominoes.iteritems():
+        for domino in dominoes:
+            well_pos = _get_well_pos(pos)
+            seq = domino[1][0][0] + domino[1][1][0]
+            pair = list(domino[0])
+            domino_id = _get_domino_id(seq, pair, domino_pairs)
+            design_id_well_pos[design_id] = well_pos
+
+            line = '\t'.join([filename.split('/')[-1] + '_domino_pools',
+                              well_pos,
+                              filename.split('/')[-1],
+                              name_well_pos[domino_id],
+                              domino_id,
+                              str(vol)])
+
+            domino_file.write(line + '\n')
+
+        pos += 1
 
     domino_file.close()
+    return design_id_well_pos
+
+
+def _write_parts(design_id_dominoes, filename):
+    '''Writes a parts list.'''
+    parts_well_pos = {}
+    parts_file = open(filename + '_parts.xls', 'w+')
+    parts_file.write(
+        '\t'.join(['Well', 'Part / plasmid id']) + '\n')
+
+    pos = 0
+    for dominoes in design_id_dominoes.itervalues():
+        for domino in dominoes:
+            for part in domino[0]:
+                if part not in parts_well_pos:
+                    well_pos = _get_well_pos(pos)
+                    parts_file.write('\t'.join([well_pos, part]) + '\n')
+                    parts_well_pos[part] = well_pos
+                    pos += 1
+
+    parts_file.close()
+    return parts_well_pos
+
+
+def _write_plasmids_file(design_id_dominoes, design_id_well_pos, part_well_pos,
+                         filename, vol=1.0):
+    '''Writes plasmids file.'''
+    plasmids_file = open(filename + '_plasmids.xls', 'w+')
+    plasmids_file.write(
+        '\t'.join(['DestinationPlateBarcode',
+                   'DestinationPlateWell',
+                   'SourcePlateBarcode',
+                   'SourcePlateWell',
+                   'ComponentName',
+                   'Volume']) + '\n')
+
+    pos = 0
+
+    for design_id, dominoes in design_id_dominoes.iteritems():
+        well_pos = _get_well_pos(pos)
+        parts = []
+        for domino in dominoes:
+            for part in list(domino[0]):
+                if part not in parts:
+                    line = '\t'.join([filename.split('/')[-1] + '_plasmids',
+                                      well_pos,
+                                      filename.split('/')[-1] + '_parts',
+                                      part_well_pos[part],
+                                      part,
+                                      str(vol)])
+                    plasmids_file.write(line + '\n')
+                    parts.append(part)
+
+        line = '\t'.join([filename.split('/')[-1] + '_plasmids',
+                          well_pos,
+                          filename.split('/')[-1] +
+                          '_domino_pools',
+                          design_id_well_pos[design_id],
+                          design_id + '_domino_pool',
+                          str(vol)])
+        plasmids_file.write(line + '\n')
+
+        pos += 1
+
+    plasmids_file.close()
 
 
 def _get_domino_id(seq, pair, domino_pairs):
@@ -158,10 +286,13 @@ def _get_domino_id(seq, pair, domino_pairs):
     return '_'.join(domino_pairs[seq][0])
 
 
-def _get_ice_url(ice_id):
-    '''Returns an ICE url.'''
-    return 'https://ice.synbiochem.co.uk/entry/' + \
-        ice_utils.get_ice_number(ice_id)
+def _get_well_pos(pos, rows=12, columns=8):
+    '''Converts a position, pos, to a well position on a microtitre plate.'''
+    if pos >= rows * columns:
+        raise ValueError('Position ' + str(pos) + ' too large for plate.')
+
+    return chr(int(pos % columns) + ord('A')) + \
+        str(int(math.floor(float(pos) / columns)) + 1)
 
 
 def main(args):
