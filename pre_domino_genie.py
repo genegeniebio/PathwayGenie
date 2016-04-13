@@ -7,25 +7,15 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-import math
 import os
 import sys
 
-from synbiochem.utils import sbol_utils
+from synbiochem.utils import plate_utils, sbol_utils
 from synbiochem.utils.ice_utils import ICEClient
 from synbiochem.utils.net_utils import NetworkError
+import doe
 import dominogenie
 import synbiochem.utils
-
-
-def get_designs(filename):
-    '''Reads design file from DOE.'''
-    designs = {}
-    with open(filename) as designfile:
-        for line in designfile:
-            line = line.split()
-            designs[line[0]] = line[1:] + [line[1]]
-    return designs
 
 
 def get_dominoes(sbol_source, designs, melt_temp, restrict=None):
@@ -96,7 +86,6 @@ def _write_plasmids(ice_client, design_id_plasmid):
             ice_client.upload_seq_file(metadata['type']['recordId'],
                                        'plasmid',
                                        filename)
-            print 'OK ' + filename
         except NetworkError as err:
             # Error thrown if sequence exists: deleteSequence?
             print err
@@ -106,10 +95,12 @@ def _write_dominoes(design_id_dominoes, filename):
     '''Writes dominoes (eventually to ICE), currently to file in Excel
     (tabbed) format.'''
     domino_pairs = _write_overview(design_id_dominoes, filename)
-    name_well_pos = _write_order(domino_pairs, filename)
-    design_id_well_pos = _write_domino_pools(design_id_dominoes, domino_pairs,
-                                             name_well_pos, filename)
-    part_well_pos = _write_parts(design_id_dominoes, filename)
+
+    name_well_pos = _write_dominoes_file(domino_pairs, filename)
+    design_id_well_pos = _write_domino_pools_file(design_id_dominoes,
+                                                  domino_pairs, name_well_pos,
+                                                  filename)
+    part_well_pos = _write_parts_file(design_id_dominoes, filename)
     _write_plasmids_file(design_id_dominoes, design_id_well_pos, part_well_pos,
                          filename)
 
@@ -152,7 +143,7 @@ def _write_overview(design_id_dominoes, filename):
     return domino_pairs
 
 
-def _write_order(domino_pairs, filename):
+def _write_dominoes_file(domino_pairs, filename):
     '''Writes an order file.'''
     order_file = open(filename + '.xls', 'w+')
     order_file.write(
@@ -162,7 +153,7 @@ def _write_order(domino_pairs, filename):
     pos = 0
 
     for domino, pairs in domino_pairs.iteritems():
-        well_pos = _get_well_pos(pos)
+        well_pos = plate_utils.get_well_pos(pos)
         name = '_'.join(pairs[0])
         name_well_pos[name] = well_pos
         pairs_str = ', '.join(set([pair[0] + '_' + pair[1] for pair in pairs]))
@@ -174,8 +165,8 @@ def _write_order(domino_pairs, filename):
     return name_well_pos
 
 
-def _write_domino_pools(design_id_dominoes, domino_pairs, name_well_pos,
-                        filename, vol=1.0):
+def _write_domino_pools_file(design_id_dominoes, domino_pairs, name_well_pos,
+                             filename, vol=1.0):
     '''Writes domino pools operation file.'''
     design_id_well_pos = {}
     domino_file = open(filename + '_domino_pools.xls', 'w+')
@@ -191,10 +182,9 @@ def _write_domino_pools(design_id_dominoes, domino_pairs, name_well_pos,
 
     for design_id, dominoes in design_id_dominoes.iteritems():
         for domino in dominoes:
-            well_pos = _get_well_pos(pos)
+            well_pos = plate_utils.get_well_pos(pos)
             seq = domino[1][0][0] + domino[1][1][0]
-            pair = list(domino[0])
-            domino_id = _get_domino_id(seq, pair, domino_pairs)
+            domino_id = _get_domino_id(seq, list(domino[0]), domino_pairs)
             design_id_well_pos[design_id] = well_pos
 
             line = '\t'.join([filename.split('/')[-1] + '_domino_pools',
@@ -212,7 +202,7 @@ def _write_domino_pools(design_id_dominoes, domino_pairs, name_well_pos,
     return design_id_well_pos
 
 
-def _write_parts(design_id_dominoes, filename):
+def _write_parts_file(design_id_dominoes, filename):
     '''Writes a parts list.'''
     parts_well_pos = {}
     parts_file = open(filename + '_parts.xls', 'w+')
@@ -224,7 +214,7 @@ def _write_parts(design_id_dominoes, filename):
         for domino in dominoes:
             for part in domino[0]:
                 if part not in parts_well_pos:
-                    well_pos = _get_well_pos(pos)
+                    well_pos = plate_utils.get_well_pos(pos)
                     parts_file.write('\t'.join([well_pos, part]) + '\n')
                     parts_well_pos[part] = well_pos
                     pos += 1
@@ -248,7 +238,7 @@ def _write_plasmids_file(design_id_dominoes, design_id_well_pos, part_well_pos,
     pos = 0
 
     for design_id, dominoes in design_id_dominoes.iteritems():
-        well_pos = _get_well_pos(pos)
+        well_pos = plate_utils.get_well_pos(pos)
         parts = []
         for domino in dominoes:
             for part in list(domino[0]):
@@ -286,25 +276,16 @@ def _get_domino_id(seq, pair, domino_pairs):
     return '_'.join(domino_pairs[seq][0])
 
 
-def _get_well_pos(pos, rows=12, columns=8):
-    '''Converts a position, pos, to a well position on a microtitre plate.'''
-    if pos >= rows * columns:
-        raise ValueError('Position ' + str(pos) + ' too large for plate.')
-
-    return chr(int(pos % columns) + ord('A')) + \
-        str(int(math.floor(float(pos) / columns)) + 1)
-
-
 def main(args):
     '''main method.'''
     ice_client = ICEClient(args[2], args[3], args[4])
 
     for filename in args[5:]:
-        designs = get_designs(filename)
-        design_id_plasmids, design_id_dominoes = get_dominoes(ice_client,
-                                                              designs,
-                                                              float(args[0]),
-                                                              args[1])
+        designs = doe.get_designs(filename)
+        _, design_id_dominoes = get_dominoes(ice_client,
+                                             designs,
+                                             float(args[0]),
+                                             args[1])
 
         _write_dominoes(design_id_dominoes, os.path.splitext(filename)[0])
 
