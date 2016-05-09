@@ -18,7 +18,7 @@ import dominogenie
 import synbiochem.utils
 
 
-def get_dominoes(sbol_source, designs, melt_temp, restrict=None):
+def get_dominoes(sbol_source, designs, melt_temp, restricts=None):
     '''Designs dominoes (bridging oligos) for LCR.'''
     design_id_plasmid = {}
     design_id_dominoes = {}
@@ -29,9 +29,9 @@ def get_dominoes(sbol_source, designs, melt_temp, restrict=None):
 
         # Apply restriction site digestion to PARTs not PLASMIDs.
         # (Assumes PLASMID at positions 1 and -1 - first and last).
-        if restrict is not None:
+        if restricts is not None:
             ids_docs = [ids_docs[0]] + \
-                [(item[0], _apply_restrict(item[1], restrict))
+                [(item[0], _apply_restricts(item[1], restricts))
                  for item in ids_docs[1:-1]] + \
                 [ids_docs[-1]]
 
@@ -50,10 +50,10 @@ def get_dominoes(sbol_source, designs, melt_temp, restrict=None):
     return design_id_plasmid, design_id_dominoes
 
 
-def _apply_restrict(sbol_doc, restrict):
+def _apply_restricts(sbol_doc, restricts):
     '''Gets sequence from sequence id, applying restriction site cleavage
     if necessary.'''
-    restrict_docs = sbol_utils.apply_restrict(sbol_doc, restrict)
+    restrict_docs = sbol_utils.apply_restricts(sbol_doc, restricts)
 
     # This is a bit fudgy...
     # If no digestion occurs, return the single, undigested Document...
@@ -285,7 +285,7 @@ def main(args):
         _, design_id_dominoes = get_dominoes(ice_client,
                                              designs,
                                              float(args[0]),
-                                             args[1])
+                                             [args[1]])
 
         _write_dominoes(design_id_dominoes, os.path.splitext(filename)[0])
 
