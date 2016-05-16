@@ -10,7 +10,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import os
 import sys
 
-from synbiochem.utils import plate_utils, sbol_utils
+from synbiochem.utils import plate_utils, sequence_utils, sbol_utils
 from synbiochem.utils.ice_utils import ICEClient
 from synbiochem.utils.net_utils import NetworkError
 import doe
@@ -22,6 +22,7 @@ def get_dominoes(sbol_source, designs, melt_temp, restricts=None):
     '''Designs dominoes (bridging oligos) for LCR.'''
     design_id_plasmid = {}
     design_id_dominoes = {}
+    design_id_analysis = {}
 
     for design_id, design in designs.iteritems():
         ids_docs = [(val, sbol_source.get_ice_entry(val).get_sbol_doc())
@@ -46,10 +47,10 @@ def get_dominoes(sbol_source, designs, melt_temp, restricts=None):
 
         pairs = [pair for pair in synbiochem.utils.pairwise(design)]
         design_id_dominoes[design_id] = zip(pairs, oligos)
+        design_id_analysis[design_id] = sequence_utils.do_blast(ids_seqs,
+                                                                ids_seqs)
 
-        _do_sanity_check(design_id, ids_seqs)
-
-    return design_id_plasmid, design_id_dominoes
+    return design_id_plasmid, design_id_dominoes, design_id_analysis
 
 
 def _apply_restricts(sbol_doc, restricts):
@@ -71,6 +72,18 @@ def _apply_restricts(sbol_doc, restricts):
 
     raise ValueError('No CDS or promoter found in restriction site cleaved ' +
                      'sequence.')
+
+
+def _write_analysis(design_id_analysis):
+    '''Write analysis results.'''
+    for result_id, results in design_id_analysis.iteritems():
+        print result_id
+
+        for result in results:
+            for alignment in result.alignments:
+                for hsp in alignment.hsps:
+                    if result.query != alignment.hit_def:
+                        print hsp
 
 
 def _write_plasmids(ice_client, design_id_plasmid):
@@ -105,32 +118,6 @@ def _write_dominoes(design_id_dominoes, filename):
     part_well_pos = _write_parts_file(design_id_dominoes, filename)
     _write_plasmids_file(design_id_dominoes, design_id_well_pos, part_well_pos,
                          filename)
-
-
-def _do_sanity_check(design_id, id_seqs):
-    '''Perform all v all local alignment sanity check.'''
-    from subprocess import call
-
-    in_filename = '/Users/neilswainston/Desktop/' + design_id + '_in.txt'
-    out_filename = '/Users/neilswainston/Desktop/' + design_id + '_in.txt'
-    result_filename = '/Users/neilswainston/Desktop/' + design_id + '_res.txt'
-
-    __write_fasta(in_filename, id_seqs)
-
-    call(['/usr/local/ncbi/blast/bin/makeblastdb', '-in', in_filename,
-          '-out', out_filename, '-dbtype', 'nucl'])
-
-    call(['/usr/local/ncbi/blast/bin/blastn', '-query', in_filename,
-          '-db', out_filename, '-out', result_filename, '-evalue', '0.001',
-          '-outfmt', '0'])
-
-
-def __write_fasta(filename, id_seqs):
-    '''Writes a fasta file.'''
-    with open(filename, 'w') as fle:
-        for id_seq in id_seqs:
-            fle.write('>' + id_seq[0] + '\n')
-            fle.write(id_seq[1] + '\n')
 
 
 def _write_overview(design_id_dominoes, filename):
@@ -310,14 +297,13 @@ def main(args):
 
     for filename in args[5:]:
         designs = doe.get_designs(filename)
-        _, design_id_dominoes = get_dominoes(ice_client,
-                                             designs,
-                                             float(args[0]),
-                                             [args[1]])
+        des_id_plasmids, des_id_dominoes, des_id_analysis = \
+            get_dominoes(ice_client, designs, float(args[0]), [args[1]])
 
-        _write_dominoes(design_id_dominoes, os.path.splitext(filename)[0])
+        _write_analysis(des_id_analysis)
+        _write_dominoes(des_id_dominoes, os.path.splitext(filename)[0])
 
-        # _write_plasmids(ice_client, design_id_plasmids)
+        _write_plasmids(ice_client, des_id_plasmids)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
