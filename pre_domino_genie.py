@@ -12,7 +12,6 @@ import sys
 
 from synbiochem.utils import plate_utils, sequence_utils, sbol_utils
 from synbiochem.utils.ice_utils import ICEClient
-from synbiochem.utils.net_utils import NetworkError
 import doe
 import dominogenie
 import synbiochem.utils
@@ -91,19 +90,8 @@ def _write_plasmids(ice_client, design_id_plasmid):
     for design_id, plasmid in design_id_plasmid.iteritems():
         ice_entry = ice_client.get_ice_entry(design_id)
         ice_entry.set_value('status', 'Complete')
+        ice_entry.set_sbol_doc(plasmid)
         ice_client.set_ice_entry(ice_entry)
-
-        metadata = ice_entry.get_metadata()
-        filename = '/Users/neilswainston/Downloads/' + design_id + '.xml'
-        plasmid.write(filename)
-
-        try:
-            ice_client.upload_seq_file(metadata['type']['recordId'],
-                                       'plasmid',
-                                       filename)
-        except NetworkError as err:
-            # Error thrown if sequence exists: deleteSequence?
-            print err
 
 
 def _write_dominoes(design_id_dominoes, filename):
