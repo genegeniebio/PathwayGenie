@@ -26,6 +26,7 @@ def _get_domino(pair, target_melt_temp, reagent_concs=None):
 
 
 def _get_domino_part(sequence, forward, target_melt_temp, reagent_concs=None):
+    # TODO: replace with sequence_utils.get_seq_by_melt_temp
     '''Gets half of bridging oligo.'''
     for i in range(1, len(sequence)):
         subsequence = sequence[:(i + 1)] if forward else sequence[-(i + 1):]
