@@ -22,10 +22,13 @@ def get_dominoes(sbol_source, designs, melt_temp, restricts=None):
     design_id_plasmid = {}
     design_id_dominoes = {}
     design_id_analysis = {}
+    design_id_names = {}
 
     for design_id, design in designs.iteritems():
-        ids_docs = [(val, sbol_source.get_ice_entry(val).get_sbol_doc())
-                    for val in design]
+        ids_entries = [(val, sbol_source.get_ice_entry(val))
+                       for val in design]
+        ids_docs = [(val, entry.get_sbol_doc())
+                    for val, entry in ids_entries]
 
         # Apply restriction site digestion to PARTs not PLASMIDs.
         # (Assumes PLASMID at positions 1 and -1 - first and last).
@@ -48,8 +51,11 @@ def get_dominoes(sbol_source, designs, melt_temp, restricts=None):
         design_id_dominoes[design_id] = zip(pairs, oligos)
         design_id_analysis[design_id] = sequence_utils.do_blast(ids_seqs,
                                                                 ids_seqs)
+        design_id_names[design_id] = '-'.join([entry.get_name().split(',')[0]
+                                               for _, entry in ids_entries])
 
-    return design_id_plasmid, design_id_dominoes, design_id_analysis
+    return design_id_plasmid, design_id_dominoes, design_id_analysis, \
+        design_id_names
 
 
 def _apply_restricts(sbol_doc, restricts):
@@ -85,11 +91,20 @@ def _write_analysis(design_id_analysis):
                         print hsp
 
 
-def _write_plasmids(ice_client, design_id_plasmid):
+def _write_plasmids(ice_client, design_id_plasmid, designs, design_id_names):
     '''Writes plasmids to ICE.'''
     for design_id, plasmid in design_id_plasmid.iteritems():
         ice_entry = ice_client.get_ice_entry(design_id)
+        ice_entry.set_value('name', design_id_names[design_id])
         ice_entry.set_value('status', 'Complete')
+        ice_entry.set_value('creator', 'SYNBIOCHEM')
+        ice_entry.set_value('creatorEmail', 'support@synbiochem.co.uk')
+        ice_entry.set_value('principalInvestigator', 'SYNBIOCHEM')
+        ice_entry.set_value(
+            'principalInvestigatorEmail', 'support@synbiochem.co.uk')
+        ice_entry.set_value(
+            'shortDescription', 'Design: ' + design_id + '; Construct: ' +
+            ' '.join(designs[design_id]))
         ice_entry.set_sbol_doc(plasmid)
         ice_client.set_ice_entry(ice_entry)
 
@@ -285,13 +300,13 @@ def main(args):
 
     for filename in args[5:]:
         designs = doe.get_designs(filename)
-        des_id_plasmids, des_id_dominoes, des_id_analysis = \
+        des_id_plasmids, des_id_dominoes, des_id_analysis, des_id_names = \
             get_dominoes(ice_client, designs, float(args[0]), [args[1]])
 
         _write_analysis(des_id_analysis)
         _write_dominoes(des_id_dominoes, os.path.splitext(filename)[0])
 
-        _write_plasmids(ice_client, des_id_plasmids)
+        _write_plasmids(ice_client, des_id_plasmids, designs, des_id_names)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
