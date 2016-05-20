@@ -15,5 +15,5 @@ def get_designs(filename):
     with open(filename) as designfile:
         for line in designfile:
             tokens = line.split()
-            designs[tokens[0]] = tokens[1:] + [tokens[1]]
+            designs[tokens[0]] = {'design': tokens[1:] + [tokens[1]]}
     return designs

@@ -19,43 +19,36 @@ import synbiochem.utils
 
 def get_dominoes(sbol_source, designs, melt_temp, restricts=None):
     '''Designs dominoes (bridging oligos) for LCR.'''
-    design_id_plasmid = {}
-    design_id_dominoes = {}
-    design_id_analysis = {}
-    design_id_names = {}
 
-    for design_id, design in designs.iteritems():
-        ids_entries = [(val, sbol_source.get_ice_entry(val))
-                       for val in design]
-        ids_docs = [(val, entry.get_sbol_doc())
-                    for val, entry in ids_entries]
+    for design in designs.values():
+        design['entries'] = [sbol_source.get_ice_entry(ice_id)
+                             for ice_id in design['design']]
+        design['sbol_docs'] = [entry.get_sbol_doc()
+                               for entry in design['entries']]
+        design['name'] = '-'.join([entry.get_name().split(',')[0]
+                                   for entry in design['entries']])
 
         # Apply restriction site digestion to PARTs not PLASMIDs.
         # (Assumes PLASMID at positions 1 and -1 - first and last).
         if restricts is not None:
-            ids_docs = [ids_docs[0]] + \
-                [(item[0], _apply_restricts(item[1], restricts))
-                 for item in ids_docs[1:-1]] + \
-                [ids_docs[-1]]
+            design['sbol_docs'] = [design['sbol_docs'][0]] + \
+                [_apply_restricts(doc, restricts)
+                 for doc in design['sbol_docs'][1:-1]] + \
+                [design['sbol_docs'][-1]]
 
-        design_id_plasmid[design_id] = \
-            sbol_utils.concat([item[1] for item in ids_docs[:-1]])
+        # Generate plasmid SBOL document:
+        design['plasmid'] = sbol_utils.concat(design['sbol_docs'][:-1])
 
-        ids_seqs = [(item[0], sbol_utils.get_seq(item[1]))
-                    for item in ids_docs]
+        # Generate domino sequences:
+        design['seqs'] = [sbol_utils.get_seq(doc)
+                          for doc in design['sbol_docs']]
+        oligos = dominogenie.get_dominoes(melt_temp, design['seqs'])
+        pairs = [pair for pair in synbiochem.utils.pairwise(design['design'])]
+        design['dominoes'] = zip(pairs, oligos)
 
-        oligos = dominogenie.get_dominoes(melt_temp, [item[1]
-                                                      for item in ids_seqs])
-
-        pairs = [pair for pair in synbiochem.utils.pairwise(design)]
-        design_id_dominoes[design_id] = zip(pairs, oligos)
-        design_id_analysis[design_id] = sequence_utils.do_blast(ids_seqs,
-                                                                ids_seqs)
-        design_id_names[design_id] = '-'.join([entry.get_name().split(',')[0]
-                                               for _, entry in ids_entries])
-
-    return design_id_plasmid, design_id_dominoes, design_id_analysis, \
-        design_id_names
+        # Analyse sequences for similarity:
+        ids_seqs = dict(zip(design['design'], design['seqs']))
+        design['analysis'] = sequence_utils.do_blast(ids_seqs, ids_seqs)
 
 
 def _apply_restricts(sbol_doc, restricts):
@@ -79,23 +72,25 @@ def _apply_restricts(sbol_doc, restricts):
                      'sequence.')
 
 
-def _write_analysis(design_id_analysis):
+def _write_analysis(designs):
     '''Write analysis results.'''
-    for result_id, results in design_id_analysis.iteritems():
-        print result_id
+    try:
+        for result_id, design in designs.iteritems():
+            print result_id
+            for result in design['analysis']:
+                for alignment in result.alignments:
+                    for hsp in alignment.hsps:
+                        if result.query != alignment.hit_def:
+                            print hsp
+    except ValueError as err:
+        print err
 
-        for result in results:
-            for alignment in result.alignments:
-                for hsp in alignment.hsps:
-                    if result.query != alignment.hit_def:
-                        print hsp
 
-
-def _write_plasmids(ice_client, design_id_plasmid, designs, design_id_names):
+def _write_plasmids(ice_client, designs):
     '''Writes plasmids to ICE.'''
-    for design_id, plasmid in design_id_plasmid.iteritems():
+    for design_id, design in designs.iteritems():
         ice_entry = ice_client.get_ice_entry(design_id)
-        ice_entry.set_value('name', design_id_names[design_id])
+        ice_entry.set_value('name', design['name'])
         ice_entry.set_value('status', 'Complete')
         ice_entry.set_value('creator', 'SYNBIOCHEM')
         ice_entry.set_value('creatorEmail', 'support@synbiochem.co.uk')
@@ -104,26 +99,26 @@ def _write_plasmids(ice_client, design_id_plasmid, designs, design_id_names):
             'principalInvestigatorEmail', 'support@synbiochem.co.uk')
         ice_entry.set_value(
             'shortDescription', 'Design: ' + design_id + '; Construct: ' +
-            ' '.join(designs[design_id]))
-        ice_entry.set_sbol_doc(plasmid)
+            ' '.join(design['design']))
+        ice_entry.set_sbol_doc(design['plasmid'])
         ice_client.set_ice_entry(ice_entry)
 
 
-def _write_dominoes(design_id_dominoes, filename):
+def _write_dominoes(designs, filename):
     '''Writes dominoes (eventually to ICE), currently to file in Excel
     (tabbed) format.'''
-    domino_pairs = _write_overview(design_id_dominoes, filename)
+    domino_pairs = _write_overview(designs, filename)
 
     name_well_pos = _write_dominoes_file(domino_pairs, filename)
-    design_id_well_pos = _write_domino_pools_file(design_id_dominoes,
+    design_id_well_pos = _write_domino_pools_file(designs,
                                                   domino_pairs, name_well_pos,
                                                   filename)
-    part_well_pos = _write_parts_file(design_id_dominoes, filename)
-    _write_plasmids_file(design_id_dominoes, design_id_well_pos, part_well_pos,
+    part_well_pos = _write_parts_file(designs, filename)
+    _write_plasmids_file(designs, design_id_well_pos, part_well_pos,
                          filename)
 
 
-def _write_overview(design_id_dominoes, filename):
+def _write_overview(designs, filename):
     '''Writes an overview file.'''
     overview_file = open(filename + '_overview.xls', 'w+')
 
@@ -141,8 +136,8 @@ def _write_overview(design_id_dominoes, filename):
 
     overview_file.write(line + '\n')
 
-    for design_id, dominoes in design_id_dominoes.iteritems():
-        for domino in dominoes:
+    for design_id, design in designs.iteritems():
+        for domino in design['dominoes']:
             pair = list(domino[0])
             seq = domino[1][0][0] + domino[1][1][0]
             line = '\t'.join([design_id] +
@@ -183,7 +178,7 @@ def _write_dominoes_file(domino_pairs, filename):
     return name_well_pos
 
 
-def _write_domino_pools_file(design_id_dominoes, domino_pairs, name_well_pos,
+def _write_domino_pools_file(designs, domino_pairs, name_well_pos,
                              filename, vol=1.0):
     '''Writes domino pools operation file.'''
     design_id_well_pos = {}
@@ -198,8 +193,8 @@ def _write_domino_pools_file(design_id_dominoes, domino_pairs, name_well_pos,
 
     pos = 0
 
-    for design_id, dominoes in design_id_dominoes.iteritems():
-        for domino in dominoes:
+    for design_id, design in designs.iteritems():
+        for domino in design['dominoes']:
             well_pos = plate_utils.get_well_pos(pos)
             seq = domino[1][0][0] + domino[1][1][0]
             domino_id = _get_domino_id(seq, list(domino[0]), domino_pairs)
@@ -220,7 +215,7 @@ def _write_domino_pools_file(design_id_dominoes, domino_pairs, name_well_pos,
     return design_id_well_pos
 
 
-def _write_parts_file(design_id_dominoes, filename):
+def _write_parts_file(designs, filename):
     '''Writes a parts list.'''
     parts_well_pos = {}
     parts_file = open(filename + '_parts.xls', 'w+')
@@ -228,8 +223,8 @@ def _write_parts_file(design_id_dominoes, filename):
         '\t'.join(['Well', 'Part / plasmid id']) + '\n')
 
     pos = 0
-    for dominoes in design_id_dominoes.itervalues():
-        for domino in dominoes:
+    for design in designs.values():
+        for domino in design['dominoes']:
             for part in domino[0]:
                 if part not in parts_well_pos:
                     well_pos = plate_utils.get_well_pos(pos)
@@ -241,7 +236,7 @@ def _write_parts_file(design_id_dominoes, filename):
     return parts_well_pos
 
 
-def _write_plasmids_file(design_id_dominoes, design_id_well_pos, part_well_pos,
+def _write_plasmids_file(designs, design_id_well_pos, part_well_pos,
                          filename, vol=1.0):
     '''Writes plasmids file.'''
     plasmids_file = open(filename + '_plasmids.xls', 'w+')
@@ -255,10 +250,10 @@ def _write_plasmids_file(design_id_dominoes, design_id_well_pos, part_well_pos,
 
     pos = 0
 
-    for design_id, dominoes in design_id_dominoes.iteritems():
+    for design_id, design in designs.iteritems():
         well_pos = plate_utils.get_well_pos(pos)
         parts = []
-        for domino in dominoes:
+        for domino in design['dominoes']:
             for part in list(domino[0]):
                 if part not in parts:
                     line = '\t'.join([filename.split('/')[-1] + '_plasmids',
@@ -300,13 +295,11 @@ def main(args):
 
     for filename in args[5:]:
         designs = doe.get_designs(filename)
-        des_id_plasmids, des_id_dominoes, des_id_analysis, des_id_names = \
-            get_dominoes(ice_client, designs, float(args[0]), [args[1]])
+        get_dominoes(ice_client, designs, float(args[0]), [args[1]])
 
-        _write_analysis(des_id_analysis)
-        _write_dominoes(des_id_dominoes, os.path.splitext(filename)[0])
-
-        _write_plasmids(ice_client, des_id_plasmids, designs, des_id_names)
+        _write_analysis(designs)
+        _write_dominoes(designs, os.path.splitext(filename)[0])
+        _write_plasmids(ice_client, designs)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
