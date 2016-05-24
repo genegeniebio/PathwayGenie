@@ -9,7 +9,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 
 from synbiochem.utils import sequence_utils
-
 import synbiochem.utils
 
 
