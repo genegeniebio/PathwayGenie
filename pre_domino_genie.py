@@ -62,7 +62,11 @@ class DominoManager(object):
 
     def __write_plasmids(self, designs):
         '''Writes plasmids to ICE.'''
-        for design_id, design in designs.iteritems():
+        for design_id in ['*' + str(num)
+                          for num in sorted([int(key[1:])
+                                             for key in designs.keys()])]:
+            design = designs[design_id]
+
             if design_id[0] == '*':
                 ice_entry = ICEEntry(typ='PLASMID')
                 self.__ice_client.set_ice_entry(ice_entry)
@@ -76,7 +80,7 @@ class DominoManager(object):
                           ' '.join(design['design']))
             ice_entry.set_sbol_doc(design['plasmid'])
             self.__ice_client.set_ice_entry(ice_entry)
-            print '\t'.join([design_id] + design['design'])
+            print '\t'.join([design_id] + design['design'][:-1])
 
     def __write_dominoes(self, designs):
         '''Writes dominoes to ICE, or retrieves them if pre-existing.'''
