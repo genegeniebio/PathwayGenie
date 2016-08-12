@@ -10,8 +10,9 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import json
 import sys
 
-from synbiochem.utils import sequence_utils, sbol_utils
-from synbiochem.utils.ice_utils import ICEClient, ICEEntry
+from sbcsbol import sbol_utils
+from sbcsbol.ice_utils import ICEClient, ICEEntry
+from synbiochem.utils import sequence_utils
 import doe
 import dominogenie
 import synbiochem.utils

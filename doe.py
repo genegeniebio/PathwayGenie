@@ -13,7 +13,7 @@ def get_designs(filename):
     '''Reads design file from DOE.'''
     designs = {}
     with open(filename) as designfile:
-        for line in designfile:
+        for line in designfile.read().split('\r'):
             tokens = line.split()
             designs[tokens[0]] = {'design': tokens[1:] + [tokens[1]]}
     return designs
