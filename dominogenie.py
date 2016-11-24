@@ -7,8 +7,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+from synbiochem.utils import seq_utils
 import synbiochem.utils
-import synbiochem.utils.sequence_utils as seq_utils
 
 
 def get_dominoes(target_melt_temp, sequences, reagent_concs=None):

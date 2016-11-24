@@ -10,12 +10,10 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import json
 import sys
 
-from sbcsbol import sbol_utils
-from sbcsbol.ice_utils import ICEClient, ICEEntry
-from synbiochem.utils import sequence_utils
+from synbiochem.utils import pairwise, seq_utils, dna_utils
+from synbiochem.utils.ice_utils import ICEClient, ICEEntry
 import doe
 import dominogenie
-import synbiochem.utils
 
 
 class DominoManager(object):
@@ -27,34 +25,31 @@ class DominoManager(object):
     def get_dominoes(self, designs, melt_temp, restricts=None):
         '''Designs dominoes (bridging oligos) for LCR.'''
 
-        for design in designs.values():
-            design['sbol_docs'] = [self.__ice_client.get_sbol_doc(sbol_id)
-                                   for sbol_id in design['design']]
-            design['name'] = ' - '.join([sbol_utils.get_name(doc)
-                                         for doc in design['sbol_docs']])
+        for design in designs:
+            design['dna'] = [self.__ice_client.get_dna(ice_id)
+                             for ice_id in design['design']]
+            design['name'] = ' - '.join([dna.name for dna in design['dna']])
 
             # Apply restriction site digestion to PARTs not PLASMIDs.
             # (Assumes PLASMID at positions 1 and -1 - first and last).
             if restricts is not None:
-                design['sbol_docs'] = [design['sbol_docs'][0]] + \
-                    [_apply_restricts(doc, restricts)
-                     for doc in design['sbol_docs'][1:-1]] + \
-                    [design['sbol_docs'][-1]]
+                design['dna'] = [design['dna'][0]] + \
+                    [_apply_restricts(dna, restricts)
+                     for dna in design['dna'][1:-1]] + \
+                    [design['dna'][-1]]
 
-            # Generate plasmid SBOL document:
-            design['plasmid'] = sbol_utils.concat(design['sbol_docs'][:-1])
+            # Generate plasmid DNA object:
+            design['plasmid'] = dna_utils.concat(design['dna'][:-1])
 
             # Generate domino sequences:
-            design['seqs'] = [sbol_utils.get_seq(doc)
-                              for doc in design['sbol_docs']]
+            design['seqs'] = [dna.seq for dna in design['dna']]
             oligos = dominogenie.get_dominoes(melt_temp, design['seqs'])
-            pairs = [
-                pair for pair in synbiochem.utils.pairwise(design['design'])]
+            pairs = [pair for pair in pairwise(design['design'])]
             design['dominoes'] = zip(pairs, oligos)
 
             # Analyse sequences for similarity:
             ids_seqs = dict(zip(design['design'], design['seqs']))
-            design['analysis'] = sequence_utils.do_blast(ids_seqs, ids_seqs)
+            design['analysis'] = seq_utils.do_blast(ids_seqs, ids_seqs)
 
     def write_dominoes(self, design):
         '''Writes plasmids and dominoes to ICE.'''
@@ -63,31 +58,22 @@ class DominoManager(object):
 
     def __write_plasmids(self, designs):
         '''Writes plasmids to ICE.'''
-        for design_id in ['*' + str(num)
-                          for num in sorted([int(key[1:])
-                                             for key in designs.keys()])]:
-            design = designs[design_id]
-
-            if design_id[0] == '*':
-                ice_entry = ICEEntry(typ='PLASMID')
-                self.__ice_client.set_ice_entry(ice_entry)
-                design_id = ice_entry.get_ice_id()
-            else:
-                ice_entry = self.__ice_client.get_ice_entry(design_id)
+        for design in designs:
+            ice_entry = ICEEntry(typ='PLASMID')
+            self.__ice_client.set_ice_entry(ice_entry)
+            design_id = ice_entry.get_ice_id()
 
             _set_metadata(ice_entry,
                           design['name'],
-                          'Design: ' + design_id + '; Construct: ' +
-                          ' '.join(design['design']))
-            ice_entry.set_sbol_doc(design['plasmid'])
+                          'Construct: ' + ' '.join(design['design']))
+
+            ice_entry.set_dna(design['plasmid'])
             self.__ice_client.set_ice_entry(ice_entry)
             print '\t'.join([design_id] + design['design'][:-1])
 
     def __write_dominoes(self, designs):
         '''Writes dominoes to ICE, or retrieves them if pre-existing.'''
         seq_entries = {}
-
-        # print self.__ice_client.rebuild_blast()
 
         for design_id, design in designs.iteritems():
             for domino in design['dominoes']:
@@ -99,8 +85,9 @@ class DominoManager(object):
                     ice_entries = self.__ice_client.get_ice_entries_by_seq(seq)
 
                     if len(ice_entries) == 0:
-                        doc = _get_sbol(seq, domino[1][0][0], domino[1][1][0])
-                        ice_entry = ICEEntry(doc, 'PART')
+                        dna = _get_domino_dna('name', seq, domino[1][0][0],
+                                              domino[1][1][0])
+                        ice_entry = ICEEntry(dna, 'PART')
                     else:
                         ice_entry = ice_entries[0]
 
@@ -132,47 +119,33 @@ class DominoManager(object):
         return name, json.dumps(description)
 
 
-def _apply_restricts(sbol_doc, restricts):
-    '''Gets sequence from sequence id, applying restriction site cleavage
-    if necessary.'''
-    restrict_docs = sbol_utils.apply_restricts(sbol_doc, restricts)
+def _apply_restricts(dna, restricts):
+    '''Cleave off prefix and suffix, according to restriction sites.'''
+    restrict_dnas = dna_utils.apply_restricts(dna, restricts)
 
     # This is a bit fudgy...
-    # If no digestion occurs, return the single, undigested Document...
-    if len(restrict_docs) == 1:
-        return restrict_docs[0]
-    else:
-        # ...else return the digested Document that contains a CDS:
-        for restrict_doc in restrict_docs:
-            for annot in restrict_doc.annotations:
-                if annot.subcomponent.type == sbol_utils.SO_CDS or \
-                        annot.subcomponent.type == sbol_utils.SO_PROM:
-                    return restrict_doc
-
-    raise ValueError('No CDS or promoter found in restriction site cleaved ' +
-                     'sequence.')
+    # Essentially, return the longest fragment remaining after digestion.
+    # Assumes prefix and suffix are short sequences that are cleaved off.
+    restrict_dnas.sort(key=lambda x: len(x.seq), reverse=True)
+    return restrict_dnas[0]
 
 
-def _get_sbol(seq, left_subseq, right_subseq):
-    '''Creates an SBOL Document representing a domino.'''
-    doc = sbol_utils.create_doc('Domino')
-    sbol_utils.set_sequence(doc, seq)
+def _get_domino_dna(name, seq, left_subseq, right_subseq):
+    '''Creates a DNA object representing a domino.'''
+    dna = dna_utils.Dna(name=name, seq=seq)
 
     # Add annotations:
-    _write_subcomp(doc, left_subseq, 1, 'Left')
-    _write_subcomp(doc, right_subseq, len(left_subseq) + 1, 'Right')
+    _write_subcomp(dna, left_subseq, 1, 'Left')
+    _write_subcomp(dna, right_subseq, len(left_subseq) + 1, 'Right')
 
-    return doc
+    return dna
 
 
-def _write_subcomp(document, seq, start, display_id):
+def _write_subcomp(dna, seq, start, name):
     '''Adds a subcomponent to the domino SBOL Document.'''
-    tag_uri = 'http://purl.obolibrary.org/obo/SO_0000807'
-    sbol_utils.add_subcomponent(document, start, start + len(seq) - 1, '+',
-                                display_id=display_id,
-                                name=None,
-                                typ=tag_uri,
-                                description=None)
+    feature = dna_utils.Dna(name=name, start=start, end=start + len(seq) - 1,
+                            forward=True)
+    dna.add_feature(feature)
 
 
 def _set_metadata(ice_entry, name, description):
