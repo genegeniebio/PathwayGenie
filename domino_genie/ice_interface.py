@@ -40,6 +40,10 @@ class ICEInterface(object):
         ice_entry.set_dna(design['plasmid'])
         self.__ice_client.set_ice_entry(ice_entry)
 
+        # Add link from plasmid -> parts:
+        for part_id in design['design']:
+            self.__ice_client.add_link(design['ice_id'], part_id)
+
     def __write_dominoes(self, design):
         '''Writes dominoes to ICE, or retrieves them if pre-existing.'''
         seq_entries = {}
@@ -63,6 +67,7 @@ class ICEInterface(object):
             _set_metadata(ice_entry, name, description, 'DOMINO')
             self.__ice_client.set_ice_entry(ice_entry)
 
+            # Add link from plasmid -> domino:
             self.__ice_client.add_link(
                 design['ice_id'], ice_entry.get_ice_id())
 
