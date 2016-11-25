@@ -7,6 +7,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=no-member
 import json
 import sys
 
@@ -54,7 +55,7 @@ class DominoManager(object):
     def write_dominoes(self, design):
         '''Writes plasmids and dominoes to ICE.'''
         self.__write_plasmids(design)
-        # self.__write_dominoes(design)
+        self.__write_dominoes(design)
 
     def __write_plasmids(self, designs):
         '''Writes plasmids to ICE.'''
@@ -75,7 +76,7 @@ class DominoManager(object):
         '''Writes dominoes to ICE, or retrieves them if pre-existing.'''
         seq_entries = {}
 
-        for design_id, design in designs.iteritems():
+        for design in designs:
             for domino in design['dominoes']:
                 seq = domino[1][0][0] + domino[1][1][0]
 
@@ -91,13 +92,12 @@ class DominoManager(object):
                     else:
                         ice_entry = ice_entries[0]
 
-                name, description = self.__get_metadata(ice_entry, design_id,
-                                                        domino[0])
+                name, description = self.__get_metadata(ice_entry, domino[0])
                 _set_metadata(ice_entry, name, description)
                 self.__ice_client.set_ice_entry(ice_entry)
                 seq_entries[seq] = ice_entry
 
-    def __get_metadata(self, ice_entry, design_id, part_ids):
+    def __get_metadata(self, ice_entry, part_ids):
         '''Gets metadata for a domino.'''
         metadata = ice_entry.get_metadata()
 
@@ -109,11 +109,8 @@ class DominoManager(object):
         # Update Designs and Pairs in description:
         description = json.loads(metadata['shortDescription']) \
             if 'shortDescription' in metadata else {}
-        designs = description['Designs'] if 'Designs' in description else []
-        designs.append(design_id)
         pairs = description['Pairs'] if 'Pairs' in description else []
         pairs.append('_'.join(part_ids))
-        description['Designs'] = list(set(designs))
         description['Pairs'] = list(set(pairs))
 
         return name, json.dumps(description)
@@ -132,20 +129,17 @@ def _apply_restricts(dna, restricts):
 
 def _get_domino_dna(name, seq, left_subseq, right_subseq):
     '''Creates a DNA object representing a domino.'''
-    dna = dna_utils.Dna(name=name, seq=seq)
+    dna = dna_utils.DNA(name=name, seq=seq)
 
     # Add annotations:
-    _write_subcomp(dna, left_subseq, 1, 'Left')
-    _write_subcomp(dna, right_subseq, len(left_subseq) + 1, 'Right')
+    dna.features.append(dna_utils.DNA(name='Left', start=1,
+                                      end=len(left_subseq), forward=True))
+
+    dna.features.append(dna_utils.DNA(name='Right', start=len(left_subseq) + 1,
+                                      end=len(left_subseq) + len(right_subseq),
+                                      forward=True))
 
     return dna
-
-
-def _write_subcomp(dna, seq, start, name):
-    '''Adds a subcomponent to the domino SBOL Document.'''
-    feature = dna_utils.Dna(name=name, start=start, end=start + len(seq) - 1,
-                            forward=True)
-    dna.add_feature(feature)
 
 
 def _set_metadata(ice_entry, name, description):
