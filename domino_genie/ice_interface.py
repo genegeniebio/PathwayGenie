@@ -15,8 +15,16 @@ from synbiochem.utils.ice_utils import ICEClient, ICEEntry
 class ICEInterface(object):
     '''Class to inferface with ICE.'''
 
-    def __init__(self, url, username, psswrd):
+    def __init__(self, url, username, psswrd, group_names=None):
         self.__ice_client = ICEClient(url, username, psswrd)
+
+        if group_names is None:
+            group_names = []
+
+        self.__group_ids = [group_id
+                            for name, group_id
+                            in self.__ice_client.get_groups().iteritems()
+                            if name in group_names]
 
     def get_dna(self, ice_id):
         '''Gets DNA object from ICE.'''
@@ -32,6 +40,7 @@ class ICEInterface(object):
         '''Writes plasmids to ICE.'''
         ice_entry = ICEEntry(typ='PLASMID')
         self.__ice_client.set_ice_entry(ice_entry)
+        self.__add_permissions(ice_entry)
         design['ice_id'] = ice_entry.get_ice_id()
 
         _set_metadata(ice_entry, design['name'], ' '.join(design['design']),
@@ -66,6 +75,7 @@ class ICEInterface(object):
             name, description = self.__get_metadata(ice_entry, domino[0])
             _set_metadata(ice_entry, name, description, 'DOMINO')
             self.__ice_client.set_ice_entry(ice_entry)
+            self.__add_permissions(ice_entry)
 
             # Add link from plasmid -> domino:
             self.__ice_client.add_link(
@@ -89,6 +99,11 @@ class ICEInterface(object):
         description = ', '.join(list(set(pairs)))
 
         return name, description
+
+    def __add_permissions(self, ice_entry):
+        '''Adds permissions for all default groups.'''
+        for group_id in self.__group_ids:
+            self.__ice_client.add_permission(ice_entry.get_ice_id(), group_id)
 
 
 def _get_domino_dna(name, seq, left_subseq, right_subseq):

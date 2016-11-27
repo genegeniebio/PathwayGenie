@@ -76,9 +76,9 @@ def _get_domino(pair, target_melt_temp, reagent_concs=None):
 
 def main(args):
     '''main method.'''
-    ice = ice_interface.ICEInterface(args[2], args[3], args[4])
+    ice = ice_interface.ICEInterface(args[2], args[3], args[4], [args[5]])
 
-    for filename in args[5:]:
+    for filename in args[6:]:
         designs = doe.get_designs(filename)
 
         for design in designs:
