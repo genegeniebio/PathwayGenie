@@ -1,4 +1,4 @@
-pathwayGenieApp.controller("pathwayGenieCtrl", ["$route", "PartsGenieService", function($route, PartsGenieService) {
+pathwayGenieApp.controller("pathwayGenieCtrl", ["$route", function($route) {
 	var self = this;
 	self.route = $route;
 }]);

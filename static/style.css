@@ -3,6 +3,11 @@
 	text-transform:uppercase;
 }
 
+input.ng-invalid
+{ 
+	border: 1px red solid;
+}
+
 .tt-menu
 {
 	background-color: #fff;
