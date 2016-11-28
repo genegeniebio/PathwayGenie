@@ -11,116 +11,118 @@
 </nav>
 
 <!-- Submission form -->
-<div class="container">
-	<form class="form-horizontal" role="form" data-ng-submit="ctrl.submit()">
-		<div class="form-group">
-			<label class="control-label col-sm-2">5' sequence:</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control uppercase"
-					data-ng-model="ctrl.query.prefix"
-					placeholder="Enter 5' sequence">
-			</div>
+<div class="col-md-6">
+	<div class="panel panel-default">
+  		<div class="panel-heading">
+	  		Query
+			<button type="submit" data-ng-click="ctrl.submit()" class="pull-right btn btn-default btn-xs">Submit</button>
 		</div>
-		<div class="form-group">
-			<label class="control-label col-sm-2">Protein names:</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control"
-					data-ng-model="ctrl.query.protein_names"
-					placeholder="Enter protein names, comma-separated" required>
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="control-label col-sm-2">Proteins:</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control"
-					data-ng-model="ctrl.query.protein_ids"
-					placeholder="Enter proteins (Uniprot ids or sequences), comma-separated" required>
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="control-label col-sm-2">3' sequence:</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control uppercase"
-					data-ng-model="ctrl.query.suffix"
-					placeholder="Enter 3' sequence">
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="control-label col-sm-2">RBS length:</label>
-			<div class="col-sm-10">
-				<input type="number" class="form-control"
-					data-ng-model="ctrl.query.len_target"
-					min="35" max="10000"
-					placeholder="Enter RBS length" required>
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="control-label col-sm-2">RBS TIR:</label>
-			<div class="col-sm-10">
-				<input type="number" class="form-control"
-					data-ng-model="ctrl.query.tir_target"
-					min="0" max="200000" step="100"
-					placeholder="Enter target RBS translation initiation rate" required>
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="control-label col-sm-2">Organism:</label>
-			<div class="col-sm-10">
-				<div data-ng-controller="typeaheadCtrl as typeahead_ctrl">
-					<input type="text" class="form-control"
-						data-ng-init="typeahead_ctrl.url='/organisms/'"
-						data-ng-model="ctrl.query.organism"
-						placeholder="Select host organism"
-						required
-						autocomplete="off"
-						uib-typeahead="organism as organism.name for organism in typeahead_ctrl.getItem($viewValue)"
-						typeahead-min-length="3"
-						typeahead-editable="false">  
+  		<div class="result-panel panel-body">
+			<form class="form-horizontal" role="form">
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">5' sequence:</label>
+					<div class="col-xs-8">
+						<input type="text" class="form-control uppercase"
+							data-ng-model="ctrl.query.prefix"
+							placeholder="Enter 5' sequence">
+					</div>
 				</div>
-			</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">Protein names:</label>
+					<div class="col-xs-8">
+						<input type="text" class="form-control"
+							data-ng-model="ctrl.query.protein_names"
+							placeholder="Enter protein names, comma-separated" required>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">Proteins:</label>
+					<div class="col-xs-8">
+						<input type="text" class="form-control"
+							data-ng-model="ctrl.query.protein_ids"
+							placeholder="Enter proteins (Uniprot ids or sequences), comma-separated" required>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">3' sequence:</label>
+					<div class="col-xs-8">
+						<input type="text" class="form-control uppercase"
+							data-ng-model="ctrl.query.suffix"
+							placeholder="Enter 3' sequence">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">RBS length:</label>
+					<div class="col-xs-8">
+						<input type="number" class="form-control"
+							data-ng-model="ctrl.query.len_target"
+							min="35" max="10000"
+							placeholder="Enter RBS length" required>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">RBS TIR:</label>
+					<div class="col-xs-8">
+						<input type="number" class="form-control"
+							data-ng-model="ctrl.query.tir_target"
+							min="0" max="200000" step="100"
+							placeholder="Enter target RBS translation initiation rate" required>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">Organism:</label>
+					<div class="col-xs-8">
+						<div data-ng-controller="typeaheadCtrl as typeahead_ctrl">
+							<input type="text" class="form-control"
+								data-ng-init="typeahead_ctrl.url='/organisms/'"
+								data-ng-model="ctrl.query.organism"
+								placeholder="Select host organism"
+								required
+								autocomplete="off"
+								uib-typeahead="organism as organism.name for organism in typeahead_ctrl.getItem($viewValue)"
+								typeahead-min-length="3"
+								typeahead-editable="false">  
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">Max repeating nucleotides:</label>
+					<div class="col-xs-8">
+						<input type="number" class="form-control"
+							data-ng-model="ctrl.query.max_repeats"
+							min="5" max="1000000" step="1"
+							placeholder="Enter maximum repeating nucleotides" required>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">Excluded codons:</label>
+					<div class="col-xs-8">
+						<input type="text" class="form-control uppercase"
+							data-ng-model="ctrl.query.excl_codons"
+							data-ng-pattern="ctrl.query.excl_codons_regex"
+							placeholder="Enter excluded codons">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">Excluded restriction sites:</label>
+					<div class="col-xs-8">
+						<select
+							data-ng-model="ctrl.query.restr_enzs"
+							data-ng-options="restr_enz as restr_enz.name for restr_enz in ctrl.restr_enzs() | orderBy:'name'"
+							data-ng-multiple="true"
+							multiple
+							class="form-control">
+						</select>
+					</div>
+				</div>
+			</form>
 		</div>
-		<div class="form-group">
-			<label class="control-label col-sm-2">Max repeating nucleotides:</label>
-			<div class="col-sm-10">
-				<input type="number" class="form-control"
-					data-ng-model="ctrl.query.max_repeats"
-					min="5" max="1000000" step="1"
-					placeholder="Enter maximum repeating nucleotides" required>
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="control-label col-sm-2">Excluded codons:</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control uppercase"
-					data-ng-model="ctrl.query.excl_codons"
-					data-ng-pattern="ctrl.query.excl_codons_regex"
-					placeholder="Enter excluded codons">
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="control-label col-sm-2">Excluded restriction sites:</label>
-			<div class="col-sm-10">
-				<select
-					data-ng-model="ctrl.query.restr_enzs"
-					data-ng-options="restr_enz as restr_enz.name for restr_enz in ctrl.restr_enzs() | orderBy:'name'"
-					data-ng-multiple="true"
-					multiple
-					class="form-control">
-				</select>
-			</div>
-		</div>
-		<div class="form-group">
-			<div class="col-sm-offset-2 col-sm-10">
-				<button type="submit" class="btn btn-default">Submit</button>
-			</div>
-		</div>
-	</form>
+	</div>
 </div>
 
 <!-- Results panel -->
-<div data-ng-controller="resultCtrl as result_ctrl">
+<div class="col-md-6" data-ng-controller="resultCtrl as result_ctrl" data-ng-show="result_ctrl.results()">
 	<result-panel
-		data-ng-show="result_ctrl.results()"
 		results="result_ctrl.results()"
 		result="result_ctrl.result()"
 		sbol="result_ctrl.sbol()"
