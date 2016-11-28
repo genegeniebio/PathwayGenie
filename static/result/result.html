@@ -1,0 +1,80 @@
+<link rel="stylesheet" href="static/result/result.css">
+<div class="container">
+	<div class="panel panel-default">
+		<div class="panel-heading">Result</div>
+		<div class="panel-body">
+			<div class="title">{{result().metadata.name}}</div>
+			<div class="subtitle">{{result().metadata.shortDescription}}</div>
+			<div class="sbol">{{sbol()}}</div>
+			<div class="links">
+				<ul>
+					<li data-ng-repeat="link in result().metadata.links">
+						<a data-ng-href="{{link}}" target="_blank">{{link}}</a>
+					</li>
+				</ul>
+			</div>
+			<div class="text-center" data-ng-if="results().length > 1">
+				<uib-pagination
+					data-ng-model="currentResult"
+					class="pagination-sm"
+					total-items="results().length"
+					max-size="5"
+					items-per-page="1">
+				</uib-pagination>
+			</div>
+		</div>
+		<div class="panel-footer clearfix">
+			<div class="pull-right">
+				<button data-toggle="modal" data-target="#save-modal" class="btn btn-default">Save</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="save-modal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+	<div class="modal-dialog">
+		<!-- Modal content-->
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">Save to ICE</h4>
+			</div>
+			<div class="modal-body">
+				<div class="container">
+					<form class="form-horizontal" role="form">
+						<div class="form-group">
+							<label class="control-label col-sm-2">URL:</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control"
+								data-ng-model="ice.url"
+								placeholder="ICE URL">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-sm-2">Username:</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control"
+								data-ng-model="ice.username"
+								placeholder="ICE username">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-sm-2">Password:</label>
+							<div class="col-sm-6">
+								<input type="password" class="form-control"
+								data-ng-model="ice.password"
+								placeholder="ICE password">
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div class="modal-footer">
+			 	<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-primary" data-dismiss="modal"
+					data-ng-click="saveResults()"
+					data-ng-disabled="!ice.url|| !ice.username || !ice.password">Save</button>
+			</div>
+		</div>
+	</div>
+</div>
