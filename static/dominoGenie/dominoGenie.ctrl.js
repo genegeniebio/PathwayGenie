@@ -1,0 +1,3 @@
+dominoGenieApp.controller("dominoGenieCtrl", [function() {
+	
+}]);
