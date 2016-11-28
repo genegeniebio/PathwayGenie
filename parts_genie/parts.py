@@ -1,7 +1,7 @@
 '''
-PartsGenie (c) University of Manchester 2015
+PathwayGenie (c) University of Manchester 2017
 
-PartsGenie is licensed under the MIT License.
+PathwayGenie is licensed under the MIT License.
 
 To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
@@ -25,8 +25,7 @@ import numpy
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import dna_utils, sbol_utils, seq_utils, taxonomy_utils
 from synbiochem.utils.job import JobThread
-import parts_genie.rbs_calculator as rbs_calc
-import parts_genie.sbol_writer as sbol_writer
+from . import rbs_calculator as rbs_calc, sbol_writer
 
 
 class PartsGenie(object):

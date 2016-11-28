@@ -1,7 +1,7 @@
 '''
-synbiochem (c) University of Manchester 2016
+PathwayGenie (c) University of Manchester 2017
 
-synbiochem is licensed under the MIT License.
+PathwayGenie is licensed under the MIT License.
 
 To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
@@ -9,7 +9,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import sys
 
-from parts_genie import APP
+from pathway_genie import APP
 
 
 def main(argv):

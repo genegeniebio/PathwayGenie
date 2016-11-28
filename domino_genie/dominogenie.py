@@ -1,5 +1,5 @@
 '''
-PathwayGenie (c) University of Manchester 2015
+PathwayGenie (c) University of Manchester 2017
 
 PathwayGenie is licensed under the MIT License.
 
@@ -9,8 +9,9 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import sys
 
-from domino_genie import doe, ice_interface
 from synbiochem.utils import pairwise, seq_utils, dna_utils
+
+from . import doe, ice_interface
 
 
 def get_dominoes(designs, melt_temp, restricts=None, reagent_concs=None):
