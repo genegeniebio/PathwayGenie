@@ -21,6 +21,7 @@ from parts_genie import parts
 from synbiochem.utils import seq_utils
 
 from .flask_utils import FlaskManager
+from .pathway_genie import PathwayGenie
 
 
 # Configuration:
@@ -34,7 +35,7 @@ APP = Flask(__name__, static_folder=_STATIC_FOLDER)
 APP.config.from_object(__name__)
 
 _RESULTS_DIR = os.path.join(_STATIC_FOLDER, 'sbol/')
-_ENGINE = parts.PartsGenie(_RESULTS_DIR)
+_ENGINE = PathwayGenie(_RESULTS_DIR)
 _MANAGER = FlaskManager(_ENGINE)
 _ORGANISMS = seq_utils.get_codon_usage_organisms()
 

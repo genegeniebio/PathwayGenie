@@ -11,9 +11,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-instance-attributes
 import copy
-import json
 import math
-import os
 import random
 import re
 import sys
@@ -25,49 +23,7 @@ import numpy
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import dna_utils, sbol_utils, seq_utils, taxonomy_utils
 from synbiochem.utils.job import JobThread
-from . import rbs_calculator as rbs_calc, sbol_writer
-
-
-class PartsGenie(object):
-    '''Class to run PartsGenie application.'''
-
-    def __init__(self, sbol_dir):
-        self.__sbol_dir = sbol_dir
-
-        if not os.path.exists(self.__sbol_dir):
-            os.makedirs(self.__sbol_dir)
-
-    def get_thread(self, query):
-        '''Gets a thread to run query.'''
-        job_id = _process_query(query)
-        return job_id, PartsThread(job_id, query, self.__sbol_dir)
-
-    def get_result(self, file_id):
-        '''Returns results.'''
-        path = os.path.join(self.__sbol_dir, file_id)
-
-        with open(path, 'r') as fle:
-            content = fle.read()
-            return content, 'text/xml'
-
-    def save(self, req):
-        '''Saves results.'''
-        ice_entry_urls = []
-        req_obj = json.loads(req.data)
-
-        for result in req_obj['result']:
-            path = str(os.path.join(self.__sbol_dir, result['data']['file']))
-
-            dna = sbol_utils.read(path)
-            url = req_obj['ice']['url']
-            url = url[:-1] if url[-1] == '/' else url
-            ice_id = sbol_writer.submit(url,
-                                        req_obj['ice']['username'],
-                                        req_obj['ice']['password'],
-                                        dna, result['metadata'])
-            ice_entry_urls.append(url + '/entry/' + str(ice_id))
-
-        return ice_entry_urls
+from . import rbs_calculator as rbs_calc
 
 
 class PartsSolution(object):
@@ -157,14 +113,8 @@ class PartsSolution(object):
 
             cds = self.__seqs[3][idx] + self.__seqs[4]
 
-            metadata = sbol_writer.get_metadata(prot_id, uniprot_id)
-            parameters = metadata['parameters']
-            parameters.append({'name': 'Type', 'value': 'PART'})
-            parameters.append({'name': 'TIR',
-                               'value': float("{0:.2f}".format(tirs[idx]))})
-            parameters.append({'name': 'CAI',
-                               'value': float("{0:.2f}".format(
-                                   self.__cod_opt.get_cai(cds)))})
+            metadata = _get_metadata(prot_id, tirs[idx],
+                                     self.__cod_opt.get_cai(cds), uniprot_id)
 
             result_file = self.__write_sbol(prot_id, metadata, cds, idx)
 
@@ -333,22 +283,22 @@ class PartsSolution(object):
                             desc=metadata['shortDescription'],
                             seq=seq)
 
-        start = sbol_writer.add_subcomp(dna, self.__seqs[0], 1, name='Prefix')
+        start = _add_subcomp(dna, self.__seqs[0], 1, name='Prefix')
 
-        start = sbol_writer.add_subcomp(dna, self.__seqs[1], start,
-                                        name='5\' Insulator')
+        start = _add_subcomp(dna, self.__seqs[1], start,
+                             name='5\' Insulator')
 
-        start = sbol_writer.add_subcomp(dna, self.__seqs[2], start, name='RBS',
-                                        typ=sbol_utils.SO_RBS)
+        start = _add_subcomp(dna, self.__seqs[2], start, name='RBS',
+                             typ=sbol_utils.SO_RBS)
 
-        start = sbol_writer.add_subcomp(dna, cds, start,
-                                        name=prot_id + ' (CDS)',
-                                        typ=sbol_utils.SO_CDS)
+        start = _add_subcomp(dna, cds, start,
+                             name=prot_id + ' (CDS)',
+                             typ=sbol_utils.SO_CDS)
 
-        start = sbol_writer.add_subcomp(dna, self.__seqs[5], start,
-                                        name='3\' Insulator')
+        start = _add_subcomp(dna, self.__seqs[5], start,
+                             name='3\' Insulator')
 
-        sbol_writer.add_subcomp(dna, self.__seqs[6], start, name='Suffix')
+        _add_subcomp(dna, self.__seqs[6], start, name='Suffix')
 
         result_file = str(uuid.uuid4()) + '.xml'
         sbol_url = urlparse.urljoin(self.__sbol_dir, result_file)
@@ -376,12 +326,11 @@ class PartsSolution(object):
 class PartsThread(JobThread):
     '''Wraps a Parts optimisation job into a thread.'''
 
-    def __init__(self, job_id, query, sbol_dir):
-        solution = PartsSolution(query, sbol_dir)
+    def __init__(self, query, sbol_dir):
+        solution = PartsSolution(_process_query(query), sbol_dir)
         self.__sim_ann = SimulatedAnnealer(solution, verbose=True)
         self.__sim_ann.add_listener(self)
-
-        JobThread.__init__(self, job_id)
+        JobThread.__init__(self)
 
     def cancel(self):
         '''Cancels the current job.'''
@@ -415,7 +364,7 @@ def _process_query(query):
     if 'suffix' in query:
         query['suffix'] = query['suffix'].upper()
 
-    return str(uuid.uuid4())
+    return query
 
 
 def _get_value(value_id, name, value, min_value, max_value, target):
@@ -447,3 +396,51 @@ def _replace(sequence, pos, nuc):
 def _rand_nuc():
     '''Returns a random nucleotide.'''
     return random.choice(['A', 'T', 'G', 'C'])
+
+
+def _get_metadata(prot_id, tir, cai, uniprot_id=None):
+    '''Gets metadata.'''
+    name = prot_id
+    description = prot_id
+    links = []
+    parameters = []
+
+    if uniprot_id is not None:
+        uniprot_vals = seq_utils.get_uniprot_values([uniprot_id],
+                                                    ['entry name',
+                                                     'protein names',
+                                                     'organism'])
+        # Add metadata:
+        if len(uniprot_vals.keys()):
+            prot_id = uniprot_vals.keys()[0]
+            name = uniprot_vals[prot_id]['Entry name']
+            organism = uniprot_vals[prot_id]['Organism']
+            description = ', '.join(uniprot_vals[prot_id]['Protein names']) + \
+                ' (' + organism + ')'
+            links.append('http://identifiers.org/uniprot/' + uniprot_id)
+            parameters.append({'name': 'Organism', 'value': organism})
+
+    parameters.append({'name': 'Type', 'value': 'PART'})
+    parameters.append({'name': 'TIR', 'value': float("{0:.2f}".format(tir))})
+    parameters.append({'name': 'CAI', 'value': float("{0:.2f}".format(cai))})
+
+    metadata = {'name': name,
+                'shortDescription': description,
+                'links': links,
+                'parameters': parameters}
+
+    return metadata
+
+
+def _add_subcomp(dna, seq, start, forward=True, name=None,
+                 typ=None, desc=None):
+    '''Adds a subcompartment.'''
+    if seq is not None and len(seq):
+        end = start + len(seq) - 1
+        feature = dna_utils.DNA(name=name, desc=desc, typ=typ,
+                                start=start, end=end, forward=forward)
+        dna.features.append(feature)
+
+        return end + 1
+
+    return start

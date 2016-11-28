@@ -26,7 +26,8 @@ class FlaskManager(object):
         query = json.loads(req.data)
 
         # Do job in new thread, return result when completed:
-        job_id, thread = self.__engine.get_thread(query)
+        thread = self.__engine.get_thread(query)
+        job_id = thread.get_job_id()
         thread.add_listener(self)
         self.__threads[job_id] = thread
         thread.start()
