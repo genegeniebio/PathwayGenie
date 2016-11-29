@@ -20,8 +20,7 @@ from flask import Flask, jsonify, request, Response
 from parts_genie import parts
 from synbiochem.utils import seq_utils
 
-from .flask_utils import FlaskManager
-from .pathway_genie import PathwayGenie
+from . import pathway_genie
 
 
 # Configuration:
@@ -34,9 +33,7 @@ _STATIC_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)),
 APP = Flask(__name__, static_folder=_STATIC_FOLDER)
 APP.config.from_object(__name__)
 
-_RESULTS_DIR = os.path.join(_STATIC_FOLDER, 'sbol/')
-_ENGINE = PathwayGenie(_RESULTS_DIR)
-_MANAGER = FlaskManager(_ENGINE)
+_MANAGER = pathway_genie.PathwayGenie()
 _ORGANISMS = seq_utils.get_codon_usage_organisms()
 
 
@@ -64,17 +61,10 @@ def cancel(job_id):
     return _MANAGER.cancel(job_id)
 
 
-@APP.route('/result/<file_id>')
-def get_result(file_id):
-    '''Gets result file.'''
-    content, mimetype = _MANAGER.get_result(file_id)
-    return Response(content, mimetype=mimetype)
-
-
 @APP.route('/save', methods=['POST'])
 def save():
     '''Saves result.'''
-    return _MANAGER.save(request)
+    return pathway_genie.save(request)
 
 
 @APP.route('/organisms/<term>')

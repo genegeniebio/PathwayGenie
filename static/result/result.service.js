@@ -2,7 +2,6 @@ resultApp.factory("ResultService", ["$http", "ErrorService", function($http, Err
 	var obj = {};
 	obj.results = null;
 	obj.result = null;
-	obj.sbol = null;
 	
 	var currentResult = 0;
 	
@@ -16,14 +15,6 @@ resultApp.factory("ResultService", ["$http", "ErrorService", function($http, Err
 		
 		if(obj.results) {
 			obj.result = obj.results[currentResult];
-			
-			$http.get("/result/" + obj.result.data.file).then(
-				function(resp) {
-					obj.sbol = resp.data;
-				},
-				function(errResp) {
-					ErrorService.open(errResp.data.message);
-				});
 		}
 		else {
 			obj.result = null;

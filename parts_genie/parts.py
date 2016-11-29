@@ -15,8 +15,6 @@ import math
 import random
 import re
 import sys
-import urlparse
-import uuid
 
 import numpy
 
@@ -29,9 +27,8 @@ from . import rbs_calculator as rbs_calc
 class PartsSolution(object):
     '''Solution for RBS optimisation.'''
 
-    def __init__(self, query, sbol_dir):
+    def __init__(self, query):
         self.__query = query
-        self.__sbol_dir = sbol_dir
         self.__calc = rbs_calc.RbsCalculator(self.__query['organism']['r_rna'])
 
         # Check if dg_total or TIR (translation initiation rate) was specified.
@@ -116,11 +113,9 @@ class PartsSolution(object):
             metadata = _get_metadata(prot_id, tirs[idx],
                                      self.__cod_opt.get_cai(cds), uniprot_id)
 
-            result_file = self.__write_sbol(prot_id, metadata, cds, idx)
+            dna = self.__get_dna(prot_id, metadata, cds, idx)
 
-            result.append({'metadata': metadata,
-                           'data': {'file': result_file,
-                                    'mimetype': 'text/xml'}})
+            result.append({'metadata': metadata, 'data': dna})
 
         return result
 
@@ -273,7 +268,7 @@ class PartsSolution(object):
         return [tir for tirs in _get_tirs(dgs) for tir in tirs[1:]
                 if tir > float(self.__query['tir_target']) * 0.1]
 
-    def __write_sbol(self, prot_id, metadata, cds, idx):
+    def __get_dna(self, prot_id, metadata, cds, idx):
         '''Writes SBOL document to temporary store.'''
         seq = self.__seqs[0] + self.__seqs[1] + self.__seqs[2] + \
             self.__seqs[3][idx] + self.__seqs[4] + self.__seqs[5] + \
@@ -300,11 +295,7 @@ class PartsSolution(object):
 
         _add_subcomp(dna, self.__seqs[6], start, name='Suffix')
 
-        result_file = str(uuid.uuid4()) + '.xml'
-        sbol_url = urlparse.urljoin(self.__sbol_dir, result_file)
-        sbol_utils.write(dna, sbol_url)
-
-        return result_file
+        return dna
 
     def __repr__(self):
         # return '%r' % (self.__dict__)
@@ -326,8 +317,8 @@ class PartsSolution(object):
 class PartsThread(JobThread):
     '''Wraps a Parts optimisation job into a thread.'''
 
-    def __init__(self, query, sbol_dir):
-        solution = PartsSolution(_process_query(query), sbol_dir)
+    def __init__(self, query):
+        solution = PartsSolution(_process_query(query))
         self.__sim_ann = SimulatedAnnealer(solution, verbose=True)
         self.__sim_ann.add_listener(self)
         JobThread.__init__(self)
@@ -439,7 +430,7 @@ def _add_subcomp(dna, seq, start, forward=True, name=None,
         end = start + len(seq) - 1
         feature = dna_utils.DNA(name=name, desc=desc, typ=typ,
                                 start=start, end=end, forward=forward)
-        dna.features.append(feature)
+        dna['features'].append(feature)
 
         return end + 1
 
