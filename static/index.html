@@ -4,28 +4,20 @@
 <head>
 <title>PathwayGenie</title>
 <link rel="stylesheet" href="static/style.css">
-<link rel="stylesheet"
-	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-<link rel="stylesheet"
-	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
-<script
-	src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-<script
-	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-<script
-	src="http://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="http://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.min.js"></script>
 <script src="https://www.google.com/jsapi"></script>
-<script
-	src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.js"></script>
-<script
-	src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.js"></script>
-<script
-	src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-route.js"></script>
-<script
-	src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-sanitize.js"></script>
-<script
-	src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-1.3.3.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-route.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-sanitize.js"></script>
+<script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-1.3.3.js"></script>
 <script src="static/utils.js"></script>
+<script src="static/assemblyGenie/assemblyGenie.module.js"></script>
+<script src="static/assemblyGenie/assemblyGenie.ctrl.js"></script>
 <script src="static/dominoGenie/dominoGenie.module.js"></script>
 <script src="static/dominoGenie/dominoGenie.ctrl.js"></script>
 <script src="static/error/error.module.js"></script>
@@ -76,13 +68,35 @@
 					<li class="dropdown">
 						<a href="#" class="dropdown-toggle"
 							data-toggle="dropdown" role="button" aria-haspopup="true"
-							aria-expanded="false">{{ctrl.route.current.app}}<span class="caret"></span>
+							aria-expanded="false">Design<span class="caret"></span>
 						</a>
 						<ul class="dropdown-menu">
 							<li data-ng-class="{active: ctrl.route.current.app === 'PartsGenie'}"><a href="./#/partsGenie">PartsGenie</a></li>
 							<li data-ng-class="{active: ctrl.route.current.app === 'SBC-DoE'}"><a href="./#/sbcdoe">SBC-DoE</a></li>
 							<li data-ng-class="{active: ctrl.route.current.app === 'DominoGenie'}"><a href="./#/dominoGenie">DominoGenie</a></li>
-						</ul></li>
+						</ul>
+					</li>
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle"
+							data-toggle="dropdown" role="button" aria-haspopup="true"
+							aria-expanded="false">Build<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu">
+							<li data-ng-class="{active: ctrl.route.current.app === 'AssemblyGenie'}"><a href="./#/assemblyGenie">AssemblyGenie</a></li>
+						</ul>
+					</li>
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle"
+							data-toggle="dropdown" role="button" aria-haspopup="true"
+							aria-expanded="false">Test<span class="caret"></span>
+						</a>
+					</li>
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle"
+							data-toggle="dropdown" role="button" aria-haspopup="true"
+							aria-expanded="false">Learn<span class="caret"></span>
+						</a>
+					</li>
 				</ul>
 			</div>
 		</div>
