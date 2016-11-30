@@ -4,3 +4,6 @@
 /**/.DS_Store
 /.settings/*
 /**/static/sbol/
+/nupack3.0.6/bin/*
+/nupack3.0.6/lib/*.a
+/nupack3.0.6/src/**/*.o
