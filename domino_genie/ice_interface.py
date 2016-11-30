@@ -28,7 +28,7 @@ class ICEInterface(object):
 
     def get_dna(self, ice_id):
         '''Gets DNA object from ICE.'''
-        return self.__ice_client.get_dna(ice_id)
+        return self.__ice_client.get_ice_entry(ice_id).get_dna()
 
     def submit(self, designs):
         '''Writes plasmids and dominoes to ICE.'''

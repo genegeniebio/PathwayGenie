@@ -83,7 +83,8 @@ def main(args):
         designs = doe.get_designs(filename)
 
         for design in designs:
-            design['dna'] = [ice.get_dna(iceid) for iceid in design['design']]
+            design['dna'] = [ice.get_dna(iceid)
+                             for iceid in design['design']]
 
         get_dominoes(designs, float(args[0]), [args[1]])
         ice.submit(designs)
