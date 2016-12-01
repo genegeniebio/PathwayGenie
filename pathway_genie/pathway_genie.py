@@ -12,6 +12,7 @@ import time
 
 from flask import Response
 
+from domino_genie.dominogenie import DominoThread
 from parts_genie.parts import PartsThread
 
 from . import sbol_writer
@@ -29,7 +30,7 @@ class PathwayGenie(object):
         query = json.loads(req.data)
 
         # Do job in new thread, return result when completed:
-        thread = PartsThread(query)
+        thread = _get_thread(query)
         job_id = thread.get_job_id()
         thread.add_listener(self)
         self.__threads[job_id] = thread
@@ -83,3 +84,14 @@ def save(req):
         ice_entry_urls.append(url + '/entry/' + str(ice_id))
 
     return json.dumps(ice_entry_urls)
+
+
+def _get_thread(query):
+    app = query.get('app', 'undefined')
+
+    if app == 'PartsGenie':
+        return PartsThread(query)
+    elif app == 'DominoGenie':
+        return DominoThread(query)
+
+    raise ValueError('Unknown app: ' + app)

@@ -1,6 +1,7 @@
 partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGenieService", "ProgressService", "ResultService", function($scope, ErrorService, PartsGenieService, ProgressService, ResultService) {
 	var self = this;
 	self.query = {
+			"app": "PartsGenie",
 			"len_target": 60,
 			"tir_target": 15000,
 			"max_repeats": 6
