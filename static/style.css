@@ -3,6 +3,11 @@
 	text-transform:uppercase;
 }
 
+.horizontal-cell
+{
+	display: table-cell;
+}
+
 input.ng-invalid
 { 
 	border: 1px red solid;

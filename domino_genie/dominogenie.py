@@ -20,7 +20,7 @@ class DominoThread(JobThread):
     def __init__(self, query):
         self.__query = query
         self.__designs = query['designs']
-        self.__restricts = query.get('restricts', None)
+        self.__restr_enzs = query.get('restr_enzs', None)
         JobThread.__init__(self)
 
     def run(self):
@@ -35,7 +35,7 @@ class DominoThread(JobThread):
 
             # Apply restriction site digestion to PARTs not PLASMIDs.
             # (Assumes PLASMID at positions 1 and -1 - first and last).
-            if self.__restricts is not None:
+            if self.__restr_enzs is not None:
                 design['dna'] = [design['dna'][0]] + \
                     [self.__apply_restricts(dna)
                      for dna in design['dna'][1:-1]] + \
@@ -77,7 +77,7 @@ class DominoThread(JobThread):
 
     def __apply_restricts(self, dna):
         '''Cleave off prefix and suffix, according to restriction sites.'''
-        restrict_dnas = dna_utils.apply_restricts(dna, self.__restricts)
+        restrict_dnas = dna_utils.apply_restricts(dna, self.__restr_enzs)
 
         # This is a bit fudgy...
         # Essentially, return the longest fragment remaining after digestion.
@@ -124,7 +124,7 @@ def main(args):
 
         query = {'designs': designs,
                  'melt_temp': float(args[0]),
-                 'restricts': [args[1]]}
+                 'restr_enzs': [args[1]]}
 
         runner = DominoThread(query)
         runner.add_listener(Listener())

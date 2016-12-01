@@ -1,1 +1,67 @@
-DominoGenie
+<!-- Submission form -->
+<div class="col-md-6">
+	<div class="panel panel-default">
+  		<div class="panel-heading">
+	  		Query
+			<button type="submit" data-ng-click="ctrl.submit()" data-ng-disabled="form.$invalid" class="pull-right btn btn-default btn-xs">Submit</button>
+		</div>
+  		<div class="result-panel panel-body">
+			<form class="form-horizontal" role="form" name="form">
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">DoE file:</label>
+					<div class="col-xs-8">
+						<div style="width:100%; display:table">
+							<input type="text" class="form-control"
+								data-ng-model="ctrl.query.file_name"
+								style="width: 100%"
+								disabled>
+							<label style="display: table-cell;" class="btn btn-default btn-sm btn-file horizontal-cell">
+								Choose file
+								<input type="file" 
+									filereader="ctrl.query.file_content"
+									filename="ctrl.query.file_name"
+									placeholder="Enter DoE file"
+									style="display:none;"
+									required>
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">Melting temp / &deg;C:</label>
+					<div class="col-xs-8">
+						<input type="number" class="form-control"
+							data-ng-model="ctrl.query.melt_temp"
+							min="60" max="80"
+							placeholder="Enter melting temperature / &deg;C" required>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">Digest reagent:</label>
+					<div class="col-xs-8">
+						<select
+							data-ng-model="ctrl.query.restr_enzs"
+							data-ng-options="restr_enz as restr_enz.name for restr_enz in ctrl.restr_enzs() | orderBy:'name'"
+							data-ng-multiple="false"
+							multiple
+							class="form-control">
+						</select>
+					</div>
+				</div>
+			</form>
+			<pre style="white-space: pre-wrap;">{{ctrl.query.designs}}</pre>
+		</div>
+	</div>
+</div>
+
+
+<!-- Results panel -->
+<div class="col-md-6" data-ng-controller="resultCtrl as result_ctrl" data-ng-show="result_ctrl.results()">
+	<result-panel
+		results="result_ctrl.results()"
+		result="result_ctrl.result()"
+		sbol="result_ctrl.sbol()"
+		save-results="result_ctrl.saveResults()"
+		ice="result_ctrl.ice">
+	</result-panel>
+</div>
