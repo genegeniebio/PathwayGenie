@@ -18,16 +18,19 @@ class DominoThread(JobThread):
     '''Runs a DominoGenie job.'''
 
     def __init__(self, query):
+        self.__query = query
         self.__designs = query['designs']
-        self.__melt_temp = query['melt_temp']
         self.__restricts = query.get('restricts', None)
-        self.__reagent_concs = query.get('reagent_concs', None)
         JobThread.__init__(self)
 
     def run(self):
         '''Designs dominoes (bridging oligos) for LCR.'''
+        iteration = 0
 
-        for design in self.__designs:
+        self.__fire_event('running', iteration, 'Running...')
+
+        for iteration, design in enumerate(self.__designs):
+
             design['name'] = ' - '.join([dna['name'] for dna in design['dna']])
 
             # Apply restriction site digestion to PARTs not PLASMIDs.
@@ -48,6 +51,14 @@ class DominoThread(JobThread):
                       for pair in pairwise(seqs)]
             pairs = [pair for pair in pairwise(design['design'])]
             design['dominoes'] = zip(pairs, oligos)
+
+            iteration += 1
+            self.__fire_event('running', iteration, 'Running...')
+
+        if self._cancelled:
+            self.__fire_event('cancelled', iteration, message='Job cancelled')
+        else:
+            self.__fire_event('finished', iteration, message='Job completed')
 
     def analyse_dominoes(self):
         '''Analyse sequences for similarity using BLAST.'''
@@ -76,10 +87,28 @@ class DominoThread(JobThread):
 
     def __get_domino(self, pair):
         '''Get bridging oligo for pair of sequences.'''
-        return (seq_utils.get_seq_by_melt_temp(pair[0], self.__melt_temp,
-                                               False, self.__reagent_concs),
-                seq_utils.get_seq_by_melt_temp(pair[1], self.__melt_temp,
-                                               self.__reagent_concs))
+        melt_temp = self.__query['melt_temp']
+        reagent_concs = self.__query.get('reagent_concs', None)
+
+        return (seq_utils.get_seq_by_melt_temp(pair[0], melt_temp,
+                                               False, reagent_concs),
+                seq_utils.get_seq_by_melt_temp(pair[1], melt_temp,
+                                               reagent_concs))
+
+    def __fire_event(self, status, iteration, message=''):
+        '''Fires an event.'''
+        event = {'update': {'status': status,
+                            'message': message,
+                            'progress': iteration / len(self.__designs) * 100,
+                            'iteration': iteration,
+                            'max_iter': len(self.__designs)},
+                 'query': self.__query
+                 }
+
+        if status == 'finished':
+            event['result'] = self.__designs
+
+        self._fire_event(event)
 
 
 def main(args):
@@ -98,11 +127,18 @@ def main(args):
                  'restricts': [args[1]]}
 
         runner = DominoThread(query)
-        runner.run()
+        runner.add_listener(Listener())
+        runner.start()
 
-        print designs
         # ice.submit(designs)
 
+
+class Listener(object):
+    '''Basic Listener class.'''
+
+    def event_fired(self, event):
+        '''Responds to event.'''
+        print event
 
 if __name__ == '__main__':
     main(sys.argv[1:])
