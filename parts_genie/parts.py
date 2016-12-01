@@ -20,7 +20,6 @@ import numpy
 
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import dna_utils, sbol_utils, seq_utils, taxonomy_utils
-from synbiochem.utils.job import JobThread
 from . import rbs_calculator as rbs_calc
 
 
@@ -314,22 +313,12 @@ class PartsSolution(object):
         return self.__repr__
 
 
-class PartsThread(JobThread):
-    '''Wraps a Parts optimisation job into a thread.'''
+class PartsThread(SimulatedAnnealer):
+    '''Wraps a PartsGenie job into a thread.'''
 
     def __init__(self, query):
         solution = PartsSolution(_process_query(query))
-        self.__sim_ann = SimulatedAnnealer(solution, verbose=True)
-        self.__sim_ann.add_listener(self)
-        JobThread.__init__(self)
-
-    def cancel(self):
-        '''Cancels the current job.'''
-        self.__sim_ann.cancel()
-
-    def run(self):
-        '''Runs the current job.'''
-        self.__sim_ann.optimise()
+        SimulatedAnnealer.__init__(self, solution, verbose=True)
 
 
 def _process_query(query):

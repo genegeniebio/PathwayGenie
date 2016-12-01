@@ -124,12 +124,5 @@ def _get_domino_dna(name, seq, left_subseq, right_subseq):
 def _set_metadata(ice_entry, name, description, typ):
     '''Sets key metadata values for ICE entry.'''
     ice_entry.set_value('name', name)
-    ice_entry.set_value('status', 'Complete')
-    ice_entry.set_value('creator', 'SYNBIOCHEM')
-    ice_entry.set_value('creatorEmail', 'support@synbiochem.co.uk')
-    ice_entry.set_value('principalInvestigator', 'SYNBIOCHEM')
-    ice_entry.set_value(
-        'principalInvestigatorEmail', 'support@synbiochem.co.uk')
     ice_entry.set_value('shortDescription', description)
-    ice_entry.set_value('parameters', [{'name': 'Type',
-                                        'value': typ}])
+    ice_entry.set_parameter('Type', typ)
