@@ -1,4 +1,4 @@
-partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGenieService", "ProgressService", "ResultService", function($scope, ErrorService, PartsGenieService, ProgressService, ResultService) {
+partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PathwayGenieService", "ProgressService", "ResultService", function($scope, ErrorService, PathwayGenieService, ProgressService, ResultService) {
 	var self = this;
 	self.query = {
 			"app": "PartsGenie",
@@ -12,13 +12,13 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	var jobId = null;
 	
 	self.restr_enzs = function() {
-		return PartsGenieService.restr_enzs();
+		return PathwayGenieService.restr_enzs();
 	};
 	
 	self.submit = function() {
 		reset();
 		
-		PartsGenieService.submit(self.query).then(
+		PathwayGenieService.submit(self.query).then(
 			function(resp) {
 				jobId = resp.data.job_id;
 				var source = new EventSource("/progress/" + jobId);
@@ -44,7 +44,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 					$scope.$apply();
 				}
 				
-				ProgressService.open("PartsGenie dashboard", self.cancel, self.update);
+				ProgressService.open(self.query["app"] + " dashboard", self.cancel, self.update);
 			},
 			function(errResp) {
 				ErrorService.open(errResp.data.message);
@@ -52,7 +52,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	};
 	
 	self.cancel = function() {
-		return PartsGenieService.cancel(jobId);
+		return PathwayGenieService.cancel(jobId);
 	};
 	
 	self.update = function() {

@@ -7,8 +7,8 @@ pathwayGenieApp.config(function($routeProvider) {
 		templateUrl: "static/partsGenie.html",
 		app: "PartsGenie",
 		resolve: {
-			"unused": function(PartsGenieService) {
-				return PartsGenieService.restr_enzymes_promise;
+			"unused": function(PathwayGenieService) {
+				return PathwayGenieService.restr_enzymes_promise;
 			}
 		}}
 	).when("/partsGenie", {
@@ -17,8 +17,8 @@ pathwayGenieApp.config(function($routeProvider) {
 		templateUrl: "static/partsGenie.html",
 		app: "PartsGenie",
 		resolve: {
-			"unused": function(PartsGenieService) {
-				return PartsGenieService.restr_enzymes_promise;
+			"unused": function(PathwayGenieService) {
+				return PathwayGenieService.restr_enzymes_promise;
 			}
 		}}
 	)
@@ -32,8 +32,12 @@ pathwayGenieApp.config(function($routeProvider) {
 		controller: "dominoGenieCtrl",
 		controllerAs: "ctrl",
 		templateUrl: "static/dominoGenie.html",
-		app: "DominoGenie"
-		}
+		app: "DominoGenie",
+		resolve: {
+			"unused": function(PathwayGenieService) {
+				return PathwayGenieService.restr_enzymes_promise;
+			}
+		}}
 	).when("/assemblyGenie", {
 		controller: "assemblyGenieCtrl",
 		controllerAs: "ctrl",

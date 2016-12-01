@@ -1,4 +1,4 @@
-partsGenieApp.factory("PartsGenieService", ["$http", "ErrorService", function($http, ErrorService) {
+pathwayGenieApp.factory("PathwayGenieService", ["$http", "ErrorService", function($http, ErrorService) {
 	var restr_enzs = null;
 	
 	var restr_enzymes_promise = $http.get("/restr_enzymes").then(
