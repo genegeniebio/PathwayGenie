@@ -7,9 +7,12 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+from __future__ import division
+
 import sys
 
-from domino_genie import doe, ice_interface
+from domino_genie import doe
+from domino_genie.ice_interface import ICEInterface
 from synbiochem.utils import pairwise, seq_utils, dna_utils
 from synbiochem.utils.job import JobThread
 
@@ -18,18 +21,22 @@ class DominoThread(JobThread):
     '''Runs a DominoGenie job.'''
 
     def __init__(self, query):
+        JobThread.__init__(self)
+
         self.__query = query
         self.__designs = query['designs']
         self.__restr_enzs = query.get('restr_enzs', None)
-        JobThread.__init__(self)
+        self.__ice_int = None
 
     def run(self):
         '''Designs dominoes (bridging oligos) for LCR.'''
-        iteration = 0
+        if 'dna' not in self.__query:
+            self.__get_dna()
 
+        iteration = 0
         self.__fire_event('running', iteration, 'Running...')
 
-        for iteration, design in enumerate(self.__designs):
+        for design in self.__designs:
 
             design['name'] = ' - '.join([dna['name'] for dna in design['dna']])
 
@@ -75,6 +82,36 @@ class DominoThread(JobThread):
             except ValueError as err:
                 print err
 
+    def __get_dna(self):
+        '''Gets DNA sequences from ICE.'''
+        self.__ice_int = self.__get_ice_interface()
+
+        iteration = 0
+
+        self.__fire_event('running', iteration,
+                          'Extracting sequences from ICE...')
+
+        for design in self.__query['designs']:
+            design['dna'] = [self.__ice_int.get_dna(iceid)
+                             for iceid in design['design']]
+
+            iteration += 1
+            self.__fire_event('running', iteration,
+                              'Extracting sequences from ICE...')
+
+    def __get_ice_interface(self):
+        '''Gets an ICEClient if not already instantiated.'''
+        if not self.__ice_int:
+            self.__fire_event('running', 0,
+                              'Connecting to ICE...')
+
+            self.__ice_int = ICEInterface(self.__query['ice']['url'],
+                                          self.__query['ice']['username'],
+                                          self.__query['ice']['password'],
+                                          self.__query['ice']['groups'])
+
+        return self.__ice_int
+
     def __apply_restricts(self, dna):
         '''Cleave off prefix and suffix, according to restriction sites.'''
         restrict_dnas = dna_utils.apply_restricts(dna, self.__restr_enzs)
@@ -113,20 +150,18 @@ class DominoThread(JobThread):
 
 def main(args):
     '''main method.'''
-    ice = ice_interface.ICEInterface(args[2], args[3], args[4], [args[5]])
-
     for filename in args[6:]:
         designs = doe.get_designs(filename)
 
-        for design in designs:
-            design['dna'] = [ice.get_dna(iceid)
-                             for iceid in design['design']]
+        _query = {'designs': designs,
+                  'melt_temp': float(args[0]),
+                  'restr_enzs': [args[1]],
+                  'ice': {'url': args[2],
+                          'username': args[3],
+                          'password': args[4],
+                          'groups': args[5:]}}
 
-        query = {'designs': designs,
-                 'melt_temp': float(args[0]),
-                 'restr_enzs': [args[1]]}
-
-        runner = DominoThread(query)
+        runner = DominoThread(_query)
         runner.add_listener(Listener())
         runner.start()
 

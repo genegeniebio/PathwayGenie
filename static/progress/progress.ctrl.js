@@ -43,8 +43,10 @@ progressApp.controller('progressInstanceCtrl', ["$scope", "$uibModalInstance", "
 		return update().values;
 	},               
 	function(values) {
-		for(i=0; i < values.length; i++) {
-			drawChart(i, values[i]);
+		if(values) {
+			for(i=0; i < values.length; i++) {
+				drawChart(i, values[i]);
+			}
 		}
 	}, true);
 

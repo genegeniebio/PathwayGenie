@@ -12,17 +12,17 @@
 					<div class="col-xs-8">
 						<div style="width:100%; display:table">
 							<input type="text" class="form-control"
-								data-ng-model="ctrl.query.file_name"
+								data-ng-model="ctrl.file_name"
 								style="width: 100%"
-								disabled>
+								disabled
+								required>
 							<label style="display: table-cell;" class="btn btn-default btn-sm btn-file horizontal-cell">
 								Choose file
 								<input type="file" 
-									filereader="ctrl.query.file_content"
-									filename="ctrl.query.file_name"
+									filereader="ctrl.file_content"
+									filename="ctrl.file_name"
 									placeholder="Enter DoE file"
-									style="display:none;"
-									required>
+									style="display:none;">
 							</label>
 						</div>
 					</div>
@@ -48,8 +48,44 @@
 						</select>
 					</div>
 				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">ICE URL:</label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control"
+						data-ng-model="ctrl.query.ice.url"
+						placeholder="ICE URL"
+						required>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">ICE username:</label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control"
+						data-ng-model="ctrl.query.ice.username"
+						placeholder="ICE username"
+						required>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">ICE password:</label>
+					<div class="col-sm-8">
+						<input type="password" class="form-control"
+						data-ng-model="ctrl.query.ice.password"
+						placeholder="ICE password"
+						required>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">ICE group:</label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control"
+						data-ng-model="ctrl.query.ice.groups"
+						placeholder="ICE group"
+						required>
+					</div>
+				</div>
 			</form>
-			<pre style="white-space: pre-wrap;">{{ctrl.query.designs}}</pre>
+			<pre style="white-space: pre-wrap;">{{ctrl.query}}</pre>
 		</div>
 	</div>
 </div>

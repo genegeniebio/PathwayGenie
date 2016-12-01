@@ -1,9 +1,13 @@
 dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "PathwayGenieService", "ProgressService", "ResultService", function($scope, ErrorService, PathwayGenieService, ProgressService, ResultService) {
 	var self = this;
+	self.file_name = null;
+	self.file_content = null
+	
 	self.query = {
 			"app": "DominoGenie",
 			"melt_temp": 70
 		};
+	
 	self.response = {"update": {}};
 	
 	var jobId = null;
@@ -57,17 +61,19 @@ dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "Pathway
 	};
 	
 	$scope.$watch(function() {
-		return self.query.file_content;
+		return self.file_content;
 	},               
 	function(values) {
 		// Parse DoE file:
-		var lines = values.match(/[^\r\n]+/g);
-		var designs = []
-		
-		for(var i=0; i < lines.length; i++ ){
-			designs.push({"design": lines[i].match(/[^\t]+/g)})
+		if(values) {
+			var lines = values.match(/[^\r\n]+/g);
+			var designs = []
+			
+			for(var i=0; i < lines.length; i++ ){
+				designs.push({"design": lines[i].match(/[^\t]+/g)})
+			}
+			self.query.designs = designs;
 		}
-		self.query.designs = designs;
 	}, true);
 
 	reset = function() {

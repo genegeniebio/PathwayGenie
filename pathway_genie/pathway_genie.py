@@ -42,8 +42,8 @@ class PathwayGenie(object):
         '''Returns progress of job.'''
         def _check_progress(job_id):
             '''Checks job progress.'''
-            while job_id not in self.__status or \
-                    self.__status[job_id]['update']['progress'] < 100:
+            while (job_id not in self.__status or
+                    self.__status[job_id]['update']['status'] == 'running'):
                 time.sleep(1)
 
                 if job_id in self.__status:
