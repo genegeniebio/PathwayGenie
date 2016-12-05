@@ -1,6 +1,5 @@
 <!doctype html>
-<html data-ng-app="pathwayGenieApp"
-	data-ng-controller="pathwayGenieCtrl as ctrl">
+<html data-ng-app="pathwayGenieApp" data-ng-controller="pathwayGenieCtrl as ctrl">
 <head>
 <title>PathwayGenie</title>
 <link rel="stylesheet" href="static/style.css">
@@ -23,6 +22,9 @@
 <script src="static/error/error.module.js"></script>
 <script src="static/error/error.ctrl.js"></script>
 <script src="static/error/error.service.js"></script>
+<script src="static/ice/ice.module.js"></script>
+<script src="static/ice/ice.ctrl.js"></script>
+<script src="static/ice/ice.service.js"></script>
 <script src="static/pathwayGenie/pathwayGenie.module.js"></script>
 <script src="static/pathwayGenie/pathwayGenie.service.js"></script>
 <script src="static/pathwayGenie/pathwayGenie.ctrl.js"></script>
@@ -99,6 +101,9 @@
 						</a>
 					</li>
 				</ul>
+				<ul class="nav navbar-nav navbar-right">
+      				<li data-ng-class="{active: ctrl.route.current.app === 'ICE'}"><a href="./#/ice"><span class="glyphicon glyphicon-log-in"></span> ICE</a></li>
+    			</ul>
 			</div>
 		</div>
 	</nav>

@@ -16,9 +16,10 @@ import uuid
 
 from Bio import Restriction
 from flask import Flask, jsonify, request, Response
+from synbiochem.utils import seq_utils
+from synbiochem.utils.ice_utils import ICEClient
 
 from parts_genie import parts
-from synbiochem.utils import seq_utils
 
 from . import pathway_genie
 
@@ -89,9 +90,29 @@ def get_restr_enzymes():
                        for enz in Restriction.AllEnzymes])
 
 
+@APP.route('/ice/search/<term>')
+def search_ice(term, url, username, password):
+    '''Searches ICE database.'''
+    ice_client = ICEClient(url, username, password)
+    return ice_client.search(term, limit=10)
+
+
+@APP.route('/ice/connect', methods=['POST'])
+def connect_ice():
+    '''Searches ICE database.'''
+    data = json.loads(request.data)
+    ICEClient(data['ice']['url'],
+              data['ice']['username'],
+              data['ice']['password'])
+
+    return json.dumps({'connected': True})
+
+
 @APP.errorhandler(Exception)
 def handle_exception(err):
     '''Exception handling method.'''
-    response = jsonify({'message': err.__class__.__name__ + ': ' + str(err)})
+    message = err.__class__.__name__ + ': ' + str(err)
+    APP.logger.error('Exception: ' + message)
+    response = jsonify({'message': message})
     response.status_code = 500
     return response

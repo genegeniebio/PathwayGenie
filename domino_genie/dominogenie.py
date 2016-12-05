@@ -11,10 +11,11 @@ from __future__ import division
 
 import sys
 
-from domino_genie import doe
-from domino_genie.ice_interface import ICEInterface
 from synbiochem.utils import pairwise, seq_utils, dna_utils
 from synbiochem.utils.job import JobThread
+
+from domino_genie import doe
+from domino_genie.ice_interface import ICEInterface
 
 
 class DominoThread(JobThread):
@@ -30,42 +31,48 @@ class DominoThread(JobThread):
 
     def run(self):
         '''Designs dominoes (bridging oligos) for LCR.'''
-        if 'dna' not in self.__query:
-            self.__get_dna()
+        try:
+            iteration = 0
 
-        iteration = 0
-        self.__fire_event('running', iteration, 'Running...')
+            if 'dna' not in self.__query:
+                self.__get_dna()
 
-        for design in self.__designs:
-
-            design['name'] = ' - '.join([dna['name'] for dna in design['dna']])
-
-            # Apply restriction site digestion to PARTs not PLASMIDs.
-            # (Assumes PLASMID at positions 1 and -1 - first and last).
-            if self.__restr_enzs is not None:
-                design['dna'] = [design['dna'][0]] + \
-                    [self.__apply_restricts(dna)
-                     for dna in design['dna'][1:-1]] + \
-                    [design['dna'][-1]]
-
-            # Generate plasmid DNA object:
-            design['plasmid'] = dna_utils.concat(design['dna'][:-1])
-
-            # Generate domino sequences:
-            seqs = [dna['seq'] for dna in design['dna']]
-
-            oligos = [self.__get_domino(pair)
-                      for pair in pairwise(seqs)]
-            pairs = [pair for pair in pairwise(design['design'])]
-            design['dominoes'] = zip(pairs, oligos)
-
-            iteration += 1
             self.__fire_event('running', iteration, 'Running...')
 
-        if self._cancelled:
-            self.__fire_event('cancelled', iteration, message='Job cancelled')
-        else:
-            self.__fire_event('finished', iteration, message='Job completed')
+            for design in self.__designs:
+                design['name'] = ' - '.join([dna['name']
+                                             for dna in design['dna']])
+
+                # Apply restriction site digestion to PARTs not PLASMIDs.
+                # (Assumes PLASMID at positions 1 and -1 - first and last).
+                if self.__restr_enzs is not None:
+                    design['dna'] = [design['dna'][0]] + \
+                        [self.__apply_restricts(dna)
+                         for dna in design['dna'][1:-1]] + \
+                        [design['dna'][-1]]
+
+                # Generate plasmid DNA object:
+                design['plasmid'] = dna_utils.concat(design['dna'][:-1])
+
+                # Generate domino sequences:
+                seqs = [dna['seq'] for dna in design['dna']]
+
+                oligos = [self.__get_domino(pair)
+                          for pair in pairwise(seqs)]
+                pairs = [pair for pair in pairwise(design['design'])]
+                design['dominoes'] = zip(pairs, oligos)
+
+                iteration += 1
+                self.__fire_event('running', iteration, 'Running...')
+
+            if self._cancelled:
+                self.__fire_event('cancelled', iteration,
+                                  message='Job cancelled')
+            else:
+                self.__fire_event('finished', iteration,
+                                  message='Job completed')
+        except Exception, err:
+            self.__fire_event('error', iteration, message=str(err))
 
     def analyse_dominoes(self):
         '''Analyse sequences for similarity using BLAST.'''

@@ -1,8 +1,5 @@
 resultApp.controller("resultCtrl", ["$http", "ResultService", function($http, ResultService) {
 	var self = this;
-	self.ice = {'url': null,
-			'username': null,
-			'password': null};
 	
 	self.results = function() {
 		return ResultService.results;

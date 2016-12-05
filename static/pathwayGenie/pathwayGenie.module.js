@@ -1,4 +1,4 @@
-var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "assemblyGenieApp", "dominoGenieApp", "partsGenieApp", "sbcdoeApp"]);
+var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "assemblyGenieApp", "dominoGenieApp", "iceApp", "partsGenieApp", "sbcdoeApp"]);
 
 pathwayGenieApp.config(function($routeProvider) {
 	$routeProvider.when("/", {
@@ -44,5 +44,11 @@ pathwayGenieApp.config(function($routeProvider) {
 		templateUrl: "static/assemblyGenie.html",
 		app: "AssemblyGenie"
 		}
-)
+	).when("/ice", {
+		controller: "iceCtrl",
+		controllerAs: "ctrl",
+		templateUrl: "static/ice.html",
+		app: "ICE"
+		}
+	)
 });

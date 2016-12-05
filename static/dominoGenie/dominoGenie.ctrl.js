@@ -1,4 +1,4 @@
-dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "PathwayGenieService", "ProgressService", "ResultService", function($scope, ErrorService, PathwayGenieService, ProgressService, ResultService) {
+dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "ICEService", "PathwayGenieService", "ProgressService", "ResultService", function($scope, ErrorService, ICEService, PathwayGenieService, ProgressService, ResultService) {
 	var self = this;
 	self.file_name = null;
 	self.file_content = null
@@ -15,11 +15,18 @@ dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "Pathway
 	self.restr_enzs = function() {
 		return PathwayGenieService.restr_enzs();
 	};
+
+	self.connected = function() {
+		return ICEService.connected;
+	}
 	
 	self.submit = function() {
 		reset();
 		
-		PathwayGenieService.submit(self.query).then(
+		// Merge self.query and ICE parameters.
+		var query = $.extend({}, self.query, {'ice': ICEService.ice});
+		
+		PathwayGenieService.submit(query).then(
 			function(resp) {
 				jobId = resp.data.job_id;
 				var source = new EventSource("/progress/" + jobId);

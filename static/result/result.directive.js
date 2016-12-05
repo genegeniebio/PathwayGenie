@@ -5,7 +5,6 @@ resultApp.directive("resultPanel", function() {
     		"result": "&",
     		"sbol": "&",
     		"saveResults": "&",
-    		"ice": "="
     	},
         templateUrl: "/static/result/result.html"
     };

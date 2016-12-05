@@ -1,0 +1,50 @@
+<div class="col-md-12">
+	<div class="panel panel-default">
+  		<div class="panel-heading">
+	  		ICE login
+			<button type="submit" data-ng-click="ctrl.connect()" data-ng-disabled="form.$invalid" class="pull-right btn btn-default btn-xs">Login</button>
+		</div>
+  		<div class="result-panel panel-body">
+			<form class="form-horizontal" role="form" name="form">
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">ICE URL:</label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control"
+						data-ng-model="ctrl.ice().url"
+						placeholder="ICE URL"
+						required>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">ICE username:</label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control"
+						data-ng-model="ctrl.ice().username"
+						placeholder="ICE username"
+						required>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">ICE password:</label>
+					<div class="col-sm-8">
+						<input type="password" class="form-control"
+						data-ng-model="ctrl.ice().password"
+						placeholder="ICE password"
+						required>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">ICE group:</label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control"
+						data-ng-model="ctrl.ice().groups"
+						placeholder="ICE group"
+						required>
+					</div>
+				</div>
+			</form>
+			<pre style="white-space: pre-wrap;">{{ctrl.ice()}}</pre>
+			<pre style="white-space: pre-wrap;">{{ctrl.connected()}}</pre>
+		</div>
+	</div>
+</div>
