@@ -1,4 +1,4 @@
-iceApp.factory("ICEService", ["$http", "ErrorService", function($http, ErrorService) {
+iceApp.factory("ICEService", ["$http", "$rootScope","ErrorService", function($http, $rootScope, ErrorService) {
 	var obj = {};
 	obj.ice = {'url': null, 'username': null, 'password': null};
 	obj.connected = false;
@@ -6,13 +6,21 @@ iceApp.factory("ICEService", ["$http", "ErrorService", function($http, ErrorServ
 	obj.connect = function() {
 		$http.post("/ice/connect", {'ice': obj.ice}).then(
 				function(resp) {
-					obj.connected = true;
+					obj.connected = resp.data.connected;
 				},
 				function(errResp) {
 					obj.connected = false;
-					ErrorService.open(errResp.data.message);
 				});
 	}
+	
+	$rootScope.$watch(function() {
+		return obj.ice;
+	},               
+	function(values) {
+		if(obj.connected) {
+			obj.connect();
+		}
+	}, true);
 	
 	return obj;
 }]);

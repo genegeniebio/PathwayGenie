@@ -18,6 +18,7 @@ from Bio import Restriction
 from flask import Flask, jsonify, request, Response
 from synbiochem.utils import seq_utils
 from synbiochem.utils.ice_utils import ICEClient
+from synbiochem.utils.net_utils import NetworkError
 
 from parts_genie import parts
 
@@ -101,11 +102,16 @@ def search_ice(term, url, username, password):
 def connect_ice():
     '''Searches ICE database.'''
     data = json.loads(request.data)
-    ICEClient(data['ice']['url'],
-              data['ice']['username'],
-              data['ice']['password'])
 
-    return json.dumps({'connected': True})
+    try:
+        ICEClient(data['ice']['url'],
+                  data['ice']['username'],
+                  data['ice']['password'])
+        connected = True
+    except NetworkError:
+        connected = False
+
+    return json.dumps({'connected': connected})
 
 
 @APP.errorhandler(Exception)
