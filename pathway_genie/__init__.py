@@ -16,6 +16,7 @@ import uuid
 
 from Bio import Restriction
 from flask import Flask, jsonify, request, Response
+from requests.exceptions import ConnectionError
 from synbiochem.utils import seq_utils
 from synbiochem.utils.ice_utils import ICEClient
 from synbiochem.utils.net_utils import NetworkError
@@ -108,7 +109,7 @@ def connect_ice():
                   data['ice']['username'],
                   data['ice']['password'])
         connected = True
-    except NetworkError:
+    except (ConnectionError, NetworkError):
         connected = False
 
     return json.dumps({'connected': connected})
