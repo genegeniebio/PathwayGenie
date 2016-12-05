@@ -5,6 +5,7 @@ resultApp.directive("resultPanel", function() {
     		"result": "&",
     		"sbol": "&",
     		"saveResults": "&",
+    		"connected": "&"
     	},
         templateUrl: "/static/result/result.html"
     };

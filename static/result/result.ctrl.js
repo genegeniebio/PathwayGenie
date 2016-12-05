@@ -1,5 +1,9 @@
-resultApp.controller("resultCtrl", ["$http", "ResultService", function($http, ResultService) {
+resultApp.controller("resultCtrl", ["$http", "ICEService", "ResultService", function($http, ICEService, ResultService) {
 	var self = this;
+	
+	self.connected = function() {
+		return ICEService.connected
+	}
 	
 	self.results = function() {
 		return ResultService.results;
@@ -14,6 +18,6 @@ resultApp.controller("resultCtrl", ["$http", "ResultService", function($http, Re
 	};
 
 	self.saveResults = function() {
-		return ResultService.saveResults(self.ice);
+		return ResultService.saveResults();
 	};
 }]);
