@@ -101,9 +101,13 @@
 						</a>
 					</li>
 				</ul>
-				<ul class="nav navbar-nav navbar-right">
-      				<li data-ng-class="{active: ctrl.route.current.app === 'ICE'}"><a href="./#/ice"><span class="glyphicon glyphicon-log-in"></span> ICE</a></li>
-    			</ul>
+    			<div class="nav navbar-nav navbar-right">
+    				<a href="./#/ice" class="btn navbar-btn" role="button"
+    					ng-class="{'btn-success': ctrl.connected(), 'btn-danger': !ctrl.connected()}">
+  						<span class="glyphicon glyphicon-log-in"></span>
+  						<span>&nbsp;ICE</span>
+					</a>
+    			</div>
 			</div>
 		</div>
 	</nav>
