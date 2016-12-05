@@ -4,7 +4,7 @@
   		Result
 		<button type="submit" class="pull-right btn btn-default btn-xs"
 			data-ng-click="saveResults()"
-			data-ng-disabled="!ice.url|| !ice.username || !ice.password">Save</button>
+			data-ng-disabled="!connected()">Save</button>
 	</div>
 	<div class="panel-body">
 		<div class="title">{{result().metadata.name}}</div>

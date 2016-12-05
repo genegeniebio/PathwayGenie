@@ -1,4 +1,4 @@
-resultApp.factory("ResultService", ["$http", "ErrorService", function($http, ErrorService) {
+resultApp.factory("ResultService", ["$http", "ICEService", "ErrorService", function($http, ICEService, ErrorService) {
 	var obj = {};
 	obj.results = null;
 	obj.result = null;
@@ -21,8 +21,8 @@ resultApp.factory("ResultService", ["$http", "ErrorService", function($http, Err
 		}
 	}
 	
-	obj.saveResults = function(ice) {
-		$http.post("/save", {'result': obj.results, 'ice': ice}).then(
+	obj.saveResults = function() {
+		$http.post("/save", {'result': obj.results, 'ice': ICEService.ice}).then(
 				function(resp) {
 					for (i = 0; i < resp.data.length; i++) {
 						obj.results[i].metadata.links.push(resp.data[i]);
