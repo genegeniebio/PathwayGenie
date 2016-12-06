@@ -1,1 +1,1 @@
-var resultApp = angular.module("resultApp", ["ui.bootstrap", "ui.bootstrap.modal"]);
+var resultApp = angular.module("resultApp", ["dnaApp", "ui.bootstrap", "ui.bootstrap.modal"]);
