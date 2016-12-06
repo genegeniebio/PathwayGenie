@@ -7,8 +7,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-# pylint: disable=no-member
-# pylint: disable=too-many-arguments
 import subprocess
 import tempfile
 
@@ -31,6 +29,11 @@ class RunnerBase(object):
     def energy(self, sequences, bp_x, bp_y, dangles='some'):
         '''Runs energy.'''
         return self._get('energy', sequences, dangles, bp_x=bp_x, bp_y=bp_y)
+
+    def _get(self, cmd, sequences, dangles, energy_gap=None, bp_x=None,
+             bp_y=None):
+        '''Abstract method.'''
+        raise NotImplementedError()
 
 
 class NuPackRunner(RunnerBase):

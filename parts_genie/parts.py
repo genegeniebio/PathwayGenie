@@ -7,19 +7,16 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-# pylint: disable=no-member
-# pylint: disable=too-many-arguments
-# pylint: disable=too-many-instance-attributes
 import copy
 import math
 import random
 import re
 import sys
 
-import numpy
-
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import dna_utils, sbol_utils, seq_utils, taxonomy_utils
+import numpy
+
 from . import rbs_calculator as rbs_calc
 
 
@@ -109,12 +106,15 @@ class PartsSolution(object):
 
             cds = self.__seqs[3][idx] + self.__seqs[4]
 
-            metadata = _get_metadata(prot_id, tirs[idx],
-                                     self.__cod_opt.get_cai(cds), uniprot_id)
+            metadata = _get_metadata(prot_id,
+                                     tirs[idx],
+                                     self.__cod_opt.get_cai(cds),
+                                     self.__query['organism']['taxonomy_id'],
+                                     uniprot_id)
 
             dna = self.__get_dna(prot_id, metadata, cds, idx)
 
-            result.append({'metadata': metadata, 'data': dna})
+            result.append({'metadata': metadata, 'dna': dna})
 
         return result
 
@@ -378,7 +378,7 @@ def _rand_nuc():
     return random.choice(['A', 'T', 'G', 'C'])
 
 
-def _get_metadata(prot_id, tir, cai, uniprot_id=None):
+def _get_metadata(prot_id, tir, cai, target_org=None, uniprot_id=None):
     '''Gets metadata.'''
     name = prot_id
     description = prot_id
@@ -389,20 +389,30 @@ def _get_metadata(prot_id, tir, cai, uniprot_id=None):
         uniprot_vals = seq_utils.get_uniprot_values([uniprot_id],
                                                     ['entry name',
                                                      'protein names',
-                                                     'organism'])
+                                                     'organism-id',
+                                                     'organism',
+                                                     'ec'])
         # Add metadata:
         if len(uniprot_vals.keys()):
             prot_id = uniprot_vals.keys()[0]
             name = uniprot_vals[prot_id]['Entry name']
             organism = uniprot_vals[prot_id]['Organism']
-            description = ', '.join(uniprot_vals[prot_id]['Protein names']) + \
-                ' (' + organism + ')'
-            links.append('http://identifiers.org/uniprot/' + uniprot_id)
+            prot_names = uniprot_vals[prot_id]['Protein names']
+            description = ', '.join(prot_names) + ' (' + organism + ')'
+            ec_number = uniprot_vals[prot_id].get('EC number', None)
+
             parameters.append({'name': 'Organism', 'value': organism})
+            links.append('http://identifiers.org/uniprot/' + uniprot_id)
+
+            if ec_number:
+                links.append('http://identifiers.org/ec-code/' + ec_number)
 
     parameters.append({'name': 'Type', 'value': 'PART'})
     parameters.append({'name': 'TIR', 'value': float("{0:.2f}".format(tir))})
     parameters.append({'name': 'CAI', 'value': float("{0:.2f}".format(cai))})
+
+    if target_org:
+        links.append('http://identifiers.org/taxonomy/' + target_org)
 
     metadata = {'name': name,
                 'shortDescription': description,
@@ -412,13 +422,12 @@ def _get_metadata(prot_id, tir, cai, uniprot_id=None):
     return metadata
 
 
-def _add_subcomp(dna, seq, start, forward=True, name=None,
-                 typ=None, desc=None):
+def _add_subcomp(dna, seq, start, forw=True, name=None, typ=None, desc=None):
     '''Adds a subcompartment.'''
     if seq is not None and len(seq):
         end = start + len(seq) - 1
         feature = dna_utils.DNA(name=name, desc=desc, typ=typ,
-                                start=start, end=end, forward=forward)
+                                start=start, end=end, forward=forw)
         dna['features'].append(feature)
 
         return end + 1

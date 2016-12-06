@@ -7,7 +7,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-# pylint: disable=broad-except
 from __future__ import division
 
 from synbiochem.utils import pairwise, seq_utils, dna_utils

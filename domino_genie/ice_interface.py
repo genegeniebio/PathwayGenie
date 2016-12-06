@@ -7,7 +7,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-# pylint: disable=no-member
 from synbiochem.utils import dna_utils
 from synbiochem.utils.ice_utils import ICEClient, ICEEntry
 

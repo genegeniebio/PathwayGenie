@@ -74,7 +74,7 @@ def save(req):
     req_obj = json.loads(req.data)
 
     for result in req_obj['result']:
-        dna = result['data']
+        dna = result['dna']
         url = req_obj['ice']['url']
         url = url[:-1] if url[-1] == '/' else url
         ice_id = sbol_writer.submit(url,
