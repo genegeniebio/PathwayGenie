@@ -7,14 +7,12 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=broad-except
 from __future__ import division
-
-import sys
 
 from synbiochem.utils import pairwise, seq_utils, dna_utils
 from synbiochem.utils.job import JobThread
 
-from domino_genie import doe
 from domino_genie.ice_interface import ICEInterface
 
 
@@ -153,34 +151,3 @@ class DominoThread(JobThread):
             event['result'] = self.__designs
 
         self._fire_event(event)
-
-
-def main(args):
-    '''main method.'''
-    for filename in args[6:]:
-        designs = doe.get_designs(filename)
-
-        _query = {'designs': designs,
-                  'melt_temp': float(args[0]),
-                  'restr_enzs': [args[1]],
-                  'ice': {'url': args[2],
-                          'username': args[3],
-                          'password': args[4],
-                          'groups': args[5:]}}
-
-        runner = DominoThread(_query)
-        runner.add_listener(Listener())
-        runner.start()
-
-        # ice.submit(designs)
-
-
-class Listener(object):
-    '''Basic Listener class.'''
-
-    def event_fired(self, event):
-        '''Responds to event.'''
-        print event
-
-if __name__ == '__main__':
-    main(sys.argv[1:])
