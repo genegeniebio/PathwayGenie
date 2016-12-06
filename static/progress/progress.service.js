@@ -9,6 +9,8 @@ progressApp.factory("ProgressService", ["$uibModal", function($uibModal) {
 			templateUrl: '/static/progress/progressContent.html',
 			controller: 'progressInstanceCtrl',
 			controllerAs: 'progressCtrl',
+			backdrop: 'static',
+			keyboard: false,
 			resolve: {
 				progressTitle: function() {
 					return progressTitle;
