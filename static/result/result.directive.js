@@ -3,7 +3,6 @@ resultApp.directive("resultPanel", function() {
     	scope: {
     		"results": "&",
     		"result": "&",
-    		"sbol": "&",
     		"saveResults": "&",
     		"connected": "&"
     	},

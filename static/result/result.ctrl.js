@@ -12,10 +12,6 @@ resultApp.controller("resultCtrl", ["$http", "ICEService", "ResultService", func
 	self.result = function() {
 		return ResultService.result;
 	};
-	
-	self.sbol = function() {
-		return ResultService.sbol;
-	};
 
 	self.saveResults = function() {
 		return ResultService.saveResults();
