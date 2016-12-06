@@ -13,6 +13,12 @@ input.ng-invalid
 	border: 1px red solid;
 }
 
+.disabled
+{
+	cursor: not-allowed;
+	color: grey;
+}
+
 .tt-menu
 {
 	background-color: #fff;

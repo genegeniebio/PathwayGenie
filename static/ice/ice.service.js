@@ -1,6 +1,9 @@
 iceApp.factory("ICEService", ["$http", "$rootScope","ErrorService", function($http, $rootScope, ErrorService) {
 	var obj = {};
-	obj.ice = {'url': null, 'username': null, 'password': null};
+	obj.ice = {'url': 'https://ice.synbiochem.co.uk',
+				'username': null,
+				'password': null};
+
 	obj.connected = false;
 	
 	obj.connect = function() {

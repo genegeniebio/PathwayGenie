@@ -74,9 +74,15 @@
 							aria-expanded="false">Design<span class="caret"></span>
 						</a>
 						<ul class="dropdown-menu">
-							<li data-ng-class="{active: ctrl.route.current.app === 'PartsGenie'}"><a href="./#/partsGenie">PartsGenie</a></li>
-							<li data-ng-class="{active: ctrl.route.current.app === 'SBC-DoE'}"><a href="./#/sbcdoe">SBC-DoE</a></li>
-							<li data-ng-class="{active: ctrl.route.current.app === 'DominoGenie'}"><a href="./#/dominoGenie">DominoGenie</a></li>
+							<li data-ng-class="{active: ctrl.route.current.app === 'PartsGenie'}">
+								<a href="./#/partsGenie">PartsGenie</a>
+							</li>
+							<li data-ng-class="{active: ctrl.route.current.app === 'SBC-DoE'}">
+								<a data-ng-class="{disabled: !ctrl.connected()}" href="./#/sbcdoe">SBC-DoE</a>
+							</li>
+							<li data-ng-class="{active: ctrl.route.current.app === 'DominoGenie'}">
+								<a data-ng-class="{disabled: !ctrl.connected()}" href="./#/dominoGenie">DominoGenie</a>
+							</li>
 						</ul>
 					</li>
 					<li class="dropdown">
@@ -85,7 +91,9 @@
 							aria-expanded="false">Build<span class="caret"></span>
 						</a>
 						<ul class="dropdown-menu">
-							<li data-ng-class="{active: ctrl.route.current.app === 'AssemblyGenie'}"><a href="./#/assemblyGenie">AssemblyGenie</a></li>
+							<li data-ng-class="{active: ctrl.route.current.app === 'AssemblyGenie'}">
+								<a data-ng-class="{disabled: !ctrl.connected()}" href="./#/assemblyGenie">AssemblyGenie</a>
+							</li>
 						</ul>
 					</li>
 					<li class="dropdown">
