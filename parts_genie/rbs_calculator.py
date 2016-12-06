@@ -15,9 +15,9 @@ import math
 import random
 
 from Bio.Seq import Seq
+from synbiochem.utils import seq_utils
 
 from parts_genie.nucl_acid_utils import NuPackRunner
-from synbiochem.utils import seq_utils
 import regex as re
 
 
