@@ -1,0 +1,43 @@
+<!-- Submission form -->
+<div class="col-md-6">
+	<div class="panel panel-default">
+  		<div class="panel-heading">
+	  		Query
+			<button type="submit" data-ng-click="ctrl.submit()" data-ng-disabled="form.$invalid" class="pull-right btn btn-default btn-xs">Submit</button>
+		</div>
+  		<div class="result-panel panel-body">
+			<form class="form-horizontal" role="form" name="form">
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">MzML file:</label>
+					<div class="col-xs-8">
+						<div style="width:100%; display:table">
+							<input type="text" class="form-control"
+								data-ng-model="ctrl.file_name"
+								style="width: 100%"
+								disabled
+								required>
+							<label style="display: table-cell;" class="btn btn-default btn-sm btn-file horizontal-cell">
+								Choose file
+								<input type="file" 
+									filereader="ctrl.query.spectra"
+									filename="ctrl.file_name"
+									placeholder="Enter MzML file"
+									style="display:none;">
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">Tolerance / Da:</label>
+					<div class="col-xs-8">
+						<input type="number" class="form-control"
+							data-ng-model="ctrl.query.tol"
+							min="0" max="2" step="0.1"
+							placeholder="Enter tolerance / Da" required>
+					</div>
+				</div>
+			</form>
+			<pre style="white-space: pre-wrap;">{{ctrl.query}}</pre>
+		</div>
+	</div>
+</div>

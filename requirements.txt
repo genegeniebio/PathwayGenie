@@ -1,2 +1,4 @@
 Flask
+ijson
+pymzml
 synbiochem-py
