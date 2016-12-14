@@ -4,7 +4,9 @@ resultApp.directive("resultPanel", function() {
     		"results": "&",
     		"result": "&",
     		"saveResults": "&",
-    		"connected": "&"
+    		"connected": "&",
+    		"feature": "=",
+    		"setFeature": "&"
     	},
         templateUrl: "/static/result/result.html"
     };

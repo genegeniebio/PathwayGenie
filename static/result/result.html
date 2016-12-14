@@ -7,15 +7,16 @@
 			data-ng-disabled="!connected()">Save</button>
 	</div>
 	<div class="panel-body">
-		<div class="title">{{result().metadata.name}}</div>
-		<div>{{result().metadata.shortDescription}}</div>
+		<dna-panel
+			dna="result().dna"
+			feature="feature"
+    		set-feature="setFeature(f)">
+		</dna-panel>
 		
 		<dl class="parameters">
 			<dt data-ng-repeat-start="parameter in result().metadata.parameters">{{parameter.name}}</dt>
 			<dd data-ng-repeat-end>{{parameter.value}}</dd>
 		</dl>
-		
-		<dna-panel dna="result().dna"></dna-panel>
 		
 		<div>
 			<label>Links</label>

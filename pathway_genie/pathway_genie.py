@@ -13,6 +13,7 @@ import time
 from flask import Response
 
 from domino_genie.dominogenie import DominoThread
+from metabolomics_genie.metabolomics import MetabolomicsThread
 from parts_genie.parts import PartsThread
 
 from . import sbol_writer
@@ -93,5 +94,7 @@ def _get_thread(query):
         return PartsThread(query)
     elif app == 'DominoGenie':
         return DominoThread(query)
+    elif app == 'MetabolomicsGenie':
+        return MetabolomicsThread(query)
 
     raise ValueError('Unknown app: ' + app)
