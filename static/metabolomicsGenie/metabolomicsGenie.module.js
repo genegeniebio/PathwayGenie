@@ -1,1 +1,1 @@
-var metabolomicsGenieApp = angular.module("metabolomicsGenieApp", []);
+var metabolomicsGenieApp = angular.module("metabolomicsGenieApp", ["metResultApp"]);

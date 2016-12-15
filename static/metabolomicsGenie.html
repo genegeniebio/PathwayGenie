@@ -37,7 +37,14 @@
 					</div>
 				</div>
 			</form>
-			<pre style="white-space: pre-wrap;">{{ctrl.query}}</pre>
 		</div>
 	</div>
+</div>
+
+<!-- Metabolomics results panel -->
+<div class="col-md-6" data-ng-controller="metResultCtrl as met_result_ctrl" data-ng-show="met_result_ctrl.results()">
+	<met-result-panel
+		results="met_result_ctrl.results()"
+		result="met_result_ctrl.result()">
+	</met-result-panel>
 </div>

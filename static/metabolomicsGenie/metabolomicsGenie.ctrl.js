@@ -1,4 +1,4 @@
-metabolomicsGenieApp.controller("metabolomicsGenieCtrl", ["$scope", "ErrorService", "PathwayGenieService", "ProgressService", function($scope, ErrorService, PathwayGenieService, ProgressService) {
+metabolomicsGenieApp.controller("metabolomicsGenieCtrl", ["$scope", "ErrorService", "MetResultService", "PathwayGenieService", "ProgressService", function($scope, ErrorService, MetResultService, PathwayGenieService, ProgressService) {
 	var self = this;
 	self.file_name = null;
 	self.file_content = null
@@ -30,7 +30,7 @@ metabolomicsGenieApp.controller("metabolomicsGenieCtrl", ["$scope", "ErrorServic
 						source.close();
 						
 						if(status == "finished") {
-							// ResultService.setResults(self.response.result);
+							MetResultService.setResults(self.response.result);
 						}
 					}
 					
@@ -61,6 +61,6 @@ metabolomicsGenieApp.controller("metabolomicsGenieCtrl", ["$scope", "ErrorServic
 	reset = function() {
 		status = {"update": {}};
 		error = null;
-		// ResultService.setResults(null);
+		MetResultService.setResults(null);
 	};
 }]);
