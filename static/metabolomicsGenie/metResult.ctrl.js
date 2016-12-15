@@ -1,8 +1,8 @@
 metResultApp.controller("metResultCtrl", ["$scope", "MetResultService", function($scope, MetResultService) {
 	var self = this;
 	var googleLoaded = false;
-
-	self.currentResult = 0;
+	
+	self.currentResult = {'value': 1};
 
 	self.init = function() {
 		google.charts.load('current', {
@@ -19,7 +19,7 @@ metResultApp.controller("metResultCtrl", ["$scope", "MetResultService", function
 
 	self.result = function() {
 		if(self.results()) {
-			return self.results()[self.currentResult];
+			return self.results()[self.currentResult.value - 1];
 		}
 		else {
 			return null;

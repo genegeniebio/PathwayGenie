@@ -15,11 +15,13 @@
 			
 			<div id="chart_div"></div>
 			
+			<!--
 			<pre style="white-space: pre-wrap;">{{result()}}</pre>
+			-->
 			
 			<div class="text-center" data-ng-if="results().length > 1">
 				<uib-pagination
-					data-ng-model="currentResult"
+					data-ng-model="currentResult.value"
 					class="pagination-sm"
 					total-items="results().length"
 					max-size="5"
