@@ -44,7 +44,9 @@
 <!-- Metabolomics results panel -->
 <div class="col-md-6" data-ng-controller="metResultCtrl as met_result_ctrl" data-ng-show="met_result_ctrl.results()">
 	<met-result-panel
+		init="met_result_ctrl.init()"
 		results="met_result_ctrl.results()"
-		result="met_result_ctrl.result()">
+		result="met_result_ctrl.result()"
+		current-result="met_result_ctrl.currentResult">
 	</met-result-panel>
 </div>

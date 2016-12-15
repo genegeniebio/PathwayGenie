@@ -1,19 +1,31 @@
 <link rel="stylesheet" href="static/metabolomicsGenie/metResult.css">
-<div class="panel panel-default">
-	<div class="panel-heading">
-  		Result
-	</div>
-	<div class="panel-body">
-		<pre style="white-space: pre-wrap;">{{result()}}</pre>
-		
-		<div class="text-center" data-ng-if="results().length > 1">
-			<uib-pagination
-				data-ng-model="currentResult"
-				class="pagination-sm"
-				total-items="results().length"
-				max-size="5"
-				items-per-page="1">
-			</uib-pagination>
+<div data-ng-init="init()">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+	  		Result
+		</div>
+		<div class="panel-body">
+			<div class="title">{{result().hits[0].chemical.name}}</div>
+			<div>Formula: {{result().hits[0].chemical.formula}}</div>
+			<div>Charge: {{result().hits[0].chemical.charge}}</div>
+			<div>Monoisotopic mass: {{result().hits[0].chemical.monoisotopic_mass | number: 4}}</div>
+			<div>InChI: {{result().hits[0].chemical.inchi}}</div>
+			<div>ChEBI: <a target="_blank" href="http://identifiers.org/chebi/CHEBI:{{result().hits[0].chemical.chebi}}">http://identifiers.org/chebi/CHEBI:{{result().hits[0].chemical.chebi}}</a></div>
+			<div>Score: {{result().hits[0].score | number: 3}}</div>
+			
+			<div id="chart_div"></div>
+			
+			<pre style="white-space: pre-wrap;">{{result()}}</pre>
+			
+			<div class="text-center" data-ng-if="results().length > 1">
+				<uib-pagination
+					data-ng-model="currentResult"
+					class="pagination-sm"
+					total-items="results().length"
+					max-size="5"
+					items-per-page="1">
+				</uib-pagination>
+			</div>
 		</div>
 	</div>
 </div>

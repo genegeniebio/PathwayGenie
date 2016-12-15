@@ -6,7 +6,7 @@ progressApp.controller('progressInstanceCtrl', ["$scope", "$uibModalInstance", "
 	self.update = update;
 
 	self.init = function() {
-		google.load('visualization', '1.0', {
+		google.charts.load('visualization', '1.0', {
 			packages: ['gauge'],
 			callback: function() {
 				googleLoaded = true;

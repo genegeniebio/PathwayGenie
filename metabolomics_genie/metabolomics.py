@@ -44,8 +44,9 @@ class MetabolomicsThread(JobThread):
                     hits = self.__analyse_spec(spectrum)
 
                     if len(hits):
+                        spectrum['peaks'] = spectrum.peaks
                         self.__results.append({'spectrum': spectrum,
-                                               'hits': hits[0]})
+                                               'hits': [hits[0]]})
 
                 iteration += 1
                 self.__fire_event('running', 'Identifying spectra...')
@@ -64,7 +65,7 @@ class MetabolomicsThread(JobThread):
     def __analyse_spec(self, spectrum):
         '''Analyse a given spectra.'''
         prec_mz = spectrum['selected ion m/z']
-        prec_charge = spectrum.get('charge state', 0)
+        prec_charge = spectrum.get('charge state', 1.0)
         prec_mass = (prec_mz - 1.00728) * prec_charge
 
         tolerance = self.__query['tol'] \
@@ -79,6 +80,10 @@ class MetabolomicsThread(JobThread):
             cand_spec = pymzml.spec.Spectrum(measuredPrecision=1e-6)
             cand_spec.peaks = zip(spec['m/z'],
                                   spec['intensity'])
+
+            spec.properties.pop('m/z')
+            spec.properties.pop('intensity')
+            spec.properties['peaks'] = cand_spec.peaks
 
             hits.append({'chemical': chem.properties,
                          'spectrum': spec.properties,
