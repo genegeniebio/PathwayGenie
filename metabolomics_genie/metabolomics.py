@@ -12,6 +12,7 @@ from __future__ import division
 from tempfile import NamedTemporaryFile
 import traceback
 
+from neo4j.v1 import GraphDatabase
 from synbiochem.utils.job import JobThread
 import pymzml
 
@@ -115,8 +116,6 @@ def _get_cand_spec(mass, tol):
         ' WHERE c.monoisotopic_mass > {start_mass}' + \
         ' AND c.monoisotopic_mass < {end_mass}' + \
         ' RETURN c, s'
-
-    from neo4j.v1 import GraphDatabase
 
     driver = GraphDatabase.driver("bolt://localhost")
     session = driver.session()
