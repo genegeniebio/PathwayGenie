@@ -7,9 +7,11 @@
 			data-ng-disabled="!connected()">Save</button>
 	</div>
 	<div class="panel-body">
+
 		<dna-panel
 			dna="result().dna"
-			feature="feature">
+			feat="feature()"
+			setFeat="setFeature()">
 		</dna-panel>
 		
 		<dl class="parameters">

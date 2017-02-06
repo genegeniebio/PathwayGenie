@@ -1,8 +1,8 @@
 resultApp.controller("resultCtrl", ["ICEService", "ResultService", function(ICEService, ResultService) {
 	var self = this;
 	
-	self.feature = 'hello';
-	
+	self.feat = {'name': 'harold', 'desc': 'something', 'forward': true}
+
 	self.connected = function() {
 		return ICEService.connected
 	}
@@ -18,4 +18,12 @@ resultApp.controller("resultCtrl", ["ICEService", "ResultService", function(ICES
 	self.saveResults = function() {
 		return ResultService.saveResults();
 	};
+	
+	self.feature = function() {
+		return self.feat;
+	};
+	
+	self.setFeature = function() {
+		self.feat = {'name': 'jim', 'desc': 'hello', 'forward': false};
+	}
 }]);
