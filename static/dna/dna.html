@@ -1,35 +1,38 @@
 <link rel="stylesheet" href="static/dna/dna.css">
-
-<div class="title">{{dna.name}}</div>
-<div>{{dna.desc}}</div>
-
-<div data-ng-repeat="feat in dna.features | orderBy: feat.start"
-	class="component SO{{feat.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}"
-	data-ng-mouseover="setFeature({f:'bye'})">
+<div>
+	<div class="title">{{dna.name}}</div>
+	<div>{{dna.desc}}</div>
+	
+	<pre style="white-space: pre-wrap;">{{feature}}</pre>
+	
+	<div data-ng-repeat="feat in dna.features | orderBy: feat.start"
+		class="component SO{{feat.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}"
+		data-ng-mouseover="feature = feat">
+	</div>
+	
+	<table class="table table-condensed table-striped">
+		<tbody>
+			<tr>
+				<td>Name</td>
+				<td>{{feature.name ? feature.name : ''}}</td>
+			</tr>
+			<tr>
+				<td>Description</td>
+				<td>{{feature.desc ? feature.desc : ''}}</td>
+			</tr>
+			<tr>
+				<td>Type</td>
+				<td>{{feature.typ ? feature.typ : ''}}</td>
+			</tr>
+			<tr>
+				<td>Strand</td>
+				<td>{{feature.forward ? '+' : '-'}}</td>
+			</tr>
+			<tr>
+				<td>Sequence</td>
+				<td>{{(feature.seq ? feature.seq :
+					dna.seq.substring(feature.start - 1, feature.end -1)) | uppercase }}</td>
+			</tr>
+		</tbody>
+	</table>
 </div>
-{{feature}}
-<table class="table table-condensed table-striped">
-	<tbody>
-		<tr>
-			<td>Name</td>
-			<td>{{feature.name}}</td>
-		</tr>
-		<tr>
-			<td>Description</td>
-			<td>{{feature.desc}}</td>
-		</tr>
-		<tr>
-			<td>Type</td>
-			<td>{{feature.typ}}</td>
-		</tr>
-		<tr>
-			<td>Strand</td>
-			<td>{{feature.forward ? '+' : '-'}}</td>
-		</tr>
-		<tr>
-			<td>Sequence</td>
-			<td>{{(feature.seq ? feature.seq :
-				dna.seq.substring(feature.start - 1, feature.end -1)) | uppercase }}</td>
-		</tr>
-	</tbody>
-</table>
