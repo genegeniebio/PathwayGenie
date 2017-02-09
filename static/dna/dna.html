@@ -5,7 +5,8 @@
 
 	<div data-ng-repeat="f in dna.features | orderBy: f.start"
 		class="component SO{{f.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}"
-		data-ng-mouseover="setFeature({ft: f})">
+		data-ng-mouseover="setFeature({args: {ft: f}})"
+		data-ng-mouseleave="setFeature({args: {ft: {}}})">
 	</div>
 	
 	<table class="table table-condensed table-striped">

@@ -1,7 +1,7 @@
 resultApp.controller("resultCtrl", ["ICEService", "ResultService", function(ICEService, ResultService) {
 	var self = this;
 	
-	self.feat = {'name': 'harold', 'desc': 'something', 'forward': true}
+	self.feat = {}
 
 	self.connected = function() {
 		return ICEService.connected
@@ -24,7 +24,6 @@ resultApp.controller("resultCtrl", ["ICEService", "ResultService", function(ICES
 	};
 	
 	self.setFeature = function(ft) {
-		// self.feat = {'name': 'jim', 'desc': 'hello', 'forward': false};
 		self.feat = ft;
 	}
 }]);
