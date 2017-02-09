@@ -29,8 +29,8 @@
 			</tr>
 			<tr>
 				<td>Sequence</td>
-				<td>{{(feature().seq ? feature().seq :
-					dna.seq.substring(feature().start - 1, feature().end -1)) | uppercase }}</td>
+				<td class="seq">{{(feature().seq ? feature().seq :
+					dna.seq.substring(feature().start - 1, feature().end - 1)) | uppercase }}</td>
 			</tr>
 		</tbody>
 	</table>

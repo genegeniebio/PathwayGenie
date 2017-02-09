@@ -37,3 +37,9 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+
+.seq
+{
+	font-family: monospace;
+	overflow: visible;
+}
