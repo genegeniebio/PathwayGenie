@@ -23,7 +23,8 @@ resultApp.controller("resultCtrl", ["ICEService", "ResultService", function(ICES
 		return self.feat;
 	};
 	
-	self.setFeature = function() {
-		self.feat = {'name': 'jim', 'desc': 'hello', 'forward': false};
+	self.setFeature = function(ft) {
+		// self.feat = {'name': 'jim', 'desc': 'hello', 'forward': false};
+		self.feat = ft;
 	}
 }]);

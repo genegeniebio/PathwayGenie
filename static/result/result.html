@@ -7,11 +7,13 @@
 			data-ng-disabled="!connected()">Save</button>
 	</div>
 	<div class="panel-body">
+	
+		<div data-ng-mouseover="setFeature({ft: {'name': 'jim', 'desc': 'hello', 'forward': false}})">Mouseover me</div>
 
 		<dna-panel
 			dna="result().dna"
-			feat="feature()"
-			set-feat="setFeature()">
+			feature="feature()"
+			set-feature="setFeature(ft)">
 		</dna-panel>
 		
 		<dl class="parameters">
