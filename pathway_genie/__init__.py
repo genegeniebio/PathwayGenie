@@ -37,7 +37,7 @@ APP = Flask(__name__, static_folder=_STATIC_FOLDER)
 APP.config.from_object(__name__)
 
 _MANAGER = pathway_genie.PathwayGenie()
-_ORGANISMS = seq_utils.get_codon_usage_organisms()
+_ORGANISMS = seq_utils.get_codon_usage_organisms(expand=True)
 
 
 @APP.route('/')
@@ -76,7 +76,8 @@ def get_organisms(term):
     url = "https://salislab.net/software/return_species_list?term=" + term
 
     response = urllib2.urlopen(url)
-    data = [{'name': term[:term.rfind('(')].strip(),
+    data = [{'taxonomy_id': _ORGANISMS[term[:term.rfind('(')].strip()],
+             'name': term[:term.rfind('(')].strip(),
              'r_rna': term[term.rfind('(') + 1:term.rfind(')')]}
             for term in json.loads(response.read())
             if term[:term.rfind('(')].strip() in _ORGANISMS]

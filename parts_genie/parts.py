@@ -7,6 +7,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-instance-attributes
 import copy
 import math
 import random
@@ -14,7 +16,7 @@ import re
 import sys
 
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
-from synbiochem.utils import dna_utils, sbol_utils, seq_utils, taxonomy_utils
+from synbiochem.utils import dna_utils, sbol_utils, seq_utils
 import numpy
 
 from . import rbs_calculator as rbs_calc
@@ -333,10 +335,6 @@ def _process_query(query):
         list(set([x.strip().upper()
                   for x in query['excl_codons'].split()])) \
         if 'excl_codons' in query else []
-
-    # Map organism to taxonomy id:
-    query['organism']['taxonomy_id'] = taxonomy_utils.get_taxonomy_id(
-        query['organism']['name'])
 
     if 'prefix' in query:
         query['prefix'] = query['prefix'].upper()
