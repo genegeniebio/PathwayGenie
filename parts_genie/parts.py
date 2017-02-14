@@ -34,10 +34,11 @@ class PartsSolution(object):
         self.__dg_target = rbs_calc.get_dg(float(query['tir_target']))
 
         # Invalid pattern is restriction sites | repeating nucleotides:
+        flt = query['filters']
         self.__inv_patt = '|'.join(([restr_enz['site']
-                                     for restr_enz in query['restr_enzs']]
+                                     for restr_enz in flt['restr_enzs']]
                                     if 'restr_enzs' in query else []) +
-                                   [x * int(query['max_repeats'])
+                                   [x * int(flt['max_repeats'])
                                     for x in ['A', 'C', 'G', 'T']])
 
         self.__cod_opt = seq_utils.CodonOptimiser(
@@ -46,13 +47,13 @@ class PartsSolution(object):
         self.__prot_seqs = seq_utils.get_sequences(query['protein_ids'])
 
         cds = [self.__cod_opt.get_codon_optim_seq(prot_seq,
-                                                  query['excl_codons'],
+                                                  flt['excl_codons'],
                                                   self.__inv_patt,
                                                   tolerant=False)
                for prot_seq in self.__prot_seqs.values()]
 
         stop_codon = self.__cod_opt.get_codon_optim_seq('*',
-                                                        query['excl_codons'])
+                                                        flt['excl_codons'])
 
         # Randomly choose an RBS that is a decent starting point,
         # using the first CDS as the upstream sequence:
@@ -331,10 +332,10 @@ def _process_query(query):
         list([x.strip() for x in query['protein_ids'].split(',')])
     query['len_target'] = int(query['len_target'])
     query['tir_target'] = float(query['tir_target'])
-    query['excl_codons'] = \
+    query['filters']['excl_codons'] = \
         list(set([x.strip().upper()
-                  for x in query['excl_codons'].split()])) \
-        if 'excl_codons' in query else []
+                  for x in query['filters']['excl_codons'].split()])) \
+        if 'excl_codons' in query['filters'] else []
 
     if 'prefix' in query:
         query['prefix'] = query['prefix'].upper()

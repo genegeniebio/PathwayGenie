@@ -4,10 +4,12 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PathwayGe
 			"app": "PartsGenie",
 			"len_target": 60,
 			"tir_target": 15000,
-			"max_repeats": 6
+			"filters": {
+				"max_repeats": 6
+			},
 		};
 	self.response = {"update": {"values": []}};
-	self.excl_codons_regex = "([ACGT]{3}(\s[ACGT]{3})+)*";
+	self.excl_codons_regex = "([ACGTacgt]{3}(\s[ACGTacgt]{3})+)*";
 	
 	var jobId = null;
 	
