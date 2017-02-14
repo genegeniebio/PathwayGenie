@@ -148,7 +148,7 @@ class PartsSolution(object):
 
     def mutate(self):
         '''Mutates and scores whole design.'''
-        self.__mutate_pre_seq()
+        self.__mutate_pre_rbs()
         self.__mutate_rbs()
         self.__mutate_cds()
         self.__dgs_new = self.__calc_dgs(self.__seqs_new[1],
@@ -180,13 +180,13 @@ class PartsSolution(object):
 
         return self.__get_init_rbs(cds, attempts + 1, max_attempts)
 
-    def __calc_dgs(self, pre_seq, rbs, cdss):
+    def __calc_dgs(self, pre_rbs, rbs, cdss):
         '''Calculates (simulated annealing) energies for given RBS.'''
-        return [self.__calc.calc_dgs(pre_seq + rbs + cds)
+        return [self.__calc.calc_dgs(pre_rbs + rbs + cds)
                 for cds in cdss]
 
-    def __mutate_pre_seq(self):
-        '''Mutates pre-sequence.'''
+    def __mutate_pre_rbs(self):
+        '''Mutates pre-RBS sequence.'''
         pos = int(random.random() * len(self.__seqs[1]))
         pre_seq_new = _replace(self.__seqs[1], pos, _rand_nuc())
 
@@ -297,11 +297,8 @@ class PartsSolution(object):
 
         start = _add_subcomp(dna, self.__seqs[0], 1, name='Prefix')
 
-        start = _add_subcomp(dna, self.__seqs[1], start,
-                             name='5\' Insulator')
-
-        start = _add_subcomp(dna, self.__seqs[2], start, name='RBS',
-                             typ=sbol_utils.SO_RBS)
+        start = _add_subcomp(dna, self.__seqs[1] + self.__seqs[2], start,
+                             name='RBS', typ=sbol_utils.SO_RBS)
 
         start = _add_subcomp(dna, cds, start,
                              name=prot_id + ' (CDS)',
