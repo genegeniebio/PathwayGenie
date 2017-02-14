@@ -1,6 +1,6 @@
 var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "assemblyGenieApp", "dominoGenieApp", "iceApp", "metabolomicsGenieApp", "partsGenieApp", "sbcdoeApp"]);
 
-pathwayGenieApp.config(function($routeProvider) {
+pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 	$routeProvider.when("/", {
 		controller: "partsGenieCtrl",
 		controllerAs: "ctrl",
@@ -57,4 +57,7 @@ pathwayGenieApp.config(function($routeProvider) {
 		app: "ICE"
 		}
 	)
+	
+	// Use the HTML5 History API:
+    $locationProvider.html5Mode(true);
 });
