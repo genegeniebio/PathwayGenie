@@ -29,9 +29,11 @@ class PartsSolution(object):
         self.__query = query
         self.__calc = rbs_calc.RbsCalculator(self.__query['organism']['r_rna'])
 
+        features = query['designs'][0]['dna']['features']
+
         # Check if dg_total or TIR (translation initiation rate) was specified.
         # If TIR, then convert to dg_total.
-        self.__dg_target = rbs_calc.get_dg(float(query['tir_target']))
+        self.__dg_target = rbs_calc.get_dg(float(features[1]['tir_target']))
 
         # Invalid pattern is restriction sites | repeating nucleotides:
         flt = query['filters']
@@ -61,17 +63,15 @@ class PartsSolution(object):
 
         post_seq_length = 30
 
-        design = query['designs'][0]['dna']['features']
-
-        self.__seqs = [design[0]['seq'],
-                       self.__get_valid_rand_seq(max(0, query['len_target'] -
+        self.__seqs = [features[0]['seq'],
+                       self.__get_valid_rand_seq(max(0, features[1]['len'] -
                                                      len(rbs))),
                        rbs,
                        cds,
                        stop_codon,
                        self.__get_valid_rand_seq(post_seq_length)
                        if len(self.__prot_seqs) > 1 else '',
-                       design[3]['seq']]
+                       features[3]['seq']]
 
         self.__dgs = None
         self.__seqs_new = copy.deepcopy(self.__seqs)
@@ -83,12 +83,14 @@ class PartsSolution(object):
 
     def get_values(self):
         '''Return update of in-progress solution.'''
+        features = self.__query['designs'][0]['dna']['features']
+
         return [_get_value('mean_cai', 'CAI',
                            self.__get_mean_cai(self.__seqs[3]), 0, 1, 1),
                 _get_value('mean_tir', 'TIR',
                            _get_mean_tir(self.__dgs), 0,
-                           float(self.__query['tir_target']) * 1.2,
-                           float(self.__query['tir_target'])),
+                           float(features[1]['tir_target']) * 1.2,
+                           float(features[1]['tir_target'])),
                 _get_value('num_invalid_seqs', 'Invalid seqs',
                            self.__get_num_inv_seq(self.__seqs), 0, 10, 0),
                 _get_value('num_rogue_rbs', 'Rogue RBSs',
@@ -129,7 +131,8 @@ class PartsSolution(object):
         if seqs is None:
             return float('inf')
 
-        tir_target = float(self.__query['tir_target'])
+        features = self.__query['designs'][0]['dna']['features']
+        tir_target = float(features[1]['tir_target'])
         mean_d_tir = abs(tir_target - _get_mean_tir(dgs)) / tir_target
 
         return math.erf(mean_d_tir) + \
@@ -270,8 +273,10 @@ class PartsSolution(object):
 
     def __get_rogue_rbs(self, dgs):
         '''Returns rogue RBS sites.'''
+        features = self.__query['designs'][0]['dna']['features']
+
         return [tir for tirs in _get_tirs(dgs) for tir in tirs[1:]
-                if tir > float(self.__query['tir_target']) * 0.1]
+                if tir > float(features[1]['tir_target']) * 0.1]
 
     def __get_dna(self, prot_id, metadata, cds, idx):
         '''Writes SBOL document to temporary store.'''
@@ -334,17 +339,20 @@ def _process_query(query):
     for design in query['designs']:
         for feature in design['dna']['features']:
             if isinstance(feature, list):
-                for ent in feature:
-                    ent['seq'] = ent['seq'].upper()
+                for entry in feature:
+                    entry['seq'] = entry['seq'].upper()
+                    entry['len'] = int(entry['len'])
             else:
                 feature['seq'] = feature['seq'].upper()
+                feature['len'] = int(feature['len'])
+
+                if 'tir_target' in feature:
+                    feature['tir_target'] = float(feature['tir_target'])
 
     query['protein_names'] = \
         list([x.strip() for x in query['protein_names'].split(',')])
     query['protein_ids'] = \
         list([x.strip() for x in query['protein_ids'].split(',')])
-    query['len_target'] = int(query['len_target'])
-    query['tir_target'] = float(query['tir_target'])
 
     # Filters:
     query['filters']['excl_codons'] = \
