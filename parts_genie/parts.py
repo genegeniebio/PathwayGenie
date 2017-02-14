@@ -64,16 +64,12 @@ class PartsSolution(object):
         # using the first CDS as the upstream sequence:
         rbs = self.__get_init_rbs(cds[0])
 
-        post_seq_length = 30
-
         self.__seqs = [features[0]['seq'],
                        self.__get_valid_rand_seq(max(0, features[1]['len'] -
                                                      len(rbs))),
                        rbs,
                        cds,
                        stop_codon,
-                       self.__get_valid_rand_seq(post_seq_length)
-                       if len(self.__prot_seqs) > 1 else '',
                        features[3]['seq']]
 
         self.__dgs = None
@@ -275,7 +271,7 @@ class PartsSolution(object):
     def __get_num_inv_seq(self, seqs):
         '''Returns number of invalid sequences.'''
         return sum([seq_utils.count_pattern(seqs[1] + seqs[2] + cds +
-                                            seqs[4] + seqs[5], self.__inv_patt)
+                                            seqs[4], self.__inv_patt)
                     for cds in seqs[3]])
 
     def __get_rogue_rbs(self, dgs):
@@ -288,8 +284,7 @@ class PartsSolution(object):
     def __get_dna(self, prot_id, metadata, cds, idx):
         '''Writes SBOL document to temporary store.'''
         seq = self.__seqs[0] + self.__seqs[1] + self.__seqs[2] + \
-            self.__seqs[3][idx] + self.__seqs[4] + self.__seqs[5] + \
-            self.__seqs[6]
+            self.__seqs[3][idx] + self.__seqs[4] + self.__seqs[5]
 
         dna = dna_utils.DNA(name=metadata['name'],
                             desc=metadata['shortDescription'],
@@ -304,10 +299,7 @@ class PartsSolution(object):
                              name=prot_id + ' (CDS)',
                              typ=sbol_utils.SO_CDS)
 
-        start = _add_subcomp(dna, self.__seqs[5], start,
-                             name='3\' Insulator')
-
-        _add_subcomp(dna, self.__seqs[6], start, name='Suffix')
+        _add_subcomp(dna, self.__seqs[5], start, name='Suffix')
 
         return dna
 
