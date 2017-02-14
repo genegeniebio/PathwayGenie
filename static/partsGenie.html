@@ -13,11 +13,11 @@
 				<div id="collapse1" class="panel-collapse collapse in">
 					<div class="panel-body">
 						<div class="form-group">
-							<label class="col-xs-4 col-form-label">5' sequence:</label>
+							<label class="col-xs-4 col-form-label">5' flanking region:</label>
 							<div class="col-xs-8">
 								<input type="text" class="form-control uppercase"
-									data-ng-model="ctrl.query.prefix"
-									placeholder="Enter 5' sequence">
+									data-ng-model="ctrl.query.designs[0].dna.features[0].seq"
+									placeholder="Enter 5' flanking region">
 							</div>
 						</div>
 						<div class="form-group">
@@ -37,11 +37,11 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="col-xs-4 col-form-label">3' sequence:</label>
+							<label class="col-xs-4 col-form-label">3' flanking region:</label>
 							<div class="col-xs-8">
 								<input type="text" class="form-control uppercase"
-									data-ng-model="ctrl.query.suffix"
-									placeholder="Enter 3' sequence">
+									data-ng-model="ctrl.query.designs[0].dna.features[3].seq"
+									placeholder="Enter 3' flanking region">
 							</div>
 						</div>
 						<div class="form-group">

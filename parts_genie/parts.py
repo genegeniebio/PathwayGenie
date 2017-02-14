@@ -60,7 +60,10 @@ class PartsSolution(object):
         rbs = self.__get_init_rbs(cds[0])
 
         post_seq_length = 30
-        self.__seqs = [query['prefix'] if 'prefix' in query else '',
+
+        design = query['designs'][0]['dna']['features']
+
+        self.__seqs = [design[0]['seq'],
                        self.__get_valid_rand_seq(max(0, query['len_target'] -
                                                      len(rbs))),
                        rbs,
@@ -68,7 +71,7 @@ class PartsSolution(object):
                        stop_codon,
                        self.__get_valid_rand_seq(post_seq_length)
                        if len(self.__prot_seqs) > 1 else '',
-                       query['suffix'] if 'suffix' in query else '']
+                       design[3]['seq']]
 
         self.__dgs = None
         self.__seqs_new = copy.deepcopy(self.__seqs)
@@ -326,22 +329,28 @@ class PartsThread(SimulatedAnnealer):
 
 def _process_query(query):
     '''Perform application-specific pre-processing of query.'''
+
+    # Designs:
+    for design in query['designs']:
+        for feature in design['dna']['features']:
+            if isinstance(feature, list):
+                for ent in feature:
+                    ent['seq'] = ent['seq'].upper()
+            else:
+                feature['seq'] = feature['seq'].upper()
+
     query['protein_names'] = \
         list([x.strip() for x in query['protein_names'].split(',')])
     query['protein_ids'] = \
         list([x.strip() for x in query['protein_ids'].split(',')])
     query['len_target'] = int(query['len_target'])
     query['tir_target'] = float(query['tir_target'])
+
+    # Filters:
     query['filters']['excl_codons'] = \
         list(set([x.strip().upper()
                   for x in query['filters']['excl_codons'].split()])) \
         if 'excl_codons' in query['filters'] else []
-
-    if 'prefix' in query:
-        query['prefix'] = query['prefix'].upper()
-
-    if 'suffix' in query:
-        query['suffix'] = query['suffix'].upper()
 
     return query
 
