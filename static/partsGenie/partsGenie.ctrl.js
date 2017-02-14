@@ -9,7 +9,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PathwayGe
 						"features": [
 							{"typ": "http://purl.obolibrary.org/obo/SO_0001416", "seq": "", "name": "5\' flanking region", "len": 0, "fixed": true},
 							{"typ": "http://purl.obolibrary.org/obo/SO_0000139", "seq": "", "name": "ribosome entry site", "len": 60, "fixed": false, "tir_target": 15000},
-							[{"typ": "http://purl.obolibrary.org/obo/SO_0000316", "seq": "", "name": "coding sequence", "len": 0, "fixed": false}],
+							[{"typ": "http://purl.obolibrary.org/obo/SO_0000316", "seq": "", "name": "coding sequence", "len": 0, "fixed": false, "aa_seq": ""}],
 							{"typ": "http://purl.obolibrary.org/obo/SO_0001417", "seq": "", "name": "3\' flanking region", "len": 0, "fixed": true}
 						]
 					}

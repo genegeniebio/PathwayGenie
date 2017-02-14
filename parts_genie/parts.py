@@ -46,7 +46,10 @@ class PartsSolution(object):
         self.__cod_opt = seq_utils.CodonOptimiser(
             query['organism']['taxonomy_id'])
 
-        self.__prot_seqs = seq_utils.get_sequences(query['protein_ids'])
+        protein_ids = [cds['aa_seq'] for cds
+                       in self.__query['designs'][0]['dna']['features'][2]]
+
+        self.__prot_seqs = seq_utils.get_sequences(protein_ids)
 
         cds = [self.__cod_opt.get_codon_optim_seq(prot_seq,
                                                   flt['excl_codons'],
@@ -101,15 +104,19 @@ class PartsSolution(object):
         result = []
         tirs = [tirs[0] for tirs in _get_tirs(self.__dgs)]
 
-        for idx, prot_id in enumerate(self.__query['protein_ids']):
+        cdss = self.__query['designs'][0]['dna']['features'][2]
+
+        for idx, cds in enumerate(cdss):
             uniprot_regex = \
                 r'^([A-N,R-Z][0-9]([A-Z][A-Z, 0-9][A-Z, 0-9][0-9]){1,2})' + \
                 r'|([O,P,Q][0-9][A-Z, 0-9][A-Z, 0-9][A-Z, 0-9][0-9])(\.\d+)?$'
 
+            prot_id = cds['aa_seq']
+
             if re.match(uniprot_regex, prot_id):
                 uniprot_id = prot_id
             else:
-                prot_id = self.__query['protein_names'][idx]
+                prot_id = cds['name']
                 uniprot_id = None
 
             cds = self.__seqs[3][idx] + self.__seqs[4]
@@ -348,11 +355,6 @@ def _process_query(query):
 
                 if 'tir_target' in feature:
                     feature['tir_target'] = float(feature['tir_target'])
-
-    query['protein_names'] = \
-        list([x.strip() for x in query['protein_names'].split(',')])
-    query['protein_ids'] = \
-        list([x.strip() for x in query['protein_ids'].split(',')])
 
     # Filters:
     query['filters']['excl_codons'] = \
