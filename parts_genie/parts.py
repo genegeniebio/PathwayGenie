@@ -46,16 +46,13 @@ class PartsSolution(object):
         self.__cod_opt = seq_utils.CodonOptimiser(
             query['organism']['taxonomy_id'])
 
-        protein_ids = [cds['aa_seq'] for cds
-                       in self.__query['designs'][0]['dna']['features'][2]]
+        self.__get_seqs()
 
-        self.__prot_seqs = seq_utils.get_sequences(protein_ids)
-
-        cds = [self.__cod_opt.get_codon_optim_seq(prot_seq,
+        cds = [self.__cod_opt.get_codon_optim_seq(feat['aa_seq'],
                                                   flt['excl_codons'],
                                                   self.__inv_patt,
                                                   tolerant=False)
-               for prot_seq in self.__prot_seqs.values()]
+               for feat in self.__query['designs'][0]['dna']['features'][2]]
 
         stop_codon = self.__cod_opt.get_codon_optim_seq('*',
                                                         flt['excl_codons'])
@@ -103,17 +100,12 @@ class PartsSolution(object):
         cdss = self.__query['designs'][0]['dna']['features'][2]
 
         for idx, cds in enumerate(cdss):
-            uniprot_regex = \
-                r'^([A-N,R-Z][0-9]([A-Z][A-Z, 0-9][A-Z, 0-9][0-9]){1,2})' + \
-                r'|([O,P,Q][0-9][A-Z, 0-9][A-Z, 0-9][A-Z, 0-9][0-9])(\.\d+)?$'
+            uniprot_id = cds.get('uniprot', None)
 
-            prot_id = cds['aa_seq']
-
-            if re.match(uniprot_regex, prot_id):
-                uniprot_id = prot_id
+            if uniprot_id:
+                prot_id = uniprot_id
             else:
                 prot_id = cds['name']
-                uniprot_id = None
 
             cds = self.__seqs[3][idx] + self.__seqs[4]
 
@@ -162,6 +154,22 @@ class PartsSolution(object):
         '''Reject potential update.'''
         self.__seqs_new = copy.deepcopy(self.__seqs)
         self.__dgs_new = copy.deepcopy(self.__dgs)
+
+    def __get_seqs(self):
+        '''Returns sequences from protein ids, which may be either Uniprot ids,
+        or a protein sequence itself.'''
+        uniprot_id_pattern = \
+            '[OPQ][0-9][A-Z0-9]{3}[0-9]|' + \
+            '[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}'
+
+        for cds in self.__query['designs'][0]['dna']['features'][2]:
+            if re.match(uniprot_id_pattern, cds['aa_seq']):
+                uniprot_vals = seq_utils.get_uniprot_values(
+                    [cds['aa_seq']], ['sequence']).values()
+
+                cds['uniprot'] = cds['aa_seq']
+                cds['aa_seq'] = [values['Sequence']
+                                 for values in uniprot_vals][0]
 
     def __get_init_rbs(self, cds, attempts=0, max_attempts=1000):
         '''Gets an initial RBS.'''
@@ -240,7 +248,8 @@ class PartsSolution(object):
 
     def __mutate_specific_cds(self, idx):
         '''Mutates one specific CDS.'''
-        prot_seq = self.__prot_seqs.values()[idx]
+        prot_seq = self.__query['designs'][0][
+            'dna']['features'][2][idx]['aa_seq']
         self.__seqs_new[3][idx] = \
             self.__cod_opt.mutate(prot_seq,
                                   self.__seqs[3][idx],
