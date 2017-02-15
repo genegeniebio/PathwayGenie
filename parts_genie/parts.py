@@ -48,25 +48,15 @@ class PartsSolution(object):
 
         self.__get_seqs()
 
-        cds = [self.__cod_opt.get_codon_optim_seq(feat['aa_seq'],
-                                                  flt['excl_codons'],
-                                                  self.__inv_patt,
-                                                  tolerant=False)
-               for feat in self.__query['designs'][0]['dna']['features'][2]]
-
-        stop_codon = self.__cod_opt.get_codon_optim_seq('*',
-                                                        flt['excl_codons'])
-
         # Randomly choose an RBS that is a decent starting point,
         # using the first CDS as the upstream sequence:
-        rbs = self.__get_init_rbs(cds[0])
+        rbs = self.__get_init_rbs(features[2][0]['seq'])
 
         self.__seqs = [features[0]['seq'],
                        self.__get_valid_rand_seq(max(0, features[1]['len'] -
                                                      len(rbs))),
                        rbs,
-                       cds,
-                       stop_codon,
+                       [feat['seq'] for feat in features[2]],
                        features[3]['seq']]
 
         self.__dgs = None
@@ -107,7 +97,7 @@ class PartsSolution(object):
             else:
                 prot_id = cds['name']
 
-            cds = self.__seqs[3][idx] + self.__seqs[4]
+            cds = self.__seqs[3][idx]
 
             metadata = _get_metadata(prot_id,
                                      tirs[idx],
@@ -170,6 +160,15 @@ class PartsSolution(object):
                 cds['uniprot'] = cds['aa_seq']
                 cds['aa_seq'] = [values['Sequence']
                                  for values in uniprot_vals][0]
+
+                if cds['aa_seq'][-1] != '*':
+                    cds['aa_seq'] += '*'
+
+            cds['seq'] = self.__cod_opt.get_codon_optim_seq(
+                cds['aa_seq'],
+                self.__query['filters']['excl_codons'],
+                self.__inv_patt,
+                tolerant=False)
 
     def __get_init_rbs(self, cds, attempts=0, max_attempts=1000):
         '''Gets an initial RBS.'''
@@ -279,8 +278,8 @@ class PartsSolution(object):
 
     def __get_num_inv_seq(self, seqs):
         '''Returns number of invalid sequences.'''
-        return sum([seq_utils.count_pattern(seqs[1] + seqs[2] + cds +
-                                            seqs[4], self.__inv_patt)
+        return sum([seq_utils.count_pattern(seqs[1] + seqs[2] + cds,
+                                            self.__inv_patt)
                     for cds in seqs[3]])
 
     def __get_rogue_rbs(self, dgs):
@@ -293,7 +292,7 @@ class PartsSolution(object):
     def __get_dna(self, prot_id, metadata, cds, idx):
         '''Writes SBOL document to temporary store.'''
         seq = self.__seqs[0] + self.__seqs[1] + self.__seqs[2] + \
-            self.__seqs[3][idx] + self.__seqs[4] + self.__seqs[5]
+            self.__seqs[3][idx] + self.__seqs[4]
 
         dna = dna_utils.DNA(name=metadata['name'],
                             desc=metadata['shortDescription'],
@@ -308,7 +307,7 @@ class PartsSolution(object):
                              name=prot_id + ' (CDS)',
                              typ=sbol_utils.SO_CDS)
 
-        _add_subcomp(dna, self.__seqs[5], start, name='Suffix')
+        _add_subcomp(dna, self.__seqs[4], start, name='Suffix')
 
         return dna
 
