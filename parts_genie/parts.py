@@ -13,7 +13,6 @@ import copy
 import math
 import random
 import re
-import sys
 
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import dna_utils, sbol_utils, seq_utils
@@ -27,13 +26,11 @@ class PartsSolution(object):
 
     def __init__(self, query):
         self.__query = query
+        self.__process_query()
+
         self.__calc = rbs_calc.RbsCalculator(self.__query['organism']['r_rna'])
-
-        features = query['designs'][0]['dna']['features']
-
-        # Check if dg_total or TIR (translation initiation rate) was specified.
-        # If TIR, then convert to dg_total.
-        self.__dg_target = rbs_calc.get_dg(float(features[1]['tir_target']))
+        self.__cod_opt = seq_utils.CodonOptimiser(
+            self.__query['organism']['taxonomy_id'])
 
         # Invalid pattern is restriction sites | repeating nucleotides:
         flt = query['filters']
@@ -41,15 +38,12 @@ class PartsSolution(object):
                                      for restr_enz in flt['restr_enzs']]
                                     if 'restr_enzs' in query else []) +
                                    [x * int(flt['max_repeats'])
-                                    for x in ['A', 'C', 'G', 'T']])
-
-        self.__cod_opt = seq_utils.CodonOptimiser(
-            query['organism']['taxonomy_id'])
+                                    for x in seq_utils.NUCLEOTIDES])
 
         self.__get_seqs()
-        self.__seqs = features
+        self.__seqs = query['designs'][0]['dna']['features']
         self.__dgs = None
-        self.__seqs_new = copy.deepcopy(self.__seqs)
+        self.__seqs_new = copy.deepcopy(query['designs'][0]['dna']['features'])
         self.__dgs_new = None
 
     def get_query(self):
@@ -60,10 +54,11 @@ class PartsSolution(object):
         '''Return update of in-progress solution.'''
         features = self.__query['designs'][0]['dna']['features']
 
-        return [_get_value('mean_cai', 'CAI',
-                           self.__get_mean_cai(), 0, 1, 1),
-                _get_value('mean_tir', 'TIR',
-                           _get_mean_tir(self.__dgs), 0,
+        mean_cai = numpy.mean([self.__cod_opt.get_cai(cds['seq'])
+                               for cds in self.__seqs[2]])
+
+        return [_get_value('mean_cai', 'CAI', mean_cai, 0, 1, 1),
+                _get_value('mean_tir', 'TIR', _get_mean_tir(self.__dgs), 0,
                            float(features[1]['tir_target']) * 1.2,
                            float(features[1]['tir_target'])),
                 _get_value('num_invalid_seqs', 'Invalid seqs',
@@ -115,10 +110,9 @@ class PartsSolution(object):
 
     def mutate(self):
         '''Mutates and scores whole design.'''
-        self.__mutate_rbs()
+        self.__seqs_new[1]['seq'] = seq_utils.mutate_seq(self.__seqs[1]['seq'])
         self.__mutate_cds()
-        self.__dgs_new = self.__calc_dgs(self.__seqs_new[1],
-                                         self.__seqs_new[2])
+        self.__dgs_new = self.__calc_dgs()
         return self.get_energy(self.__seqs_new, self.__dgs_new)
 
     def accept(self):
@@ -131,6 +125,35 @@ class PartsSolution(object):
         '''Reject potential update.'''
         self.__seqs_new = copy.deepcopy(self.__seqs)
         self.__dgs_new = copy.deepcopy(self.__dgs)
+
+    def __process_query(self):
+        '''Perform application-specific pre-processing of query.'''
+
+        # Designs:
+        for design in self.__query['designs']:
+            features = design['dna']['features']
+
+            for feature in features:
+                if isinstance(feature, list):
+                    for entry in feature:
+                        entry['seq'] = entry['seq'].upper()
+                        entry['len'] = int(entry['len'])
+                else:
+                    feature['seq'] = feature['seq'].upper()
+                    feature['len'] = int(feature['len'])
+
+                    if 'tir_target' in feature:
+                        feature['tir_target'] = float(feature['tir_target'])
+                        feature['dg_target'] = \
+                            rbs_calc.get_dg(feature['tir_target'])
+
+        # Filters:
+        filters = self.__query['filters']
+
+        filters['excl_codons'] = \
+            list(set([x.strip().upper()
+                      for x in filters['excl_codons'].split()])) \
+            if 'excl_codons' in filters else []
 
     def __get_seqs(self):
         '''Returns sequences from protein ids, which may be either Uniprot ids,
@@ -161,37 +184,16 @@ class PartsSolution(object):
 
         # Randomly choose an RBS that is a decent starting point,
         # using the first CDS as the upstream sequence:
-        rbs_len = features[1]['len']
-        features[1]['seq'] = self.__calc.get_initial_rbs(rbs_len,
+        rbs = features[1]
+        features[1]['seq'] = self.__calc.get_initial_rbs(rbs['len'],
                                                          features[2][0]['seq'],
-                                                         self.__dg_target)
+                                                         rbs['dg_target'])
 
-    def __calc_dgs(self, rbs, cdss):
+    def __calc_dgs(self):
         '''Calculates (simulated annealing) energies for given RBS.'''
-        return [self.__calc.calc_dgs(rbs['seq'] + cds['seq'])
-                for cds in cdss]
-
-    def __mutate_rbs(self):
-        '''Mutates RBS.'''
-        rbs = self.__seqs[1]['seq']
-
-        move = random.random()
-        pos = int(random.random() * len(rbs))
-        base = random.choice(seq_utils.NUCLEOTIDES)
-
-        # Insert:
-        if move < 0.1:
-            rbs_new = rbs[1:pos] + base + rbs[pos:]
-
-        # Delete:
-        elif move < 0.2:
-            rbs_new = base + rbs[:pos] + rbs[pos + 1:]
-
-        # Replace:
-        else:
-            rbs_new = rbs[:pos] + base + rbs[pos + 1:]
-
-        self.__seqs_new[1]['seq'] = rbs_new
+        return [self.__calc.calc_dgs(self.__seqs_new[1]['seq'] +
+                                     cds['seq'])
+                for cds in self.__seqs_new[2]]
 
     def __mutate_cds(self):
         '''Mutates (potentially) multiple CDS.'''
@@ -211,29 +213,6 @@ class PartsSolution(object):
             self.__cod_opt.mutate(prot_seq,
                                   self.__seqs[2][idx]['seq'],
                                   5.0 / len(prot_seq))
-
-    def __get_valid_rand_seq(self, length, attempts=0, max_attempts=1000):
-        '''Returns a valid random sequence of supplied length.'''
-        sys.setrecursionlimit(max_attempts)
-
-        if attempts > max_attempts - 1:
-            raise ValueError('Unable to generate valid random sequence of ' +
-                             'length ' + str(length))
-
-        seq = ''.join([random.choice(['A', 'T', 'G', 'C'])
-                       for _ in range(0, length)])
-
-        if seq_utils.count_pattern(seq, self.__inv_patt) + \
-                seq_utils.count_pattern(seq,
-                                        seq_utils.START_CODON_PATT) == 0:
-            return seq
-
-        return self.__get_valid_rand_seq(length, attempts + 1, max_attempts)
-
-    def __get_mean_cai(self):
-        '''Gets mean CAI.'''
-        return numpy.mean([self.__cod_opt.get_cai(cds['seq'])
-                           for cds in self.__seqs[2]])
 
     def __get_num_inv_seq(self, seqs):
         '''Returns number of invalid sequences.'''
@@ -291,34 +270,8 @@ class PartsThread(SimulatedAnnealer):
     '''Wraps a PartsGenie job into a thread.'''
 
     def __init__(self, query):
-        solution = PartsSolution(_process_query(query))
+        solution = PartsSolution(query)
         SimulatedAnnealer.__init__(self, solution, verbose=True)
-
-
-def _process_query(query):
-    '''Perform application-specific pre-processing of query.'''
-
-    # Designs:
-    for design in query['designs']:
-        for feature in design['dna']['features']:
-            if isinstance(feature, list):
-                for entry in feature:
-                    entry['seq'] = entry['seq'].upper()
-                    entry['len'] = int(entry['len'])
-            else:
-                feature['seq'] = feature['seq'].upper()
-                feature['len'] = int(feature['len'])
-
-                if 'tir_target' in feature:
-                    feature['tir_target'] = float(feature['tir_target'])
-
-    # Filters:
-    query['filters']['excl_codons'] = \
-        list(set([x.strip().upper()
-                  for x in query['filters']['excl_codons'].split()])) \
-        if 'excl_codons' in query['filters'] else []
-
-    return query
 
 
 def _get_value(value_id, name, value, min_value, max_value, target):
@@ -340,11 +293,6 @@ def _get_mean_tir(dgs):
     '''Gets mean TIR of RBS sites (not rogue RBSs).'''
     return 0 if dgs is None \
         else numpy.mean([tirs[0] for tirs in _get_tirs(dgs)])
-
-
-def _replace(sequence, pos, nuc):
-    '''Replace nucleotide at pos with nuc.'''
-    return sequence[:pos] + nuc + sequence[pos + 1:]
 
 
 def _get_metadata(prot_id, tir, cai, target_org=None, uniprot_id=None):
