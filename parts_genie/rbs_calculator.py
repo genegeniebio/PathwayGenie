@@ -7,6 +7,10 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 import math
 import random
 
@@ -16,8 +20,6 @@ from synbiochem.utils import seq_utils
 from parts_genie.nucl_acid_utils import NuPackRunner
 import regex as re
 
-
-MAX_RBS_LENGTH = 35
 _RT_EFF = 2.222
 _K = 2500.0
 
@@ -73,7 +75,7 @@ class RbsCalculator(object):
 
         return float(largest_range_helix) / float(len(sub_m_rna))
 
-    def get_initial_rbs(self, cds, dg_target_rel):
+    def get_initial_rbs(self, rbs_len, cds, dg_target_rel):
         '''Generates random initial condition for designing a synthetic rbs
         sequence.'''
         cds = cds.upper()
@@ -121,15 +123,16 @@ class RbsCalculator(object):
 
         shine_delgano = Seq(self.__r_rna).reverse_complement()
 
-        return self.__get_random_rbs(shine_delgano,
-                                     prob_shine_delgano,
-                                     core_length,
+        return self.__get_random_rbs(rbs_len, shine_delgano,
+                                     prob_shine_delgano, core_length,
                                      max_nonoptimal_spacing)
 
     def __calc_dg(self, m_rna, start_pos):
         '''Calculates dG.'''
         # Set dangles based on length between 5' end of m_rna and start codon:
-        if start_pos > MAX_RBS_LENGTH:
+        max_rbs_len = 35
+
+        if start_pos > max_rbs_len:
             dangles = 'none'
         else:
             dangles = 'all'
@@ -197,8 +200,6 @@ class RbsCalculator(object):
         if len(m_rna_subseq) == 0:
             raise ValueError('Warning: There is a leaderless start codon, ' +
                              'which is being ignored.')
-
-        # print 'After exception'
 
         energies, bp_xs, bp_ys = self.__runner.subopt([m_rna_subseq,
                                                        self.__r_rna],
@@ -421,12 +422,11 @@ class RbsCalculator(object):
 
         return d_g
 
-    def __get_random_rbs(self, shine_delgano, prob_shine_delgano, core_length,
-                         max_nonoptimal_spacing):
+    def __get_random_rbs(self, rbs_len, shine_delgano, prob_shine_delgano,
+                         core_length, max_nonoptimal_spacing):
         '''Generates a random rbs sequence tailored towards the target
         translation  initiation rate.'''
-        pre_length = 25
-        rbs = [random.choice(seq_utils.NUCLEOTIDES) for _ in range(pre_length)]
+        rbs = []
 
         # Choose core_length nucleotides.
         # Choose from the SD sequence with probability prob_shine_delgano
@@ -457,10 +457,11 @@ class RbsCalculator(object):
         rbs.extend([random.choice(seq_utils.NUCLEOTIDES)
                     for _ in range(spacing)])
 
-        if len(rbs) > MAX_RBS_LENGTH:
-            rbs = rbs[len(rbs) - MAX_RBS_LENGTH:len(rbs) + 1]
+        # if len(rbs) > MAX_RBS_LENGTH:
+        #    rbs = rbs[len(rbs) - MAX_RBS_LENGTH:len(rbs) + 1]
 
-        return ''.join(rbs)
+        return ''.join([random.choice(seq_utils.NUCLEOTIDES)
+                        for _ in range(rbs_len - len(rbs))] + rbs)
 
     def __calc_aligned_spacing(self, m_rna, start_pos, bp_x, bp_y):
         '''Calculates the aligned spacing between the 16S r_rna binding site and

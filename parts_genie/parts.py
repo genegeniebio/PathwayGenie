@@ -50,12 +50,8 @@ class PartsSolution(object):
 
         # Randomly choose an RBS that is a decent starting point,
         # using the first CDS as the upstream sequence:
-        rbs = self.__get_init_rbs(features[2][0]['seq'])
-
         self.__seqs = [features[0]['seq'],
-                       self.__get_valid_rand_seq(max(0, features[1]['len'] -
-                                                     len(rbs))),
-                       rbs,
+                       self.__get_init_rbs(features[2][0]['seq']),
                        [feat['seq'] for feat in features[2]],
                        features[3]['seq']]
 
@@ -72,7 +68,7 @@ class PartsSolution(object):
         features = self.__query['designs'][0]['dna']['features']
 
         return [_get_value('mean_cai', 'CAI',
-                           self.__get_mean_cai(self.__seqs[3]), 0, 1, 1),
+                           self.__get_mean_cai(self.__seqs[2]), 0, 1, 1),
                 _get_value('mean_tir', 'TIR',
                            _get_mean_tir(self.__dgs), 0,
                            float(features[1]['tir_target']) * 1.2,
@@ -97,7 +93,7 @@ class PartsSolution(object):
             else:
                 prot_id = cds['name']
 
-            cds = self.__seqs[3][idx]
+            cds = self.__seqs[2][idx]
 
             metadata = _get_metadata(prot_id,
                                      tirs[idx],
@@ -126,12 +122,10 @@ class PartsSolution(object):
 
     def mutate(self):
         '''Mutates and scores whole design.'''
-        self.__mutate_pre_rbs()
         self.__mutate_rbs()
         self.__mutate_cds()
         self.__dgs_new = self.__calc_dgs(self.__seqs_new[1],
-                                         self.__seqs_new[2],
-                                         self.__seqs_new[3])
+                                         self.__seqs_new[2])
         return self.get_energy(self.__seqs_new, self.__dgs_new)
 
     def accept(self):
@@ -170,88 +164,55 @@ class PartsSolution(object):
                 self.__inv_patt,
                 tolerant=False)
 
-    def __get_init_rbs(self, cds, attempts=0, max_attempts=1000):
+    def __get_init_rbs(self, cds):
         '''Gets an initial RBS.'''
-        if attempts > max_attempts - 1:
-            raise ValueError('Unable to generate valid initial RBS.')
+        rbs_len = self.__query['designs'][0]['dna']['features'][1]['len']
+        return self.__calc.get_initial_rbs(rbs_len, cds, self.__dg_target)
 
-        rbs = self.__calc.get_initial_rbs(cds, self.__dg_target)
-
-        if seq_utils.count_pattern(rbs,
-                                   seq_utils.START_CODON_PATT) == 0:
-            return rbs
-
-        return self.__get_init_rbs(cds, attempts + 1, max_attempts)
-
-    def __calc_dgs(self, pre_rbs, rbs, cdss):
+    def __calc_dgs(self, rbs, cdss):
         '''Calculates (simulated annealing) energies for given RBS.'''
-        return [self.__calc.calc_dgs(pre_rbs + rbs + cds)
+        return [self.__calc.calc_dgs(rbs + cds)
                 for cds in cdss]
-
-    def __mutate_pre_rbs(self):
-        '''Mutates pre-RBS sequence.'''
-        pos = int(random.random() * len(self.__seqs[1]))
-        pre_seq_new = _replace(self.__seqs[1], pos, _rand_nuc())
-
-        if seq_utils.count_pattern(pre_seq_new + self.__seqs[2],
-                                   self.__inv_patt) + \
-                seq_utils.count_pattern(pre_seq_new + self.__seqs[2],
-                                        seq_utils.START_CODON_PATT) == 0:
-            self.__seqs_new[1] = pre_seq_new
-        else:
-            self.__seqs_new[1] = self.__seqs[1]
 
     def __mutate_rbs(self):
         '''Mutates RBS.'''
         move = random.random()
-        pos = int(random.random() * len(self.__seqs[2]))
+        pos = int(random.random() * len(self.__seqs[1]))
 
         # Insert:
-        if move < 0.1 and \
-                len(self.__seqs[2]) < rbs_calc.MAX_RBS_LENGTH:
+        if move < 0.1:
             base = random.choice(seq_utils.NUCLEOTIDES)
-            rbs_new = self.__seqs[2][0:pos] + base + \
-                self.__seqs[2][pos:len(self.__seqs[2])]
-            pre_seq_new = self.__seqs_new[1][1:] \
-                if len(self.__seqs_new[1]) > 0 else ''
+            rbs_new = self.__seqs[1][1:pos] + base + \
+                self.__seqs[1][pos:len(self.__seqs[1])]
 
         # Delete:
-        elif move < 0.2 and len(self.__seqs[2]) > 1:
-            rbs_new = _replace(self.__seqs[2], pos, '')
-            pre_seq_new = random.choice(seq_utils.NUCLEOTIDES) + \
-                self.__seqs_new[1]
+        elif move < 0.2 and len(self.__seqs[1]) > 1:
+            rbs_new = random.choice(seq_utils.NUCLEOTIDES) + \
+                _replace(self.__seqs[1], pos, '')
 
         # Replace:
         else:
-            rbs_new = _replace(self.__seqs[2], pos, _rand_nuc())
-            pre_seq_new = self.__seqs_new[1]
+            rbs_new = _replace(self.__seqs[1], pos, _rand_nuc())
 
-        if seq_utils.count_pattern(pre_seq_new + rbs_new, self.__inv_patt) + \
-                seq_utils.count_pattern(pre_seq_new + rbs_new,
-                                        seq_utils.START_CODON_PATT) == 0:
-            self.__seqs_new[1] = pre_seq_new
-            self.__seqs_new[2] = rbs_new
-        else:
-            self.__seqs_new[1] = self.__seqs[1]
-            self.__seqs_new[2] = self.__seqs[2]
+        self.__seqs_new[1] = rbs_new
 
     def __mutate_cds(self):
         '''Mutates (potentially) multiple CDS.'''
-        for idx in range(len(self.__seqs[3])):
+        for idx in range(len(self.__seqs[2])):
             self.__mutate_specific_cds(idx)
 
     def __mutate_single_cds(self):
         '''Mutates one randomly-selected CDS.'''
-        idx = int(random.random() * len(self.__seqs[3]))
+        idx = int(random.random() * len(self.__seqs[2]))
         self.__mutate_specific_cds(idx)
 
     def __mutate_specific_cds(self, idx):
         '''Mutates one specific CDS.'''
         prot_seq = self.__query['designs'][0][
             'dna']['features'][2][idx]['aa_seq']
-        self.__seqs_new[3][idx] = \
+        self.__seqs_new[2][idx] = \
             self.__cod_opt.mutate(prot_seq,
-                                  self.__seqs[3][idx],
+                                  self.__seqs[2][idx],
                                   5.0 / len(prot_seq))
 
     def __get_valid_rand_seq(self, length, attempts=0, max_attempts=1000):
@@ -278,9 +239,9 @@ class PartsSolution(object):
 
     def __get_num_inv_seq(self, seqs):
         '''Returns number of invalid sequences.'''
-        return sum([seq_utils.count_pattern(seqs[1] + seqs[2] + cds,
+        return sum([seq_utils.count_pattern(seqs[1] + cds,
                                             self.__inv_patt)
-                    for cds in seqs[3]])
+                    for cds in seqs[2]])
 
     def __get_rogue_rbs(self, dgs):
         '''Returns rogue RBS sites.'''
@@ -291,8 +252,8 @@ class PartsSolution(object):
 
     def __get_dna(self, prot_id, metadata, cds, idx):
         '''Writes SBOL document to temporary store.'''
-        seq = self.__seqs[0] + self.__seqs[1] + self.__seqs[2] + \
-            self.__seqs[3][idx] + self.__seqs[4]
+        seq = self.__seqs[0] + self.__seqs[1] + \
+            self.__seqs[2][idx] + self.__seqs[3]
 
         dna = dna_utils.DNA(name=metadata['name'],
                             desc=metadata['shortDescription'],
@@ -300,21 +261,21 @@ class PartsSolution(object):
 
         start = _add_subcomp(dna, self.__seqs[0], 1, name='Prefix')
 
-        start = _add_subcomp(dna, self.__seqs[1] + self.__seqs[2], start,
+        start = _add_subcomp(dna, self.__seqs[1], start,
                              name='RBS', typ=sbol_utils.SO_RBS)
 
         start = _add_subcomp(dna, cds, start,
                              name=prot_id + ' (CDS)',
                              typ=sbol_utils.SO_CDS)
 
-        _add_subcomp(dna, self.__seqs[4], start, name='Suffix')
+        _add_subcomp(dna, self.__seqs[3], start, name='Suffix')
 
         return dna
 
     def __repr__(self):
         # return '%r' % (self.__dict__)
         cais = [self.__cod_opt.get_cai(prot_seq)
-                for prot_seq in self.__seqs[3]]
+                for prot_seq in self.__seqs[2]]
 
         return '\t'.join(['' if self.__dgs is None
                           else str([tirs[0]
