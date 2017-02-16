@@ -19,7 +19,7 @@ from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import dna_utils, sbol_utils, seq_utils
 import numpy
 
-from . import rbs_calculator as rbs_calc
+from parts_genie import rbs_calculator as rbs_calc
 
 
 class PartsSolution(object):
@@ -52,7 +52,7 @@ class PartsSolution(object):
         # using the first CDS as the upstream sequence:
         self.__seqs = [features[0],
                        self.__get_init_rbs(features[2][0]['seq']),
-                       [feat['seq'] for feat in features[2]],
+                       features[2],
                        features[3]]
 
         self.__dgs = None
@@ -68,7 +68,7 @@ class PartsSolution(object):
         features = self.__query['designs'][0]['dna']['features']
 
         return [_get_value('mean_cai', 'CAI',
-                           self.__get_mean_cai(self.__seqs[2]), 0, 1, 1),
+                           self.__get_mean_cai(), 0, 1, 1),
                 _get_value('mean_tir', 'TIR',
                            _get_mean_tir(self.__dgs), 0,
                            float(features[1]['tir_target']) * 1.2,
@@ -97,7 +97,7 @@ class PartsSolution(object):
 
             metadata = _get_metadata(prot_id,
                                      tirs[idx],
-                                     self.__cod_opt.get_cai(cds),
+                                     self.__cod_opt.get_cai(cds['seq']),
                                      self.__query['organism']['taxonomy_id'],
                                      uniprot_id)
 
@@ -171,7 +171,7 @@ class PartsSolution(object):
 
     def __calc_dgs(self, rbs, cdss):
         '''Calculates (simulated annealing) energies for given RBS.'''
-        return [self.__calc.calc_dgs(rbs + cds)
+        return [self.__calc.calc_dgs(rbs + cds['seq'])
                 for cds in cdss]
 
     def __mutate_rbs(self):
@@ -211,9 +211,9 @@ class PartsSolution(object):
         '''Mutates one specific CDS.'''
         prot_seq = self.__query['designs'][0][
             'dna']['features'][2][idx]['aa_seq']
-        self.__seqs_new[2][idx] = \
+        self.__seqs_new[2][idx]['seq'] = \
             self.__cod_opt.mutate(prot_seq,
-                                  self.__seqs[2][idx],
+                                  self.__seqs[2][idx]['seq'],
                                   5.0 / len(prot_seq))
 
     def __get_valid_rand_seq(self, length, attempts=0, max_attempts=1000):
@@ -234,14 +234,14 @@ class PartsSolution(object):
 
         return self.__get_valid_rand_seq(length, attempts + 1, max_attempts)
 
-    def __get_mean_cai(self, cdss):
+    def __get_mean_cai(self):
         '''Gets mean CAI.'''
-        return numpy.mean([self.__cod_opt.get_cai(cds)
-                           for cds in cdss])
+        return numpy.mean([self.__cod_opt.get_cai(cds['seq'])
+                           for cds in self.__seqs[2]])
 
     def __get_num_inv_seq(self, seqs):
         '''Returns number of invalid sequences.'''
-        return sum([seq_utils.count_pattern(seqs[1] + cds,
+        return sum([seq_utils.count_pattern(seqs[1] + cds['seq'],
                                             self.__inv_patt)
                     for cds in seqs[2]])
 
@@ -255,7 +255,7 @@ class PartsSolution(object):
     def __get_dna(self, prot_id, metadata, cds, idx):
         '''Writes SBOL document to temporary store.'''
         seq = self.__seqs[0]['seq'] + self.__seqs[1] + \
-            self.__seqs[2][idx] + self.__seqs[3]['seq']
+            self.__seqs[2][idx]['seq'] + self.__seqs[3]['seq']
 
         dna = dna_utils.DNA(name=metadata['name'],
                             desc=metadata['shortDescription'],
@@ -266,7 +266,7 @@ class PartsSolution(object):
         start = _add_subcomp(dna, self.__seqs[1], start,
                              name='RBS', typ=sbol_utils.SO_RBS)
 
-        start = _add_subcomp(dna, cds, start,
+        start = _add_subcomp(dna, cds['seq'], start,
                              name=prot_id + ' (CDS)',
                              typ=sbol_utils.SO_CDS)
 
@@ -276,8 +276,8 @@ class PartsSolution(object):
 
     def __repr__(self):
         # return '%r' % (self.__dict__)
-        cais = [self.__cod_opt.get_cai(prot_seq)
-                for prot_seq in self.__seqs[2]]
+        cais = [self.__cod_opt.get_cai(cds['seq'])
+                for cds in self.__seqs[2]]
 
         return '\t'.join(['' if self.__dgs is None
                           else str([tirs[0]
