@@ -47,14 +47,7 @@ class PartsSolution(object):
             query['organism']['taxonomy_id'])
 
         self.__get_seqs()
-
-        # Randomly choose an RBS that is a decent starting point,
-        # using the first CDS as the upstream sequence:
-        self.__seqs = [features[0],
-                       self.__get_init_rbs(features[2][0]['seq']),
-                       features[2],
-                       features[3]]
-
+        self.__seqs = features
         self.__dgs = None
         self.__seqs_new = copy.deepcopy(self.__seqs)
         self.__dgs_new = None
@@ -146,7 +139,9 @@ class PartsSolution(object):
             '[OPQ][0-9][A-Z0-9]{3}[0-9]|' + \
             '[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}'
 
-        for cds in self.__query['designs'][0]['dna']['features'][2]:
+        features = self.__query['designs'][0]['dna']['features']
+
+        for cds in features[2]:
             if re.match(uniprot_id_pattern, cds['aa_seq']):
                 uniprot_vals = seq_utils.get_uniprot_values(
                     [cds['aa_seq']], ['sequence']).values()
@@ -164,38 +159,39 @@ class PartsSolution(object):
                 self.__inv_patt,
                 tolerant=False)
 
-    def __get_init_rbs(self, cds):
-        '''Gets an initial RBS.'''
-        rbs_len = self.__query['designs'][0]['dna']['features'][1]['len']
-        return self.__calc.get_initial_rbs(rbs_len, cds, self.__dg_target)
+        # Randomly choose an RBS that is a decent starting point,
+        # using the first CDS as the upstream sequence:
+        rbs_len = features[1]['len']
+        features[1]['seq'] = self.__calc.get_initial_rbs(rbs_len,
+                                                         features[2][0]['seq'],
+                                                         self.__dg_target)
 
     def __calc_dgs(self, rbs, cdss):
         '''Calculates (simulated annealing) energies for given RBS.'''
-        return [self.__calc.calc_dgs(rbs + cds['seq'])
+        return [self.__calc.calc_dgs(rbs['seq'] + cds['seq'])
                 for cds in cdss]
 
     def __mutate_rbs(self):
         '''Mutates RBS.'''
+        rbs = self.__seqs[1]['seq']
+
         move = random.random()
-        pos = int(random.random() * len(self.__seqs[1]))
+        pos = int(random.random() * len(rbs))
+        base = random.choice(seq_utils.NUCLEOTIDES)
 
         # Insert:
         if move < 0.1:
-            base = random.choice(seq_utils.NUCLEOTIDES)
-            rbs_new = self.__seqs[1][1:pos] + base + \
-                self.__seqs[1][pos:len(self.__seqs[1])]
+            rbs_new = rbs[1:pos] + base + rbs[pos:]
 
         # Delete:
-        elif move < 0.2 and len(self.__seqs[1]) > 1:
-            rbs_new = random.choice(seq_utils.NUCLEOTIDES) + \
-                _replace(self.__seqs[1], pos, '')
+        elif move < 0.2:
+            rbs_new = base + rbs[:pos] + rbs[pos + 1:]
 
         # Replace:
         else:
-            rbs_new = _replace(
-                self.__seqs[1], pos, random.choice(['A', 'T', 'G', 'C']))
+            rbs_new = rbs[:pos] + base + rbs[pos + 1:]
 
-        self.__seqs_new[1] = rbs_new
+        self.__seqs_new[1]['seq'] = rbs_new
 
     def __mutate_cds(self):
         '''Mutates (potentially) multiple CDS.'''
@@ -241,7 +237,7 @@ class PartsSolution(object):
 
     def __get_num_inv_seq(self, seqs):
         '''Returns number of invalid sequences.'''
-        return sum([seq_utils.count_pattern(seqs[1] + cds['seq'],
+        return sum([seq_utils.count_pattern(seqs[1]['seq'] + cds['seq'],
                                             self.__inv_patt)
                     for cds in seqs[2]])
 
@@ -254,7 +250,7 @@ class PartsSolution(object):
 
     def __get_dna(self, prot_id, metadata, cds, idx):
         '''Writes SBOL document to temporary store.'''
-        seq = self.__seqs[0]['seq'] + self.__seqs[1] + \
+        seq = self.__seqs[0]['seq'] + self.__seqs[1]['seq'] + \
             self.__seqs[2][idx]['seq'] + self.__seqs[3]['seq']
 
         dna = dna_utils.DNA(name=metadata['name'],
@@ -263,7 +259,7 @@ class PartsSolution(object):
 
         start = _add_subcomp(dna, self.__seqs[0]['seq'], 1, name='Prefix')
 
-        start = _add_subcomp(dna, self.__seqs[1], start,
+        start = _add_subcomp(dna, self.__seqs[1]['seq'], start,
                              name='RBS', typ=sbol_utils.SO_RBS)
 
         start = _add_subcomp(dna, cds['seq'], start,
