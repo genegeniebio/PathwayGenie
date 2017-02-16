@@ -46,11 +46,16 @@ class RbsCalculator(object):
                                  overlapped=True):
 
             start_pos = match.start()
-            d_g = self.__calc_dg(m_rna, start_pos)
-            start_positions.append(start_pos)
-            dgs.append(d_g)
 
-            count += 1
+            try:
+                d_g = self.__calc_dg(m_rna, start_pos)
+                start_positions.append(start_pos)
+                dgs.append(d_g)
+                count += 1
+            except ValueError:
+                # Occurs when start codon appears at start of sequence, and is
+                # therefore leaderless. Take no action, as safe to ignore.
+                continue
 
             if count == limit:
                 break

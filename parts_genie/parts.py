@@ -50,10 +50,10 @@ class PartsSolution(object):
 
         # Randomly choose an RBS that is a decent starting point,
         # using the first CDS as the upstream sequence:
-        self.__seqs = [features[0]['seq'],
+        self.__seqs = [features[0],
                        self.__get_init_rbs(features[2][0]['seq']),
                        [feat['seq'] for feat in features[2]],
-                       features[3]['seq']]
+                       features[3]]
 
         self.__dgs = None
         self.__seqs_new = copy.deepcopy(self.__seqs)
@@ -192,7 +192,8 @@ class PartsSolution(object):
 
         # Replace:
         else:
-            rbs_new = _replace(self.__seqs[1], pos, _rand_nuc())
+            rbs_new = _replace(
+                self.__seqs[1], pos, random.choice(['A', 'T', 'G', 'C']))
 
         self.__seqs_new[1] = rbs_new
 
@@ -223,7 +224,8 @@ class PartsSolution(object):
             raise ValueError('Unable to generate valid random sequence of ' +
                              'length ' + str(length))
 
-        seq = ''.join([_rand_nuc() for _ in range(0, length)])
+        seq = ''.join([random.choice(['A', 'T', 'G', 'C'])
+                       for _ in range(0, length)])
 
         if seq_utils.count_pattern(seq, self.__inv_patt) + \
                 seq_utils.count_pattern(seq,
@@ -252,14 +254,14 @@ class PartsSolution(object):
 
     def __get_dna(self, prot_id, metadata, cds, idx):
         '''Writes SBOL document to temporary store.'''
-        seq = self.__seqs[0] + self.__seqs[1] + \
-            self.__seqs[2][idx] + self.__seqs[3]
+        seq = self.__seqs[0]['seq'] + self.__seqs[1] + \
+            self.__seqs[2][idx] + self.__seqs[3]['seq']
 
         dna = dna_utils.DNA(name=metadata['name'],
                             desc=metadata['shortDescription'],
                             seq=seq)
 
-        start = _add_subcomp(dna, self.__seqs[0], 1, name='Prefix')
+        start = _add_subcomp(dna, self.__seqs[0]['seq'], 1, name='Prefix')
 
         start = _add_subcomp(dna, self.__seqs[1], start,
                              name='RBS', typ=sbol_utils.SO_RBS)
@@ -268,7 +270,7 @@ class PartsSolution(object):
                              name=prot_id + ' (CDS)',
                              typ=sbol_utils.SO_CDS)
 
-        _add_subcomp(dna, self.__seqs[3], start, name='Suffix')
+        _add_subcomp(dna, self.__seqs[3]['seq'], start, name='Suffix')
 
         return dna
 
@@ -347,11 +349,6 @@ def _get_mean_tir(dgs):
 def _replace(sequence, pos, nuc):
     '''Replace nucleotide at pos with nuc.'''
     return sequence[:pos] + nuc + sequence[pos + 1:]
-
-
-def _rand_nuc():
-    '''Returns a random nucleotide.'''
-    return random.choice(['A', 'T', 'G', 'C'])
 
 
 def _get_metadata(prot_id, tir, cai, target_org=None, uniprot_id=None):
