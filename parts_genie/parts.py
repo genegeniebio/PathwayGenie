@@ -26,24 +26,24 @@ class PartsSolution(object):
 
     def __init__(self, query):
         self.__query = query
-        self.__process_query()
 
-        self.__calc = rbs_calc.RbsCalculator(self.__query['organism']['r_rna'])
-        self.__cod_opt = seq_utils.CodonOptimiser(
-            self.__query['organism']['taxonomy_id'])
+        organism = self.__query['organism']
+        self.__calc = rbs_calc.RbsCalculator(organism['r_rna'])
+        self.__cod_opt = seq_utils.CodonOptimiser(organism['taxonomy_id'])
 
         # Invalid pattern is restriction sites | repeating nucleotides:
-        flt = query['filters']
+        filters = query['filters']
         self.__inv_patt = '|'.join(([restr_enz['site']
-                                     for restr_enz in flt['restr_enzs']]
+                                     for restr_enz in filters['restr_enzs']]
                                     if 'restr_enzs' in query else []) +
-                                   [x * int(flt['max_repeats'])
+                                   [x * int(filters['max_repeats'])
                                     for x in seq_utils.NUCLEOTIDES])
 
+        self.__features = query['designs'][0]['dna']['features']
         self.__get_seqs()
-        self.__seqs = query['designs'][0]['dna']['features']
+
+        self.__features_new = copy.deepcopy(self.__features)
         self.__dgs = None
-        self.__seqs_new = copy.deepcopy(query['designs'][0]['dna']['features'])
         self.__dgs_new = None
 
     def get_query(self):
@@ -52,17 +52,15 @@ class PartsSolution(object):
 
     def get_values(self):
         '''Return update of in-progress solution.'''
-        features = self.__query['designs'][0]['dna']['features']
-
         mean_cai = numpy.mean([self.__cod_opt.get_cai(cds['seq'])
-                               for cds in self.__seqs[2]])
+                               for cds in self.__features[2]['options']])
 
         return [_get_value('mean_cai', 'CAI', mean_cai, 0, 1, 1),
                 _get_value('mean_tir', 'TIR', _get_mean_tir(self.__dgs), 0,
-                           float(features[1]['tir_target']) * 1.2,
-                           float(features[1]['tir_target'])),
+                           float(self.__features[1]['tir_target']) * 1.2,
+                           float(self.__features[1]['tir_target'])),
                 _get_value('num_invalid_seqs', 'Invalid seqs',
-                           self.__get_num_inv_seq(self.__seqs), 0, 10, 0),
+                           self.__get_num_inv_seq(self.__features), 0, 10, 0),
                 _get_value('num_rogue_rbs', 'Rogue RBSs',
                            len(self.__get_rogue_rbs(self.__dgs)), 0, 10, 0)]
 
@@ -71,9 +69,7 @@ class PartsSolution(object):
         result = []
         tirs = [tirs[0] for tirs in _get_tirs(self.__dgs)]
 
-        cdss = self.__query['designs'][0]['dna']['features'][2]
-
-        for idx, cds in enumerate(cdss):
+        for idx, cds in enumerate(self.__features[2]['options']):
             uniprot_id = cds.get('uniprot', None)
 
             if uniprot_id:
@@ -81,15 +77,15 @@ class PartsSolution(object):
             else:
                 prot_id = cds['name']
 
-            cds = self.__seqs[2][idx]
-
             metadata = _get_metadata(prot_id,
                                      tirs[idx],
                                      self.__cod_opt.get_cai(cds['seq']),
                                      self.__query['organism']['taxonomy_id'],
                                      uniprot_id)
 
-            dna = self.__get_dna(prot_id, metadata, cds, idx)
+            dna = self.__get_dna(metadata['name'],
+                                 metadata['shortDescription'],
+                                 idx)
 
             result.append({'metadata': metadata, 'dna': dna})
 
@@ -100,8 +96,7 @@ class PartsSolution(object):
         if seqs is None:
             return float('inf')
 
-        features = self.__query['designs'][0]['dna']['features']
-        tir_target = float(features[1]['tir_target'])
+        tir_target = float(self.__features[1]['tir_target'])
         mean_d_tir = abs(tir_target - _get_mean_tir(dgs)) / tir_target
 
         return math.erf(mean_d_tir) + \
@@ -110,50 +105,27 @@ class PartsSolution(object):
 
     def mutate(self):
         '''Mutates and scores whole design.'''
-        self.__seqs_new[1]['seq'] = seq_utils.mutate_seq(self.__seqs[1]['seq'])
-        self.__mutate_cds()
+        for idx, feature in enumerate(self.__features):
+            if not feature['fixed']:
+                if feature['typ'] == sbol_utils.SO_CDS:
+                    self.__mutate_cds(feature['options'])
+                else:
+                    self.__features_new[idx]['seq'] = \
+                        seq_utils.mutate_seq(feature['seq'])
+
         self.__dgs_new = self.__calc_dgs()
-        return self.get_energy(self.__seqs_new, self.__dgs_new)
+        return self.get_energy(self.__features_new, self.__dgs_new)
 
     def accept(self):
         '''Accept potential update.'''
-        self.__seqs = copy.deepcopy(self.__seqs_new)
+        self.__features = copy.deepcopy(self.__features_new)
         self.__dgs = copy.deepcopy(self.__dgs_new)
         self.reject()
 
     def reject(self):
         '''Reject potential update.'''
-        self.__seqs_new = copy.deepcopy(self.__seqs)
+        self.__features_new = copy.deepcopy(self.__features)
         self.__dgs_new = copy.deepcopy(self.__dgs)
-
-    def __process_query(self):
-        '''Perform application-specific pre-processing of query.'''
-
-        # Designs:
-        for design in self.__query['designs']:
-            features = design['dna']['features']
-
-            for feature in features:
-                if isinstance(feature, list):
-                    for entry in feature:
-                        entry['seq'] = entry['seq'].upper()
-                        entry['len'] = int(entry['len'])
-                else:
-                    feature['seq'] = feature['seq'].upper()
-                    feature['len'] = int(feature['len'])
-
-                    if 'tir_target' in feature:
-                        feature['tir_target'] = float(feature['tir_target'])
-                        feature['dg_target'] = \
-                            rbs_calc.get_dg(feature['tir_target'])
-
-        # Filters:
-        filters = self.__query['filters']
-
-        filters['excl_codons'] = \
-            list(set([x.strip().upper()
-                      for x in filters['excl_codons'].split()])) \
-            if 'excl_codons' in filters else []
 
     def __get_seqs(self):
         '''Returns sequences from protein ids, which may be either Uniprot ids,
@@ -162,9 +134,7 @@ class PartsSolution(object):
             '[OPQ][0-9][A-Z0-9]{3}[0-9]|' + \
             '[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}'
 
-        features = self.__query['designs'][0]['dna']['features']
-
-        for cds in features[2]:
+        for cds in self.__features[2]['options']:
             if re.match(uniprot_id_pattern, cds['aa_seq']):
                 uniprot_vals = seq_utils.get_uniprot_values(
                     [cds['aa_seq']], ['sequence']).values()
@@ -184,83 +154,78 @@ class PartsSolution(object):
 
         # Randomly choose an RBS that is a decent starting point,
         # using the first CDS as the upstream sequence:
-        rbs = features[1]
-        features[1]['seq'] = self.__calc.get_initial_rbs(rbs['len'],
-                                                         features[2][0]['seq'],
-                                                         rbs['dg_target'])
+        idx = 1
+        rbs = self.__features[idx]
+        rbs['seq'] = self.__calc.get_initial_rbs(
+            rbs['len'], self.__features[idx + 1]['options'][0]['seq'],
+            rbs['dg_target'])
 
     def __calc_dgs(self):
         '''Calculates (simulated annealing) energies for given RBS.'''
-        return [self.__calc.calc_dgs(self.__seqs_new[1]['seq'] +
+        return [self.__calc.calc_dgs(self.__features_new[1]['seq'] +
                                      cds['seq'])
-                for cds in self.__seqs_new[2]]
+                for cds in self.__features_new[2]['options']]
 
-    def __mutate_cds(self):
+    def __mutate_cds(self, cdss):
         '''Mutates (potentially) multiple CDS.'''
-        for idx in range(len(self.__seqs[2])):
-            self.__mutate_specific_cds(idx)
+        for idx in range(len(cdss)):
+            self.__mutate_specific_cds(cdss, idx)
 
-    def __mutate_single_cds(self):
+    def __mutate_single_cds(self, cdss):
         '''Mutates one randomly-selected CDS.'''
-        idx = int(random.random() * len(self.__seqs[2]))
-        self.__mutate_specific_cds(idx)
+        idx = int(random.random() * len(cdss))
+        self.__mutate_specific_cds(cdss, idx)
 
-    def __mutate_specific_cds(self, idx):
+    def __mutate_specific_cds(self, cdss, idx):
         '''Mutates one specific CDS.'''
-        prot_seq = self.__query['designs'][0][
-            'dna']['features'][2][idx]['aa_seq']
-        self.__seqs_new[2][idx]['seq'] = \
-            self.__cod_opt.mutate(prot_seq,
-                                  self.__seqs[2][idx]['seq'],
-                                  5.0 / len(prot_seq))
+        cds = cdss[idx]
+
+        self.__features_new[2]['options'][idx]['seq'] = \
+            self.__cod_opt.mutate(cds['aa_seq'], cds['seq'],
+                                  5.0 / len(cds['aa_seq']))
 
     def __get_num_inv_seq(self, seqs):
         '''Returns number of invalid sequences.'''
         return sum([seq_utils.count_pattern(seqs[1]['seq'] + cds['seq'],
                                             self.__inv_patt)
-                    for cds in seqs[2]])
+                    for cds in seqs[2]['options']])
 
     def __get_rogue_rbs(self, dgs):
         '''Returns rogue RBS sites.'''
-        features = self.__query['designs'][0]['dna']['features']
-
         return [tir for tirs in _get_tirs(dgs) for tir in tirs[1:]
-                if tir > float(features[1]['tir_target']) * 0.1]
+                if tir > float(self.__features[1]['tir_target']) * 0.1]
 
-    def __get_dna(self, prot_id, metadata, cds, idx):
+    def __get_dna(self, name, desc, idx):
         '''Writes SBOL document to temporary store.'''
-        seq = self.__seqs[0]['seq'] + self.__seqs[1]['seq'] + \
-            self.__seqs[2][idx]['seq'] + self.__seqs[3]['seq']
+        seq = self.__features[0]['seq'] + self.__features[1]['seq'] + \
+            self.__features[2]['options'][idx]['seq'] + \
+            self.__features[3]['seq']
 
-        dna = dna_utils.DNA(name=metadata['name'],
-                            desc=metadata['shortDescription'],
-                            seq=seq)
+        dna = dna_utils.DNA(name=name, desc=desc, seq=seq)
 
-        start = _add_subcomp(dna, self.__seqs[0]['seq'], 1, name='Prefix')
+        start = _add_feature(dna, self.__features[0], 1)
 
-        start = _add_subcomp(dna, self.__seqs[1]['seq'], start,
-                             name='RBS', typ=sbol_utils.SO_RBS)
+        start = _add_feature(dna, self.__features[1], start)
 
-        start = _add_subcomp(dna, cds['seq'], start,
-                             name=prot_id + ' (CDS)',
-                             typ=sbol_utils.SO_CDS)
+        start = _add_feature(dna, self.__features[2]['options'][idx],
+                             start)
 
-        _add_subcomp(dna, self.__seqs[3]['seq'], start, name='Suffix')
+        _add_feature(dna, self.__features[3], start)
 
         return dna
 
     def __repr__(self):
         # return '%r' % (self.__dict__)
         cais = [self.__cod_opt.get_cai(cds['seq'])
-                for cds in self.__seqs[2]]
+                for cds in self.__features[2]['options']]
 
         return '\t'.join(['' if self.__dgs is None
                           else str([tirs[0]
                                     for tirs in _get_tirs(self.__dgs)]),
                           str(cais),
-                          str(self.__get_num_inv_seq(self.__seqs)),
+                          str(self.__get_num_inv_seq(self.__features)),
                           str(len(self.__get_rogue_rbs(self.__dgs))),
-                          ' '.join([str(seq) for seq in self.__seqs])])
+                          ' '.join([str(feat) for feat in self.__features])])
 
     def __print__(self):
         return self.__repr__
@@ -270,8 +235,36 @@ class PartsThread(SimulatedAnnealer):
     '''Wraps a PartsGenie job into a thread.'''
 
     def __init__(self, query):
+        _process_query(query)
         solution = PartsSolution(query)
         SimulatedAnnealer.__init__(self, solution, verbose=True)
+
+
+def _process_query(query):
+    '''Perform application-specific pre-processing of query.'''
+
+    # Designs:
+    for design in query['designs']:
+        features = design['dna']['features']
+
+        for feature in features:
+            if 'seq' in feature:
+                feature['seq'] = feature['seq'].upper()
+
+            if 'tir_target' in feature:
+                feature['dg_target'] = \
+                    rbs_calc.get_dg(feature['tir_target'])
+
+            for cds in feature.get('options', []):
+                cds['aa_seq'] = cds['aa_seq'].upper()
+
+    # Filters:
+    filters = query['filters']
+
+    filters['excl_codons'] = \
+        list(set([x.strip().upper()
+                  for x in filters['excl_codons'].split()])) \
+        if 'excl_codons' in filters else []
 
 
 def _get_value(value_id, name, value, min_value, max_value, target):
@@ -339,12 +332,18 @@ def _get_metadata(prot_id, tir, cai, target_org=None, uniprot_id=None):
     return metadata
 
 
-def _add_subcomp(dna, seq, start, forw=True, name=None, typ=None, desc=None):
+def _add_feature(dna, feature, start):
     '''Adds a subcompartment.'''
+    seq = feature['seq']
+
     if seq is not None and len(seq):
         end = start + len(seq) - 1
-        feature = dna_utils.DNA(name=name, desc=desc, typ=typ,
-                                start=start, end=end, forward=forw)
+        feature = dna_utils.DNA(name=feature['name'],
+                                desc=feature.get('desc', None),
+                                typ=feature['typ'],
+                                start=start,
+                                end=end,
+                                forward=feature.get('forward', True))
         dna['features'].append(feature)
 
         return end + 1
