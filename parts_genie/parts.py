@@ -40,10 +40,8 @@ class PartsSolution(object):
                                     for x in seq_utils.NUCLEOTIDES])
 
         self.__get_seqs()
-
+        self.__calc_dgs(self.__dna)
         self.__dna_new = copy.deepcopy(self.__dna)
-        self.__dgs = None
-        self.__dgs_new = None
 
     def get_query(self):
         '''Return query.'''
@@ -53,41 +51,41 @@ class PartsSolution(object):
 
     def get_values(self):
         '''Return update of in-progress solution.'''
+        mean_tirs = []
+        num_rogue_rbs = 0
         cais = []
+
         for feature in self.__dna['features']:
-            if feature['typ'] == sbol_utils.SO_CDS:
+            if feature['typ'] == sbol_utils.SO_RBS:
+                mean_tirs.append(_get_mean_tir(feature['dgs']))
+                num_rogue_rbs += len(self.__get_rogue_rbs(feature['dgs']))
+            elif feature['typ'] == sbol_utils.SO_CDS:
                 cais.extend([self.__cod_opt.get_cai(cds['seq'])
                              for cds in feature['options']])
 
         return [_get_value('mean_cai', 'CAI', numpy.mean(cais), 0, 1, 1),
-                _get_value('mean_tir', 'TIR', _get_mean_tir(self.__dgs), 0,
+                _get_value('mean_tir', 'TIR', numpy.mean(mean_tirs), 0,
                            float(
                                self.__dna['features'][1]['tir_target']) * 1.2,
                            float(self.__dna['features'][1]['tir_target'])),
                 _get_value('num_invalid_seqs', 'Invalid seqs',
-                           self.__get_num_inv_seq(self.__dna['features']), 0,
+                           self.__get_num_inv_seq(self.__dna), 0,
                            10, 0),
-                _get_value('num_rogue_rbs', 'Rogue RBSs',
-                           len(self.__get_rogue_rbs(self.__dgs)), 0, 10, 0)]
+                _get_value('num_rogue_rbs', 'Rogue RBSs', num_rogue_rbs, 0, 10,
+                           0)]
 
     def get_result(self):
         '''Return result of solution.'''
         result = []
-        tirs = [tirs[0] for tirs in _get_tirs(self.__dgs)]
+        tirs = [tirs[0]
+                for tirs in _get_tirs(self.__dna['features'][1]['dgs'])]
 
         for idx, cds in enumerate(self.__dna['features'][2]['options']):
-            uniprot_id = cds.get('uniprot', None)
-
-            if uniprot_id:
-                prot_id = uniprot_id
-            else:
-                prot_id = cds['name']
-
-            metadata = _get_metadata(prot_id,
+            metadata = _get_metadata(cds['name'],
                                      tirs[idx],
                                      self.__cod_opt.get_cai(cds['seq']),
                                      self.__organism['taxonomy_id'],
-                                     uniprot_id)
+                                     cds.get('uniprot', None))
 
             dna = self.__get_dna(metadata['name'],
                                  metadata['shortDescription'],
@@ -97,41 +95,39 @@ class PartsSolution(object):
 
         return result
 
-    def get_energy(self, seqs=None, dgs=None):
+    def get_energy(self, dna=None):
         '''Gets the (simulated annealing) energy.'''
-        if seqs is None:
+        if dna is None:
             return float('inf')
 
-        tir_target = float(self.__dna['features'][1]['tir_target'])
-        mean_d_tir = abs(tir_target - _get_mean_tir(dgs)) / tir_target
+        rbs = dna['features'][1]
+        tir_target = float(rbs['tir_target'])
+        mean_d_tir = abs(tir_target - _get_mean_tir(rbs['dgs'])) / tir_target
 
         return math.erf(mean_d_tir) + \
-            self.__get_num_inv_seq(seqs) + \
-            len(self.__get_rogue_rbs(dgs))
+            self.__get_num_inv_seq(dna) + \
+            len(self.__get_rogue_rbs(rbs['dgs']))
 
     def mutate(self):
         '''Mutates and scores whole design.'''
-        for idx, feature in enumerate(self.__dna['features']):
+        for feature in self.__dna['features']:
             if not feature['fixed']:
                 if feature['typ'] == sbol_utils.SO_CDS:
                     self.__mutate_cds(feature['options'])
                 else:
-                    self.__dna_new[idx]['seq'] = \
-                        seq_utils.mutate_seq(feature['seq'])
+                    feature['seq'] = seq_utils.mutate_seq(feature['seq'])
 
-        self.__dgs_new = self.__calc_dgs()
-        return self.get_energy(self.__dna_new, self.__dgs_new)
+        self.__calc_dgs(self.__dna_new)
+        return self.get_energy(self.__dna_new)
 
     def accept(self):
         '''Accept potential update.'''
         self.__dna = copy.deepcopy(self.__dna_new)
-        self.__dgs = copy.deepcopy(self.__dgs_new)
         self.reject()
 
     def reject(self):
         '''Reject potential update.'''
         self.__dna_new = copy.deepcopy(self.__dna)
-        self.__dgs_new = copy.deepcopy(self.__dgs)
 
     def __get_seqs(self):
         '''Returns sequences from protein ids, which may be either Uniprot ids,
@@ -166,11 +162,11 @@ class PartsSolution(object):
             rbs['len'], self.__dna['features'][idx + 1]['options'][0]['seq'],
             rbs['dg_target'])
 
-    def __calc_dgs(self):
+    def __calc_dgs(self, dna):
         '''Calculates (simulated annealing) energies for given RBS.'''
-        return [self.__calc.calc_dgs(self.__dna_new['features'][1]['seq'] +
-                                     cds['seq'])
-                for cds in self.__dna_new['features'][2]['options']]
+        rbs = dna['features'][1]
+        rbs['dgs'] = [self.__calc.calc_dgs(rbs['seq'] + cds['seq'])
+                      for cds in dna['features'][2]['options']]
 
     def __mutate_cds(self, cdss):
         '''Mutates (potentially) multiple CDS.'''
@@ -190,11 +186,12 @@ class PartsSolution(object):
             self.__cod_opt.mutate(cds['aa_seq'], cds['seq'],
                                   5.0 / len(cds['aa_seq']))
 
-    def __get_num_inv_seq(self, seqs):
+    def __get_num_inv_seq(self, dna):
         '''Returns number of invalid sequences.'''
-        return sum([seq_utils.count_pattern(seqs[1]['seq'] + cds['seq'],
+        return sum([seq_utils.count_pattern(dna['features'][1]['seq'] +
+                                            cds['seq'],
                                             self.__inv_patt)
-                    for cds in seqs[2]['options']])
+                    for cds in dna['features'][2]['options']])
 
     def __get_rogue_rbs(self, dgs):
         '''Returns rogue RBS sites.'''
@@ -223,15 +220,16 @@ class PartsSolution(object):
 
     def __repr__(self):
         # return '%r' % (self.__dict__)
+        dgs = self.__dna['features'][1]['dgs']
         cais = [self.__cod_opt.get_cai(cds['seq'])
                 for cds in self.__dna['features'][2]['options']]
 
-        return '\t'.join(['' if self.__dgs is None
+        return '\t'.join(['' if dgs is None
                           else str([tirs[0]
-                                    for tirs in _get_tirs(self.__dgs)]),
+                                    for tirs in _get_tirs(dgs)]),
                           str(cais),
-                          str(self.__get_num_inv_seq(self.__dna['features'])),
-                          str(len(self.__get_rogue_rbs(self.__dgs))),
+                          str(self.__get_num_inv_seq(self.__dna)),
+                          str(len(self.__get_rogue_rbs(dgs))),
                           ' '.join([str(feat)
                                     for feat in self.__dna['features']])])
 
@@ -245,7 +243,7 @@ class PartsThread(SimulatedAnnealer):
     def __init__(self, query):
         _process_query(query)
 
-        solution = PartsSolution(query['designs'][0],
+        solution = PartsSolution(query['designs'][0]['dna'],
                                  query['organism'],
                                  query['filters'])
 
