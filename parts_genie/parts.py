@@ -57,8 +57,8 @@ class PartsSolution(object):
 
         for feature in self.__dna['features']:
             if feature['typ'] == sbol_utils.SO_RBS:
-                mean_tirs.append(_get_mean_tir(feature['dgs']))
-                num_rogue_rbs += len(self.__get_rogue_rbs(feature['dgs']))
+                mean_tirs.append(_get_mean_tir(feature))
+                num_rogue_rbs += len(_get_rogue_rbs(feature))
             elif feature['typ'] == sbol_utils.SO_CDS:
                 cais.extend([self.__cod_opt.get_cai(cds['seq'])
                              for cds in feature['options']])
@@ -77,8 +77,8 @@ class PartsSolution(object):
     def get_result(self):
         '''Return result of solution.'''
         result = []
-        tirs = [tirs[0]
-                for tirs in _get_tirs(self.__dna['features'][1]['dgs'])]
+        dgs = _get_non_rogue_dgs(self.__dna['features'][1])
+        tirs = _get_tirs([dgs])
 
         for idx, cds in enumerate(self.__dna['features'][2]['options']):
             metadata = _get_metadata(cds['name'],
@@ -102,15 +102,16 @@ class PartsSolution(object):
 
         rbs = dna['features'][1]
         tir_target = float(rbs['tir_target'])
-        mean_d_tir = abs(tir_target - _get_mean_tir(rbs['dgs'])) / tir_target
+        mean_tir = _get_mean_tir(rbs)
+        mean_d_tir = abs(tir_target - mean_tir) / tir_target
 
         return math.erf(mean_d_tir) + \
             self.__get_num_inv_seq(dna) + \
-            len(self.__get_rogue_rbs(rbs['dgs']))
+            len(_get_rogue_rbs(rbs))
 
     def mutate(self):
         '''Mutates and scores whole design.'''
-        for feature in self.__dna['features']:
+        for feature in self.__dna_new['features']:
             if not feature['fixed']:
                 if feature['typ'] == sbol_utils.SO_CDS:
                     self.__mutate_cds(feature['options'])
@@ -123,7 +124,6 @@ class PartsSolution(object):
     def accept(self):
         '''Accept potential update.'''
         self.__dna = copy.deepcopy(self.__dna_new)
-        self.reject()
 
     def reject(self):
         '''Reject potential update.'''
@@ -136,37 +136,43 @@ class PartsSolution(object):
             '[OPQ][0-9][A-Z0-9]{3}[0-9]|' + \
             '[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}'
 
-        for cds in self.__dna['features'][2]['options']:
-            if re.match(uniprot_id_pattern, cds['aa_seq']):
-                uniprot_vals = seq_utils.get_uniprot_values(
-                    [cds['aa_seq']], ['sequence']).values()
+        for feature in self.__dna['features']:
+            if feature['typ'] == sbol_utils.SO_CDS:
+                for cds in feature['options']:
+                    if re.match(uniprot_id_pattern, cds['aa_seq']):
+                        uniprot_vals = seq_utils.get_uniprot_values(
+                            [cds['aa_seq']], ['sequence']).values()
 
-                cds['uniprot'] = cds['aa_seq']
-                cds['aa_seq'] = [values['Sequence']
-                                 for values in uniprot_vals][0]
+                        cds['uniprot'] = cds['aa_seq']
+                        cds['aa_seq'] = [values['Sequence']
+                                         for values in uniprot_vals][0]
 
-                if cds['aa_seq'][-1] != '*':
-                    cds['aa_seq'] += '*'
+                        if cds['aa_seq'][-1] != '*':
+                            cds['aa_seq'] += '*'
 
-            cds['seq'] = self.__cod_opt.get_codon_optim_seq(
-                cds['aa_seq'],
-                self.__filters['excl_codons'],
-                self.__inv_patt,
-                tolerant=False)
+                    cds['seq'] = self.__cod_opt.get_codon_optim_seq(
+                        cds['aa_seq'],
+                        self.__filters['excl_codons'],
+                        self.__inv_patt,
+                        tolerant=False)
 
         # Randomly choose an RBS that is a decent starting point,
         # using the first CDS as the upstream sequence:
-        idx = 1
-        rbs = self.__dna['features'][idx]
-        rbs['seq'] = self.__calc.get_initial_rbs(
-            rbs['len'], self.__dna['features'][idx + 1]['options'][0]['seq'],
-            rbs['dg_target'])
+        for idx, feature in enumerate(self.__dna['features']):
+            if feature['typ'] == sbol_utils.SO_RBS:
+                rbs = self.__dna['features'][idx]
+                rbs['seq'] = self.__calc.get_initial_rbs(
+                    rbs['len'],
+                    self.__dna['features'][idx + 1]['options'][0]['seq'],
+                    rbs['dg_target'])
 
     def __calc_dgs(self, dna):
         '''Calculates (simulated annealing) energies for given RBS.'''
-        rbs = dna['features'][1]
-        rbs['dgs'] = [self.__calc.calc_dgs(rbs['seq'] + cds['seq'])
-                      for cds in dna['features'][2]['options']]
+        for idx, feature in enumerate(dna['features']):
+            if feature['typ'] == sbol_utils.SO_RBS:
+                rbs = dna['features'][idx]
+                rbs['dgs'] = [self.__calc.calc_dgs(rbs['seq'] + cds['seq'])
+                              for cds in dna['features'][idx + 1]['options']]
 
     def __mutate_cds(self, cdss):
         '''Mutates (potentially) multiple CDS.'''
@@ -193,16 +199,11 @@ class PartsSolution(object):
                                             self.__inv_patt)
                     for cds in dna['features'][2]['options']])
 
-    def __get_rogue_rbs(self, dgs):
-        '''Returns rogue RBS sites.'''
-        return [tir for tirs in _get_tirs(dgs) for tir in tirs[1:]
-                if tir > float(self.__dna['features'][1]['tir_target']) * 0.1]
-
-    def __get_dna(self, name, desc, idx):
+    def __get_dna(self, name, desc, cds_idx):
         '''Writes SBOL document to temporary store.'''
         seq = self.__dna['features'][0]['seq'] + \
             self.__dna['features'][1]['seq'] + \
-            self.__dna['features'][2]['options'][idx]['seq'] + \
+            self.__dna['features'][2]['options'][cds_idx]['seq'] + \
             self.__dna['features'][3]['seq']
 
         dna = dna_utils.DNA(name=name, desc=desc, seq=seq)
@@ -211,7 +212,8 @@ class PartsSolution(object):
 
         start = _add_feature(dna, self.__dna['features'][1], start)
 
-        start = _add_feature(dna, self.__dna['features'][2]['options'][idx],
+        start = _add_feature(dna,
+                             self.__dna['features'][2]['options'][cds_idx],
                              start)
 
         _add_feature(dna, self.__dna['features'][3], start)
@@ -220,16 +222,23 @@ class PartsSolution(object):
 
     def __repr__(self):
         # return '%r' % (self.__dict__)
-        dgs = self.__dna['features'][1]['dgs']
-        cais = [self.__cod_opt.get_cai(cds['seq'])
-                for cds in self.__dna['features'][2]['options']]
+        dgs = []
+        cais = []
+        rogue_rbs = []
+
+        for feature in self.__dna['features']:
+            if feature['typ'] == sbol_utils.SO_RBS:
+                dgs.append(_get_non_rogue_dgs(feature))
+                rogue_rbs.append(len(_get_rogue_rbs(feature)))
+            elif feature['typ'] == sbol_utils.SO_CDS:
+                cais.append([self.__cod_opt.get_cai(cds['seq'])
+                             for cds in feature['options']])
 
         return '\t'.join(['' if dgs is None
-                          else str([tirs[0]
-                                    for tirs in _get_tirs(dgs)]),
+                          else str(_get_tirs(dgs)),
                           str(cais),
                           str(self.__get_num_inv_seq(self.__dna)),
-                          str(len(self.__get_rogue_rbs(dgs))),
+                          str(sum(rogue_rbs)),
                           ' '.join([str(feat)
                                     for feat in self.__dna['features']])])
 
@@ -287,15 +296,42 @@ def _get_value(value_id, name, value, min_value, max_value, target):
             'target': target}
 
 
+def _get_rogue_rbs(rbs):
+    '''Returns rogue RBS sites.'''
+    dgs = rbs['dgs']
+    idx = rbs['len']
+    target = rbs['tir_target']
+
+    dgs = [cds_vals[1][:cds_vals[0].index(idx)] +
+           cds_vals[1][cds_vals[0].index(idx) + 1:]
+           for cds_vals in dgs]
+
+    return [tir for tir in _get_tirs(dgs) if tir > target * 0.1]
+
+
 def _get_tirs(dgs):
     '''Gets the translation initiation rates.'''
-    return [[rbs_calc.get_tir(d_g) for d_g in lst[1]] for lst in dgs]
+    return [rbs_calc.get_tir(d_g) for lst in dgs for d_g in lst]
 
 
-def _get_mean_tir(dgs):
-    '''Gets mean TIR of RBS sites (not rogue RBSs).'''
-    return 0 if dgs is None \
-        else numpy.mean([tirs[0] for tirs in _get_tirs(dgs)])
+def _get_non_rogue_dgs(rbs):
+    '''Gets all non-rogue dGs for RBS sites.'''
+    dgs = rbs['dgs']
+    idx = rbs['len']
+
+    return None if dgs is None \
+        else [cds_vals[1][cds_vals[0].index(idx)] for cds_vals in dgs]
+
+
+def _get_mean_tir(rbs):
+    '''Gets mean dG of RBS sites (not rogue RBSs).'''
+    try:
+        dgs = _get_non_rogue_dgs(rbs)
+    except ValueError, err:
+        print err
+        print str(rbs)
+    tirs = _get_tirs([dgs])
+    return 0 if dgs is None else numpy.mean(tirs)
 
 
 def _get_metadata(prot_id, tir, cai, target_org=None, uniprot_id=None):
