@@ -40,9 +40,7 @@ class AssemblyGenie(object):
                       lcr_plate_id='lcr_plate', pool_vol=1):
         '''Exports recipes.'''
         comp_well = _get_src_comp_well(src_filenames)
-        backbone_pools = defaultdict(list)
-        parts_pools = defaultdict(list)
-        domino_pools = defaultdict(list)
+        pools = defaultdict(lambda: defaultdict(list))
 
         for ice_id in self.__ice_ids:
             data = self.__get_data(ice_id)
@@ -51,16 +49,16 @@ class AssemblyGenie(object):
                 data = self.__get_data(part['partId'])
 
                 if data[4] == 'ORF':
-                    parts_pools[ice_id].append(data)
+                    pools[ice_id]['parts'].append(data)
                 elif data[4] == 'DOMINO':
-                    domino_pools[ice_id].append(data)
+                    pools[ice_id]['dominoes'].append(data)
                 else:
                     # Assume backbone:
-                    backbone_pools[ice_id].append(data)
+                    pools[ice_id]['backbone'].append(data)
 
-        self.__output_recipe(comp_well,
-                             domino_pools, dom_pool_plate_id, domino_vol,
-                             lcr_plate_id, pool_vol)
+        self.__output_lcr_recipe(comp_well,
+                                 pools, dom_pool_plate_id, domino_vol,
+                                 lcr_plate_id, pool_vol)
 
     def __get_data(self, ice_id):
         '''Gets data from ICE entry.'''
@@ -74,12 +72,12 @@ class AssemblyGenie(object):
             ice_entry.get_parameter('Type'), \
             ice_entry.get_seq()
 
-    def __output_recipe(self, comp_well,
-                        domino_pools, dom_pool_plate_id, domino_vol,
-                        lcr_plate_id, pool_vol):
+    def __output_lcr_recipe(self, comp_well,
+                            pools, dom_pool_plate_id, domino_vol,
+                            lcr_plate_id, pool_vol):
         '''Outputs recipes.'''
         # Write domino pools worklist:
-        self.__write_dom_pool_worklist(domino_pools, dom_pool_plate_id,
+        self.__write_dom_pool_worklist(pools, dom_pool_plate_id,
                                        comp_well,
                                        domino_vol)
 
@@ -88,17 +86,7 @@ class AssemblyGenie(object):
         # Write LCR worklist:
         self.__write_lcr_worklist(lcr_plate_id, comp_well, pool_vol)
 
-    def __write_components(self, comp_well, components, plate_id):
-        '''Writes plate.'''
-
-        for idx, component in enumerate(components):
-            well = self.__get_well(idx)
-            comp_well[component[1]] = (well, plate_id)
-            print '\t'.join([well, component[1]])
-
-        return comp_well
-
-    def __write_dom_pool_worklist(self, domino_pools, dest_plate_id, comp_well,
+    def __write_dom_pool_worklist(self, pools, dest_plate_id, comp_well,
                                   vol):
         '''Write domino pool worklist.'''
         print '\t'.join(['DestinationPlateBarcode',
@@ -108,10 +96,10 @@ class AssemblyGenie(object):
                          'Volume',
                          'plasmid_id'])
 
-        for idx, ice_id in enumerate(domino_pools):
+        for idx, ice_id in enumerate(pools):
             dest_well = _get_well(idx)
 
-            for domino in domino_pools[ice_id]:
+            for domino in pools[ice_id]['dominoes']:
                 src_well = comp_well[domino[1]]
                 print '\t'.join([dest_plate_id, dest_well, src_well[1],
                                  src_well[0], str(vol), ice_id])
