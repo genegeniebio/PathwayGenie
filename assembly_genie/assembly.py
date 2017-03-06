@@ -41,16 +41,22 @@ def export_order(url, username, password, ice_ids):
 class AssemblyGenie(object):
     '''Class implementing AssemblyGenie algorithms.'''
 
-    def __init__(self, url, username, password, ice_ids, src_filenames):
-        self.__ice_client = ICEClient(url, username, password)
+    def __init__(self, ice_details, ice_ids, src_filenames):
+        self.__ice_client = ICEClient(ice_details['url'],
+                                      ice_details['username'],
+                                      ice_details['password'])
         self.__ice_ids = ice_ids
         self.__comp_well = _get_src_comp_well(src_filenames)
 
     def export_lcr_recipe(self,
-                          dom_pool_plate_id='domino_pools', domino_vol=3,
-                          lcr_plate_id='lcr', def_reagents=None,
-                          vols=None):
+                          plate_ids=None,
+                          def_reagents=None,
+                          vols=None,
+                          domino_vol=3):
         '''Exports LCR recipes.'''
+        if plate_ids is None:
+            plate_ids = {'domino_pools': 'domino_pools', 'lcr': 'lcr'}
+
         if def_reagents is None:
             def_reagents = {'mastermix': 7.5, 'ampligase': 1.5}
 
@@ -73,19 +79,20 @@ class AssemblyGenie(object):
                     # Assume backbone:
                     pools[ice_id]['backbone'].append(data)
 
-        self.__output_lcr_recipe(pools, dom_pool_plate_id, domino_vol,
-                                 lcr_plate_id, def_reagents, vols)
+        self.__output_lcr_recipe(pools, plate_ids, def_reagents, vols,
+                                 domino_vol)
 
-    def __output_lcr_recipe(self, pools, dom_pool_plate_id, domino_vol,
-                            lcr_plate_id, def_reagents, vols):
+    def __output_lcr_recipe(self, pools, plate_ids, def_reagents, vols,
+                            domino_vol):
         '''Outputs recipes.'''
         # Write domino pools worklist:
-        self.__write_dom_pool_worklist(pools, dom_pool_plate_id, domino_vol)
+        self.__write_dom_pool_worklist(pools, plate_ids['domino_pools'],
+                                       domino_vol)
 
         print ''
 
         # Write LCR worklist:
-        self.__write_lcr_worklist(lcr_plate_id, pools, def_reagents, vols)
+        self.__write_lcr_worklist(plate_ids['lcr'], pools, def_reagents, vols)
 
     def __write_dom_pool_worklist(self, pools, dest_plate_id, vol):
         '''Write domino pool worklist.'''
@@ -180,7 +187,10 @@ def _get_src_comp_well(src_filenames):
 
 def main(args):
     '''main method.'''
-    genie = AssemblyGenie(args[0], args[1], args[2], args[4:],
+    genie = AssemblyGenie({'url': args[0],
+                           'username': args[1],
+                           'password': args[2]},
+                          args[4:],
                           args[3].split(','))
     genie.export_lcr_recipe()
 
