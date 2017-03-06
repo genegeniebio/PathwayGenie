@@ -49,11 +49,13 @@ class AssemblyGenie(object):
     def export_lcr_recipe(self,
                           dom_pool_plate_id='domino_pools', domino_vol=3,
                           lcr_plate_id='lcr', def_reagents=None,
-                          backbone_vol=1, comp_vol=1, dom_pool_vol=1,
-                          total_vol=25):
+                          vols=None):
         '''Exports LCR recipes.'''
         if def_reagents is None:
             def_reagents = {'mastermix': 7.5, 'ampligase': 1.5}
+
+        if vols is None:
+            vols = {'backbone': 1, 'parts': 1, 'dom_pool': 1, 'total': 25}
 
         pools = defaultdict(lambda: defaultdict(list))
 
@@ -72,13 +74,10 @@ class AssemblyGenie(object):
                     pools[ice_id]['backbone'].append(data)
 
         self.__output_lcr_recipe(pools, dom_pool_plate_id, domino_vol,
-                                 lcr_plate_id, def_reagents,
-                                 backbone_vol, comp_vol, dom_pool_vol,
-                                 total_vol)
+                                 lcr_plate_id, def_reagents, vols)
 
     def __output_lcr_recipe(self, pools, dom_pool_plate_id, domino_vol,
-                            lcr_plate_id, def_reagents,
-                            backbone_vol, comp_vol, dom_pool_vol, total_vol):
+                            lcr_plate_id, def_reagents, vols):
         '''Outputs recipes.'''
         # Write domino pools worklist:
         self.__write_dom_pool_worklist(pools, dom_pool_plate_id, domino_vol)
@@ -86,9 +85,7 @@ class AssemblyGenie(object):
         print ''
 
         # Write LCR worklist:
-        self.__write_lcr_worklist(lcr_plate_id, pools, def_reagents,
-                                  backbone_vol, comp_vol, dom_pool_vol,
-                                  total_vol)
+        self.__write_lcr_worklist(lcr_plate_id, pools, def_reagents, vols)
 
     def __write_dom_pool_worklist(self, pools, dest_plate_id, vol):
         '''Write domino pool worklist.'''
@@ -105,8 +102,7 @@ class AssemblyGenie(object):
             self.__comp_well[ice_id + '_domino_pool'] = \
                 (dest_well, dest_plate_id)
 
-    def __write_lcr_worklist(self, dest_plate_id, pools, def_reagents,
-                             backbone_vol, comp_vol, dom_pool_vol, total_vol):
+    def __write_lcr_worklist(self, dest_plate_id, pools, def_reagents, vols):
         '''Writes LCR worklist.'''
         print '\t'.join(_WORKLIST_COLS)
 
@@ -119,26 +115,26 @@ class AssemblyGenie(object):
                 well = self.__comp_well[comp[1]]
 
                 print '\t'.join([dest_plate_id, dest_well, well[1],
-                                 well[0], str(backbone_vol), comp[2],
+                                 well[0], str(vols['backbone']), comp[2],
                                  ice_id])
-                curr_vol += backbone_vol
+                curr_vol += vols['backbone']
 
             # Write parts:
             for comp in pools[ice_id]['parts']:
                 well = self.__comp_well[comp[1]]
 
                 print '\t'.join([dest_plate_id, dest_well, well[1],
-                                 well[0], str(comp_vol), comp[2],
+                                 well[0], str(vols['parts']), comp[2],
                                  ice_id])
-                curr_vol += backbone_vol
+                curr_vol += vols['parts']
 
             # Write domino pools:
             well = self.__comp_well[ice_id + '_domino_pool']
 
             print '\t'.join([dest_plate_id, dest_well, well[1],
-                             well[0], str(dom_pool_vol), 'domino pool',
+                             well[0], str(vols['dom_pool']), 'domino pool',
                              ice_id])
-            curr_vol += dom_pool_vol
+            curr_vol += vols['dom_pool']
 
             # Write default reagents:
             for reagent, vol in def_reagents.iteritems():
@@ -150,7 +146,7 @@ class AssemblyGenie(object):
             # Write water:
             well = self.__comp_well['H2O']
             print '\t'.join([dest_plate_id, dest_well, well[1],
-                             well[0], str(total_vol - curr_vol), 'H2O',
+                             well[0], str(vols['total'] - curr_vol), 'H2O',
                              ice_id])
 
 
