@@ -22,58 +22,53 @@ class DominoThread(JobThread):
         JobThread.__init__(self)
 
         self.__query = query
-        self.__designs = query['designs']
-        self.__restr_enzs = query.get('restr_enzs', None)
         self.__ice_int = None
 
     def run(self):
         '''Designs dominoes (bridging oligos) for LCR.'''
-        try:
-            iteration = 0
+        iteration = 0
 
-            if 'dna' not in self.__query:
-                self.__get_dna()
+        if 'dna' not in self.__query:
+            self.__get_dna()
 
+        self.__fire_event('running', iteration, 'Running...')
+
+        for design in self.__query['designs']:
+            design['name'] = ' - '.join([dna['name']
+                                         for dna in design['dna']])
+
+            # Apply restriction site digestion to PARTs not PLASMIDs.
+            # (Assumes PLASMID at positions 1 and -1 - first and last).
+            if self.__query.get('restr_enzs', None) is not None:
+                design['dna'] = [design['dna'][0]] + \
+                    [self.__apply_restricts(dna)
+                     for dna in design['dna'][1:-1]] + \
+                    [design['dna'][-1]]
+
+            # Generate plasmid DNA object:
+            design['plasmid'] = dna_utils.concat(design['dna'][:-1])
+
+            # Generate domino sequences:
+            seqs = [dna['seq'] for dna in design['dna']]
+
+            oligos = [self.__get_domino(pair)
+                      for pair in pairwise(seqs)]
+            pairs = [pair for pair in pairwise(design['design'])]
+            design['dominoes'] = zip(pairs, oligos)
+
+            iteration += 1
             self.__fire_event('running', iteration, 'Running...')
 
-            for design in self.__designs:
-                design['name'] = ' - '.join([dna['name']
-                                             for dna in design['dna']])
-
-                # Apply restriction site digestion to PARTs not PLASMIDs.
-                # (Assumes PLASMID at positions 1 and -1 - first and last).
-                if self.__restr_enzs is not None:
-                    design['dna'] = [design['dna'][0]] + \
-                        [self.__apply_restricts(dna)
-                         for dna in design['dna'][1:-1]] + \
-                        [design['dna'][-1]]
-
-                # Generate plasmid DNA object:
-                design['plasmid'] = dna_utils.concat(design['dna'][:-1])
-
-                # Generate domino sequences:
-                seqs = [dna['seq'] for dna in design['dna']]
-
-                oligos = [self.__get_domino(pair)
-                          for pair in pairwise(seqs)]
-                pairs = [pair for pair in pairwise(design['design'])]
-                design['dominoes'] = zip(pairs, oligos)
-
-                iteration += 1
-                self.__fire_event('running', iteration, 'Running...')
-
-            if self._cancelled:
-                self.__fire_event('cancelled', iteration,
-                                  message='Job cancelled')
-            else:
-                self.__fire_event('finished', iteration,
-                                  message='Job completed')
-        except Exception, err:
-            self.__fire_event('error', iteration, message=str(err))
+        if self._cancelled:
+            self.__fire_event('cancelled', iteration,
+                              message='Job cancelled')
+        else:
+            self.__fire_event('finished', iteration,
+                              message='Job completed')
 
     def analyse_dominoes(self):
         '''Analyse sequences for similarity using BLAST.'''
-        for design in self.__designs:
+        for design in self.__query['designs']:
             ids_seqs = dict(zip(design['design'], design['seqs']))
             analysis = seq_utils.do_blast(ids_seqs, ids_seqs)
 
@@ -118,7 +113,8 @@ class DominoThread(JobThread):
 
     def __apply_restricts(self, dna):
         '''Cleave off prefix and suffix, according to restriction sites.'''
-        restrict_dnas = dna_utils.apply_restricts(dna, self.__restr_enzs)
+        restrict_dnas = dna_utils.apply_restricts(
+            dna, self.__query.get('restr_enzs', None))
 
         # This is a bit fudgy...
         # Essentially, return the longest fragment remaining after digestion.
@@ -140,13 +136,14 @@ class DominoThread(JobThread):
         '''Fires an event.'''
         event = {'update': {'status': status,
                             'message': message,
-                            'progress': iteration / len(self.__designs) * 100,
+                            'progress': iteration /
+                            len(self.__query['designs']) * 100,
                             'iteration': iteration,
-                            'max_iter': len(self.__designs)},
+                            'max_iter': len(self.__query['designs'])},
                  'query': self.__query
                  }
 
         if status == 'finished':
-            event['result'] = self.__designs
+            event['result'] = self.__query['designs']
 
         self._fire_event(event)
