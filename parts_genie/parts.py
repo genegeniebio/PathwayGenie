@@ -48,22 +48,22 @@ class PartsSolution(object):
 
     def get_values(self):
         '''Return update of in-progress solution.'''
-        mean_tir_errs = []
-        num_rogue_rbs = 0
-
-        for feature in self.__dna['features']:
-            if feature['typ'] == sbol_utils.SO_RBS:
-                mean_tir_errs.append(_get_mean_tir_err(feature))
-                num_rogue_rbs += len(_get_rogue_rbs(feature))
-
-        return [_get_value('mean_cai', 'CAI', self.__dna['mean_cai'], 0, 1, 1),
-                _get_value(
-                    'mean_tir', 'TIR', mean(mean_tir_errs), 0, 1, 0),
-                _get_value('num_invalid_seqs', 'Invalid seqs',
-                           self.__dna['num_inv_seq'], 0,
-                           10, 0),
-                _get_value('num_rogue_rbs', 'Rogue RBSs', num_rogue_rbs, 0, 10,
-                           0)]
+        return [_get_value('mean_cai',
+                           'CAI',
+                           self.__dna['mean_cai'],
+                           0, 1, 1),
+                _get_value('mean_tir',
+                           'TIR',
+                           self.__dna['mean_tir_errs'],
+                           0, 1, 0),
+                _get_value('num_invalid_seqs',
+                           'Invalid seqs',
+                           self.__dna['num_inv_seq'],
+                           0, 10, 0),
+                _get_value('num_rogue_rbs',
+                           'Rogue RBSs',
+                           self.__dna['num_rogue_rbs'],
+                           0, 10, 0)]
 
     def get_result(self):
         '''Return result of solution.'''
@@ -157,14 +157,19 @@ class PartsSolution(object):
         '''Calculates (simulated annealing) energies for given RBS.'''
         cais = []
         mean_tir_errs = []
+        num_rogue_rbs = 0
 
         for idx, feature in enumerate(dna['features']):
             if feature['typ'] == sbol_utils.SO_RBS:
-                rbs = dna['features'][idx]
-                rbs['dgs'] = [self.__calc.calc_dgs(rbs['seq'] + cds['seq'])
-                              for cds in dna['features'][idx + 1]['options']]
+                cdss = dna['features'][idx + 1]['options']
 
-                mean_tir_errs.append(_get_mean_tir_err(rbs))
+                feature['dgs'] = [self.__calc.calc_dgs(feature['seq'] +
+                                                       cds['seq'])
+                                  for cds in cdss]
+
+                mean_tir_errs.append(_get_mean_tir_err(feature))
+                num_rogue_rbs += len(_get_rogue_rbs(feature))
+
             elif feature['typ'] == sbol_utils.SO_CDS:
                 for cds in feature['options']:
                     cds['cai'] = self.__cod_opt.get_cai(cds['seq'])
@@ -172,14 +177,16 @@ class PartsSolution(object):
 
         dna['cais'] = cais
         dna['mean_cai'] = mean(cais)
+        dna['mean_tir_errs'] = mean(mean_tir_errs)
+        dna['num_rogue_rbs'] = num_rogue_rbs
 
         # Get number of invalid seqs:
         dna['num_inv_seq'] = sum([seq_utils.count_pattern(seq, self.__inv_patt)
                                   for seq in _get_all_seqs(dna)])
 
-        dna['energy'] = mean(mean_tir_errs) + \
+        dna['energy'] = dna['mean_tir_errs'] + \
             dna['num_inv_seq'] + \
-            len(_get_rogue_rbs(rbs))
+            dna['num_rogue_rbs']
 
         return self.get_energy(dna)
 
@@ -208,18 +215,16 @@ class PartsSolution(object):
     def __repr__(self):
         # return '%r' % (self.__dict__)
         dgs = []
-        rogue_rbs = []
 
         for feature in self.__dna['features']:
             if feature['typ'] == sbol_utils.SO_RBS:
                 dgs.append(_get_non_rogue_dgs(feature))
-                rogue_rbs.append(len(_get_rogue_rbs(feature)))
 
         return '\t'.join(['' if dgs is None
                           else str(_get_tirs(dgs)),
                           str(self.__dna['cais']),
                           str(self.__dna['num_inv_seq']),
-                          str(sum(rogue_rbs)),
+                          str(self.__dna['num_rogue_rbs']),
                           ' '.join([str(feat)
                                     for feat in self.__dna['features']])])
 
