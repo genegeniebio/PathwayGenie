@@ -69,12 +69,11 @@ class PartsSolution(object):
         '''Return result of solution.'''
         # TODO: fix...
         result = []
-        dgs = _get_non_rogue_dgs(self.__dna['features'][1])
-        tirs = _get_tirs([dgs])
+        tirs = _get_non_rogue_tirs(self.__dna['features'][1])
 
         for idx, cds in enumerate(self.__dna['features'][2]['options']):
             metadata = _get_metadata(cds['name'],
-                                     tirs[idx],
+                                     tirs[0],
                                      self.__cod_opt.get_cai(cds['seq']),
                                      self.__organism['taxonomy_id'],
                                      cds.get('uniprot', None))
@@ -163,9 +162,9 @@ class PartsSolution(object):
             if feature['typ'] == sbol_utils.SO_RBS:
                 cdss = dna['features'][idx + 1]['options']
 
-                feature['dgs'] = [self.__calc.calc_dgs(feature['seq'] +
-                                                       cds['seq'])
-                                  for cds in cdss]
+                feature['rbs_vals'] = [self.__calc.calc_dgs(feature['seq'] +
+                                                            cds['seq'])
+                                       for cds in cdss]
 
                 mean_tir_errs.append(_get_mean_tir_err(feature))
                 num_rogue_rbs += len(_get_rogue_rbs(feature))
@@ -214,14 +213,14 @@ class PartsSolution(object):
 
     def __repr__(self):
         # return '%r' % (self.__dict__)
-        dgs = []
+        tirs = []
 
         for feature in self.__dna['features']:
             if feature['typ'] == sbol_utils.SO_RBS:
-                dgs.append(_get_non_rogue_dgs(feature))
+                tirs.append(_get_non_rogue_tirs(feature))
 
-        return '\t'.join(['' if dgs is None
-                          else str(_get_tirs(dgs)),
+        return '\t'.join(['' if tirs is None
+                          else str(tirs),
                           str(self.__dna['cais']),
                           str(self.__dna['num_inv_seq']),
                           str(self.__dna['num_rogue_rbs']),
@@ -299,42 +298,27 @@ def _get_value(value_id, name, value, min_value, max_value, target):
             'target': target}
 
 
-def _get_rogue_rbs(rbs):
+def _get_rogue_rbs(rbs, cutoff=0.1):
     '''Returns rogue RBS sites.'''
-    dgs = rbs['dgs']
-    idx = rbs['len']
-    target = rbs['tir_target']
-
-    dgs = [cds_vals[1][:cds_vals[0].index(idx)] +
-           cds_vals[1][cds_vals[0].index(idx) + 1:]
-           for cds_vals in dgs]
-
-    return [tir for tir in _get_tirs(dgs) if tir > target * 0.1]
+    return [(pos, terms)
+            for rbs_vals in rbs['rbs_vals']
+            for pos, terms in rbs_vals.iteritems()
+            if pos != rbs['len'] and terms[1] > rbs['tir_target'] * cutoff]
 
 
-def _get_tirs(dgs):
-    '''Gets the translation initiation rates.'''
-    return [rbs_calc.get_tir(d_g) for lst in dgs for d_g in lst]
-
-
-def _get_non_rogue_dgs(rbs):
-    '''Gets all non-rogue dGs for RBS sites.'''
-    dgs = rbs['dgs']
-    idx = rbs['len']
-
-    return None if dgs is None \
-        else [cds_vals[1][cds_vals[0].index(idx)] for cds_vals in dgs]
+def _get_non_rogue_tirs(rbs):
+    '''Gets all non-rogue TIRs for RBS sites.'''
+    return [terms[1]
+            for rbs_vals in rbs['rbs_vals']
+            for pos, terms in rbs_vals.iteritems()
+            if pos == rbs['len']]
 
 
 def _get_mean_tir_err(rbs):
     '''Gets mean TIR error of RBS sites (not rogue RBSs) as proportion of
     target TIR.'''
-    dgs = _get_non_rogue_dgs(rbs)
-    tirs = _get_tirs([dgs])
-
-    tir_target = float(rbs['tir_target'])
-    mean_tir = 0 if dgs is None else mean(tirs)
-    return abs(tir_target - mean_tir) / tir_target
+    return abs(rbs['tir_target'] - mean(_get_non_rogue_tirs(rbs))) / \
+        rbs['tir_target']
 
 
 def _get_metadata(prot_id, tir, cai, target_org=None, uniprot_id=None):

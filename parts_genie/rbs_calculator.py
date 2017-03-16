@@ -20,6 +20,7 @@ from synbiochem.utils import seq_utils
 from parts_genie.nucl_acid_utils import NuPackRunner
 import regex as re
 
+
 _RT_EFF = 2.222
 _K = 2500.0
 
@@ -39,7 +40,7 @@ class RbsCalculator(object):
         m_rna = m_rna.upper()
 
         start_positions = []
-        dgs = []
+        dgs_tirs = []
         count = 0
 
         for match in re.finditer(seq_utils.START_CODON_PATT, m_rna,
@@ -50,7 +51,7 @@ class RbsCalculator(object):
             try:
                 d_g = self.__calc_dg(m_rna, start_pos)
                 start_positions.append(start_pos)
-                dgs.append(d_g)
+                dgs_tirs.append((d_g, get_tir(d_g)))
                 count += 1
             except ValueError:
                 # Occurs when start codon appears at start of sequence, and is
@@ -60,7 +61,7 @@ class RbsCalculator(object):
             if count == limit:
                 break
 
-        return start_positions, dgs
+        return dict(zip(start_positions, dgs_tirs))
 
     def calc_kinetic_score(self, m_rna, start_pos, dangles='none'):
         '''Gets kinetic score.'''
