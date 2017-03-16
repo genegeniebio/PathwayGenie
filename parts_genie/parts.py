@@ -11,9 +11,9 @@ from itertools import product
 import copy
 import re
 
+from numpy import mean
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import dna_utils, sbol_utils, seq_utils
-import numpy
 
 from parts_genie import rbs_calculator as rbs_calc
 
@@ -48,20 +48,17 @@ class PartsSolution(object):
 
     def get_values(self):
         '''Return update of in-progress solution.'''
-        mean_tirs = []
+        mean_tir_errs = []
         num_rogue_rbs = 0
 
         for feature in self.__dna['features']:
             if feature['typ'] == sbol_utils.SO_RBS:
-                mean_tirs.append(_get_mean_tir(feature))
+                mean_tir_errs.append(_get_mean_tir_err(feature))
                 num_rogue_rbs += len(_get_rogue_rbs(feature))
 
-        # TODO: fix...
         return [_get_value('mean_cai', 'CAI', self.__dna['mean_cai'], 0, 1, 1),
-                _get_value('mean_tir', 'TIR', numpy.mean(mean_tirs), 0,
-                           float(
-                               self.__dna['features'][1]['tir_target']) * 1.2,
-                           float(self.__dna['features'][1]['tir_target'])),
+                _get_value(
+                    'mean_tir', 'TIR', mean(mean_tir_errs), 0, 1, 0),
                 _get_value('num_invalid_seqs', 'Invalid seqs',
                            self.__dna['num_inv_seq'], 0,
                            10, 0),
@@ -159,6 +156,7 @@ class PartsSolution(object):
     def __update(self, dna):
         '''Calculates (simulated annealing) energies for given RBS.'''
         cais = []
+        mean_tir_errs = []
 
         for idx, feature in enumerate(dna['features']):
             if feature['typ'] == sbol_utils.SO_RBS:
@@ -166,22 +164,20 @@ class PartsSolution(object):
                 rbs['dgs'] = [self.__calc.calc_dgs(rbs['seq'] + cds['seq'])
                               for cds in dna['features'][idx + 1]['options']]
 
-                tir_target = float(rbs['tir_target'])
-                mean_tir = _get_mean_tir(rbs)
-                mean_d_tir = abs(tir_target - mean_tir) / tir_target
+                mean_tir_errs.append(_get_mean_tir_err(rbs))
             elif feature['typ'] == sbol_utils.SO_CDS:
                 for cds in feature['options']:
                     cds['cai'] = self.__cod_opt.get_cai(cds['seq'])
                     cais.append(cds['cai'])
 
         dna['cais'] = cais
-        dna['mean_cai'] = numpy.mean(cais)
+        dna['mean_cai'] = mean(cais)
 
         # Get number of invalid seqs:
         dna['num_inv_seq'] = sum([seq_utils.count_pattern(seq, self.__inv_patt)
                                   for seq in _get_all_seqs(dna)])
 
-        dna['energy'] = mean_d_tir + \
+        dna['energy'] = mean(mean_tir_errs) + \
             dna['num_inv_seq'] + \
             len(_get_rogue_rbs(rbs))
 
@@ -325,15 +321,15 @@ def _get_non_rogue_dgs(rbs):
         else [cds_vals[1][cds_vals[0].index(idx)] for cds_vals in dgs]
 
 
-def _get_mean_tir(rbs):
-    '''Gets mean dG of RBS sites (not rogue RBSs).'''
-    try:
-        dgs = _get_non_rogue_dgs(rbs)
-    except ValueError, err:
-        print err
-        print str(rbs)
+def _get_mean_tir_err(rbs):
+    '''Gets mean TIR error of RBS sites (not rogue RBSs) as proportion of
+    target TIR.'''
+    dgs = _get_non_rogue_dgs(rbs)
     tirs = _get_tirs([dgs])
-    return 0 if dgs is None else numpy.mean(tirs)
+
+    tir_target = float(rbs['tir_target'])
+    mean_tir = 0 if dgs is None else mean(tirs)
+    return abs(tir_target - mean_tir) / tir_target
 
 
 def _get_metadata(prot_id, tir, cai, target_org=None, uniprot_id=None):
