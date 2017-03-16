@@ -7,11 +7,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-# pylint: disable=too-many-arguments
-# pylint: disable=too-many-instance-attributes
+from itertools import product
 import copy
-import math
-import random
 import re
 
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
@@ -40,7 +37,7 @@ class PartsSolution(object):
                                     for x in seq_utils.NUCLEOTIDES])
 
         self.__get_seqs()
-        self.__calc_dgs(self.__dna)
+        self.__update(self.__dna)
         self.__dna_new = copy.deepcopy(self.__dna)
 
     def get_query(self):
@@ -53,29 +50,27 @@ class PartsSolution(object):
         '''Return update of in-progress solution.'''
         mean_tirs = []
         num_rogue_rbs = 0
-        cais = []
 
         for feature in self.__dna['features']:
             if feature['typ'] == sbol_utils.SO_RBS:
                 mean_tirs.append(_get_mean_tir(feature))
                 num_rogue_rbs += len(_get_rogue_rbs(feature))
-            elif feature['typ'] == sbol_utils.SO_CDS:
-                cais.extend([self.__cod_opt.get_cai(cds['seq'])
-                             for cds in feature['options']])
 
-        return [_get_value('mean_cai', 'CAI', numpy.mean(cais), 0, 1, 1),
+        # TODO: fix...
+        return [_get_value('mean_cai', 'CAI', self.__dna['mean_cai'], 0, 1, 1),
                 _get_value('mean_tir', 'TIR', numpy.mean(mean_tirs), 0,
                            float(
                                self.__dna['features'][1]['tir_target']) * 1.2,
                            float(self.__dna['features'][1]['tir_target'])),
                 _get_value('num_invalid_seqs', 'Invalid seqs',
-                           self.__get_num_inv_seq(self.__dna), 0,
+                           self.__dna['num_inv_seq'], 0,
                            10, 0),
                 _get_value('num_rogue_rbs', 'Rogue RBSs', num_rogue_rbs, 0, 10,
                            0)]
 
     def get_result(self):
         '''Return result of solution.'''
+        # TODO: fix...
         result = []
         dgs = _get_non_rogue_dgs(self.__dna['features'][1])
         tirs = _get_tirs([dgs])
@@ -97,29 +92,24 @@ class PartsSolution(object):
 
     def get_energy(self, dna=None):
         '''Gets the (simulated annealing) energy.'''
-        if dna is None:
-            return float('inf')
-
-        rbs = dna['features'][1]
-        tir_target = float(rbs['tir_target'])
-        mean_tir = _get_mean_tir(rbs)
-        mean_d_tir = abs(tir_target - mean_tir) / tir_target
-
-        return math.erf(mean_d_tir) + \
-            self.__get_num_inv_seq(dna) + \
-            len(_get_rogue_rbs(rbs))
+        return float('inf') if dna is None else dna['energy']
 
     def mutate(self):
         '''Mutates and scores whole design.'''
         for feature in self.__dna_new['features']:
             if not feature['fixed']:
                 if feature['typ'] == sbol_utils.SO_CDS:
-                    self.__mutate_cds(feature['options'])
+                    for idx, cds in enumerate(feature['options']):
+                        cds = feature['options'][idx]
+                        mutation_rate = 5.0 / len(cds['aa_seq'])
+                        cds['seq'] = self.__cod_opt.mutate(cds['aa_seq'],
+                                                           cds['seq'],
+                                                           mutation_rate)
                 else:
-                    feature['seq'] = seq_utils.mutate_seq(feature['seq'])
+                    feature['seq'] = seq_utils.mutate_seq(feature['seq'],
+                                                          mutations=3)
 
-        self.__calc_dgs(self.__dna_new)
-        return self.get_energy(self.__dna_new)
+        return self.__update(self.__dna_new)
 
     def accept(self):
         '''Accept potential update.'''
@@ -166,41 +156,40 @@ class PartsSolution(object):
                     self.__dna['features'][idx + 1]['options'][0]['seq'],
                     rbs['dg_target'])
 
-    def __calc_dgs(self, dna):
+    def __update(self, dna):
         '''Calculates (simulated annealing) energies for given RBS.'''
+        cais = []
+
         for idx, feature in enumerate(dna['features']):
             if feature['typ'] == sbol_utils.SO_RBS:
                 rbs = dna['features'][idx]
                 rbs['dgs'] = [self.__calc.calc_dgs(rbs['seq'] + cds['seq'])
                               for cds in dna['features'][idx + 1]['options']]
 
-    def __mutate_cds(self, cdss):
-        '''Mutates (potentially) multiple CDS.'''
-        for idx in range(len(cdss)):
-            self.__mutate_specific_cds(cdss, idx)
+                tir_target = float(rbs['tir_target'])
+                mean_tir = _get_mean_tir(rbs)
+                mean_d_tir = abs(tir_target - mean_tir) / tir_target
+            elif feature['typ'] == sbol_utils.SO_CDS:
+                for cds in feature['options']:
+                    cds['cai'] = self.__cod_opt.get_cai(cds['seq'])
+                    cais.append(cds['cai'])
 
-    def __mutate_single_cds(self, cdss):
-        '''Mutates one randomly-selected CDS.'''
-        idx = int(random.random() * len(cdss))
-        self.__mutate_specific_cds(cdss, idx)
+        dna['cais'] = cais
+        dna['mean_cai'] = numpy.mean(cais)
 
-    def __mutate_specific_cds(self, cdss, idx):
-        '''Mutates one specific CDS.'''
-        cds = cdss[idx]
+        # Get number of invalid seqs:
+        dna['num_inv_seq'] = sum([seq_utils.count_pattern(seq, self.__inv_patt)
+                                  for seq in _get_all_seqs(dna)])
 
-        self.__dna_new['features'][2]['options'][idx]['seq'] = \
-            self.__cod_opt.mutate(cds['aa_seq'], cds['seq'],
-                                  5.0 / len(cds['aa_seq']))
+        dna['energy'] = mean_d_tir + \
+            dna['num_inv_seq'] + \
+            len(_get_rogue_rbs(rbs))
 
-    def __get_num_inv_seq(self, dna):
-        '''Returns number of invalid sequences.'''
-        return sum([seq_utils.count_pattern(dna['features'][1]['seq'] +
-                                            cds['seq'],
-                                            self.__inv_patt)
-                    for cds in dna['features'][2]['options']])
+        return self.get_energy(dna)
 
     def __get_dna(self, name, desc, cds_idx):
         '''Writes SBOL document to temporary store.'''
+        # TODO: fix...
         seq = self.__dna['features'][0]['seq'] + \
             self.__dna['features'][1]['seq'] + \
             self.__dna['features'][2]['options'][cds_idx]['seq'] + \
@@ -223,21 +212,17 @@ class PartsSolution(object):
     def __repr__(self):
         # return '%r' % (self.__dict__)
         dgs = []
-        cais = []
         rogue_rbs = []
 
         for feature in self.__dna['features']:
             if feature['typ'] == sbol_utils.SO_RBS:
                 dgs.append(_get_non_rogue_dgs(feature))
                 rogue_rbs.append(len(_get_rogue_rbs(feature)))
-            elif feature['typ'] == sbol_utils.SO_CDS:
-                cais.append([self.__cod_opt.get_cai(cds['seq'])
-                             for cds in feature['options']])
 
         return '\t'.join(['' if dgs is None
                           else str(_get_tirs(dgs)),
-                          str(cais),
-                          str(self.__get_num_inv_seq(self.__dna)),
+                          str(self.__dna['cais']),
+                          str(self.__dna['num_inv_seq']),
                           str(sum(rogue_rbs)),
                           ' '.join([str(feat)
                                     for feat in self.__dna['features']])])
@@ -284,6 +269,23 @@ def _process_query(query):
         list(set([x.strip().upper()
                   for x in filters['excl_codons'].split()])) \
         if 'excl_codons' in filters else []
+
+
+def _get_all_seqs(dna):
+    '''Return all sequence.'''
+    all_seqs = ['']
+
+    for feature in dna['features']:
+        if feature['typ'] == sbol_utils.SO_CDS:
+            all_seqs = [''.join(term)
+                        for term in product([option['seq']
+                                             for option in feature['options']],
+                                            all_seqs)]
+        else:
+            for idx, seq in enumerate(all_seqs):
+                all_seqs[idx] = seq + feature['seq']
+
+    return all_seqs
 
 
 def _get_value(value_id, name, value, min_value, max_value, target):
