@@ -67,24 +67,31 @@ class PartsSolution(object):
 
     def get_result(self):
         '''Return result of solution.'''
-        # TODO: fix...
-        result = []
-        tirs = _get_non_rogue_tirs(self.__dna['features'][1])
+        all_dnas = []
 
-        for idx, cds in enumerate(self.__dna['features'][2]['options']):
-            metadata = _get_metadata(cds['name'],
-                                     tirs[0],
-                                     self.__cod_opt.get_cai(cds['seq']),
-                                     self.__organism['taxonomy_id'],
-                                     cds.get('uniprot', None))
+        for feature in self.__dna['features']:
+            if len(feature.get('seq', '')) or len(feature.get('options', '')):
+                if feature['typ'] == sbol_utils.SO_RBS:
+                    tirs = _get_non_rogue_tirs(feature)
 
-            dna = self.__get_dna(metadata['name'],
-                                 metadata['shortDescription'],
-                                 idx)
+                if feature['typ'] == sbol_utils.SO_CDS:
+                    for tir, cds in zip(tirs, feature['options']):
+                        metadata = _get_metadata(cds['name'],
+                                                 tir,
+                                                 self.__cod_opt.get_cai(
+                                                     cds['seq']),
+                                                 self.__organism[
+                                                     'taxonomy_id'],
+                                                 cds.get('uniprot', None))
 
-            result.append({'metadata': metadata, 'dna': dna})
+                        cds['name'] = metadata['name']
+                        cds['desc'] = metadata['shortDescription']
 
-        return result
+                        _add_feature_to_all(all_dnas, cds)
+                else:
+                    _add_feature_to_all(all_dnas, feature)
+
+        return all_dnas
 
     def get_energy(self, dna=None):
         '''Gets the (simulated annealing) energy.'''
@@ -189,28 +196,6 @@ class PartsSolution(object):
 
         return self.get_energy(dna)
 
-    def __get_dna(self, name, desc, cds_idx):
-        '''Writes SBOL document to temporary store.'''
-        # TODO: fix...
-        seq = self.__dna['features'][0]['seq'] + \
-            self.__dna['features'][1]['seq'] + \
-            self.__dna['features'][2]['options'][cds_idx]['seq'] + \
-            self.__dna['features'][3]['seq']
-
-        dna = dna_utils.DNA(name=name, desc=desc, seq=seq)
-
-        start = _add_feature(dna, self.__dna['features'][0], 1)
-
-        start = _add_feature(dna, self.__dna['features'][1], start)
-
-        start = _add_feature(dna,
-                             self.__dna['features'][2]['options'][cds_idx],
-                             start)
-
-        _add_feature(dna, self.__dna['features'][3], start)
-
-        return dna
-
     def __repr__(self):
         # return '%r' % (self.__dict__)
         tirs = []
@@ -272,7 +257,7 @@ def _process_query(query):
 
 
 def _get_all_seqs(dna):
-    '''Return all sequence.'''
+    '''Return all sequences.'''
     all_seqs = ['']
 
     for feature in dna['features']:
@@ -365,8 +350,22 @@ def _get_metadata(prot_id, tir, cai, target_org=None, uniprot_id=None):
     return metadata
 
 
-def _add_feature(dna, feature, start):
+def _add_feature_to_all(all_dnas, feature):
+    if not len(all_dnas):
+        dna = dna_utils.DNA(name=feature['name'],
+                            desc=feature.get('desc', None),
+                            seq=feature['seq'],
+                            forward=feature.get('forward', True))
+        _add_feature(dna, feature)
+        all_dnas.append(dna)
+    else:
+        for dna in all_dnas:
+            _add_feature(dna, feature)
+
+
+def _add_feature(dna, feature):
     '''Adds a subcompartment.'''
+    start = len(dna['seq']) + 1
     seq = feature['seq']
 
     if seq is not None and len(seq):
@@ -378,7 +377,3 @@ def _add_feature(dna, feature, start):
                                 end=end,
                                 forward=feature.get('forward', True))
         dna['features'].append(feature)
-
-        return end + 1
-
-    return start
