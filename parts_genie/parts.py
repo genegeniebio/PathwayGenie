@@ -48,22 +48,24 @@ class PartsSolution(object):
 
     def get_values(self):
         '''Return update of in-progress solution.'''
-        return [_get_value('mean_cai',
-                           'CAI',
-                           self.__dna['mean_cai'],
-                           0, 1, 1),
-                _get_value('mean_tir',
-                           'TIR',
-                           self.__dna['mean_tir_errs'],
-                           0, 1, 0),
-                _get_value('num_invalid_seqs',
-                           'Invalid seqs',
-                           self.__dna['num_inv_seq'],
-                           0, 10, 0),
-                _get_value('num_rogue_rbs',
-                           'Rogue RBSs',
-                           self.__dna['num_rogue_rbs'],
-                           0, 10, 0)]
+        keys = ['id', 'name', 'value', 'min', 'max', 'target']
+
+        return [dict(zip(keys, ('mean_cai',
+                                'CAI',
+                                self.__dna['mean_cai'],
+                                0, 1, 1))),
+                dict(zip(keys, ('mean_tir',
+                                'TIR',
+                                self.__dna['mean_tir_errs'],
+                                0, 1, 0))),
+                dict(zip(keys, ('num_invalid_seqs',
+                                'Invalid seqs',
+                                self.__dna['num_inv_seq'],
+                                0, 10, 0))),
+                dict(zip(keys, ('num_rogue_rbs',
+                                'Rogue RBSs',
+                                self.__dna['num_rogue_rbs'],
+                                0, 10, 0)))]
 
     def get_result(self):
         '''Return result of solution.'''
@@ -123,37 +125,14 @@ class PartsSolution(object):
             if feature['typ'] == sbol_utils.SO_CDS:
                 for cds in feature['options']:
                     if re.match(uniprot_id_pattern, cds['aa_seq']):
-                        uniprot_id = cds['aa_seq']
-                        uniprot_vals = seq_utils.get_uniprot_values(
-                            [uniprot_id], ['sequence',
-                                           'entry name',
-                                           'protein names',
-                                           'organism',
-                                           'organism-id',
-                                           'ec'])
+                        _get_uniprot_data(cds, cds['aa_seq'])
 
-                        cds['uniprot'] = uniprot_id
-                        cds['aa_seq'] = uniprot_vals[uniprot_id]['Sequence']
-                        cds['name'] = uniprot_vals[uniprot_id]['Entry name']
-                        prot_names = uniprot_vals[uniprot_id]['Protein names']
-                        org = uniprot_vals[uniprot_id]['Organism']
-                        cds['desc'] = ', '.join(prot_names) + ' (' + org + ')'
-                        ec_number = \
-                            uniprot_vals[uniprot_id].get('EC number', None)
+                    if cds['aa_seq'][-1] != '*':
+                        cds['aa_seq'] += '*'
 
-                        cds['Organism'] = org
-                        cds['links'] = [
-                            'http://identifiers.org/uniprot/' + uniprot_id,
-                            'http://identifiers.org/taxonomy/' +
-                            self.__organism['taxonomy_id']
-                        ]
-
-                        if ec_number:
-                            cds['links'].append(
-                                'http://identifiers.org/ec-code/' + ec_number)
-
-                        if cds['aa_seq'][-1] != '*':
-                            cds['aa_seq'] += '*'
+                    cds['links'].append(
+                        'http://identifiers.org/taxonomy/' +
+                        self.__organism['taxonomy_id'])
 
                     cds['seq'] = self.__cod_opt.get_codon_optim_seq(
                         cds['aa_seq'],
@@ -285,16 +264,6 @@ def _get_all_seqs(dna):
     return all_seqs
 
 
-def _get_value(value_id, name, value, min_value, max_value, target):
-    '''Returns value data as a dict.'''
-    return {'id': value_id,
-            'name': name,
-            'value': value,
-            'min': min_value,
-            'max': max_value,
-            'target': target}
-
-
 def _get_rogue_rbs(rbs, cutoff=0.1):
     '''Returns rogue RBS sites.'''
     return [(pos, terms)
@@ -318,14 +287,44 @@ def _get_mean_tir_err(rbs):
         rbs['tir_target']
 
 
+def _get_uniprot_data(cds, uniprot_id):
+    '''Updates CDS with Uniprot data.'''
+    uniprot_vals = seq_utils.get_uniprot_values(
+        [uniprot_id], ['sequence',
+                       'entry name',
+                       'protein names',
+                       'organism',
+                       'organism-id',
+                       'ec'])
+
+    cds['uniprot'] = uniprot_id
+    cds['aa_seq'] = uniprot_vals[uniprot_id]['Sequence']
+    cds['name'] = uniprot_vals[uniprot_id]['Entry name']
+    prot_names = uniprot_vals[uniprot_id]['Protein names']
+    org = uniprot_vals[uniprot_id]['Organism']
+    cds['desc'] = ', '.join(prot_names) + ' (' + org + ')'
+    ec_number = \
+        uniprot_vals[uniprot_id].get('EC number', None)
+
+    cds['Organism'] = org
+    cds['links'] = [
+        'http://identifiers.org/uniprot/' + uniprot_id,
+    ]
+
+    if ec_number:
+        cds['links'].append(
+            'http://identifiers.org/ec-code/' + ec_number)
+
+
 def _add_feature_to_all(all_dnas, feature):
     if not len(all_dnas):
         dna = dna_utils.DNA(name=feature['name'],
                             desc=feature.get('desc', None),
-                            seq=feature['seq'],
+                            seq='',
                             forward=feature.get('forward', True))
         dna['Type'] = 'PART'
         _add_feature(dna, feature)
+        dna['seq'] = feature['seq']
         all_dnas.append(dna)
     else:
         for dna in all_dnas:
