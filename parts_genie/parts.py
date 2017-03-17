@@ -76,17 +76,7 @@ class PartsSolution(object):
 
                 if feature['typ'] == sbol_utils.SO_CDS:
                     for tir, cds in zip(tirs, feature['options']):
-                        metadata = _get_metadata(cds['name'],
-                                                 tir,
-                                                 self.__cod_opt.get_cai(
-                                                     cds['seq']),
-                                                 self.__organism[
-                                                     'taxonomy_id'],
-                                                 cds.get('uniprot', None))
-
-                        cds['name'] = metadata['name']
-                        cds['desc'] = metadata['shortDescription']
-
+                        cds['TIR'] = float("{0:.2f}".format(tir))
                         _add_feature_to_all(all_dnas, cds)
                 else:
                     _add_feature_to_all(all_dnas, feature)
@@ -133,12 +123,34 @@ class PartsSolution(object):
             if feature['typ'] == sbol_utils.SO_CDS:
                 for cds in feature['options']:
                     if re.match(uniprot_id_pattern, cds['aa_seq']):
+                        uniprot_id = cds['aa_seq']
                         uniprot_vals = seq_utils.get_uniprot_values(
-                            [cds['aa_seq']], ['sequence']).values()
+                            [uniprot_id], ['sequence',
+                                           'entry name',
+                                           'protein names',
+                                           'organism',
+                                           'organism-id',
+                                           'ec'])
 
-                        cds['uniprot'] = cds['aa_seq']
-                        cds['aa_seq'] = [values['Sequence']
-                                         for values in uniprot_vals][0]
+                        cds['uniprot'] = uniprot_id
+                        cds['aa_seq'] = uniprot_vals[uniprot_id]['Sequence']
+                        cds['name'] = uniprot_vals[uniprot_id]['Entry name']
+                        prot_names = uniprot_vals[uniprot_id]['Protein names']
+                        org = uniprot_vals[uniprot_id]['Organism']
+                        cds['desc'] = ', '.join(prot_names) + ' (' + org + ')'
+                        ec_number = \
+                            uniprot_vals[uniprot_id].get('EC number', None)
+
+                        cds['Organism'] = org
+                        cds['links'] = [
+                            'http://identifiers.org/uniprot/' + uniprot_id,
+                            'http://identifiers.org/taxonomy/' +
+                            self.__organism['taxonomy_id']
+                        ]
+
+                        if ec_number:
+                            cds['links'].append(
+                                'http://identifiers.org/ec-code/' + ec_number)
 
                         if cds['aa_seq'][-1] != '*':
                             cds['aa_seq'] += '*'
@@ -306,56 +318,13 @@ def _get_mean_tir_err(rbs):
         rbs['tir_target']
 
 
-def _get_metadata(prot_id, tir, cai, target_org=None, uniprot_id=None):
-    '''Gets metadata.'''
-    name = prot_id
-    description = prot_id
-    links = []
-    parameters = []
-
-    if uniprot_id is not None:
-        uniprot_vals = seq_utils.get_uniprot_values([uniprot_id],
-                                                    ['entry name',
-                                                     'protein names',
-                                                     'organism-id',
-                                                     'organism',
-                                                     'ec'])
-        # Add metadata:
-        if len(uniprot_vals.keys()):
-            prot_id = uniprot_vals.keys()[0]
-            name = uniprot_vals[prot_id]['Entry name']
-            organism = uniprot_vals[prot_id]['Organism']
-            prot_names = uniprot_vals[prot_id]['Protein names']
-            description = ', '.join(prot_names) + ' (' + organism + ')'
-            ec_number = uniprot_vals[prot_id].get('EC number', None)
-
-            parameters.append({'name': 'Organism', 'value': organism})
-            links.append('http://identifiers.org/uniprot/' + uniprot_id)
-
-            if ec_number:
-                links.append('http://identifiers.org/ec-code/' + ec_number)
-
-    parameters.append({'name': 'Type', 'value': 'PART'})
-    parameters.append({'name': 'TIR', 'value': float("{0:.2f}".format(tir))})
-    parameters.append({'name': 'CAI', 'value': float("{0:.2f}".format(cai))})
-
-    if target_org:
-        links.append('http://identifiers.org/taxonomy/' + target_org)
-
-    metadata = {'name': name,
-                'shortDescription': description,
-                'links': links,
-                'parameters': parameters}
-
-    return metadata
-
-
 def _add_feature_to_all(all_dnas, feature):
     if not len(all_dnas):
         dna = dna_utils.DNA(name=feature['name'],
                             desc=feature.get('desc', None),
                             seq=feature['seq'],
                             forward=feature.get('forward', True))
+        dna['Type'] = 'PART'
         _add_feature(dna, feature)
         all_dnas.append(dna)
     else:
