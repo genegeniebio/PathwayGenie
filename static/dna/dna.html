@@ -28,9 +28,9 @@
 				<td class="seq">{{(feature().seq ? feature().seq :
 					dna.seq.substring(feature().start - 1, feature().end)) | uppercase }}</td>
 			</tr>
-			<tr data-ng-repeat="parameter in feature().parameters">
-				<td>{{parameter.name}}</td>
-				<td>{{parameter.value}}</td>
+			<tr data-ng-repeat="(key, value) in feature().parameters">
+				<td>{{key}}</td>
+				<td>{{value}}</td>
 			</tr>
 			<tr data-ng-show="feature().links">
 				<td>Links</td>

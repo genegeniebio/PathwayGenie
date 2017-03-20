@@ -22,7 +22,7 @@ class PartsSolution(object):
     '''Solution for RBS optimisation.'''
 
     def __init__(self, dna, organism, filters):
-        self.__dna = dna
+        self.__dna = dna_utils.get_dna(dna)
         self.__organism = organism
         self.__filters = filters
 
@@ -52,19 +52,19 @@ class PartsSolution(object):
 
         return [dict(zip(keys, ('mean_cai',
                                 'CAI',
-                                self.__dna['mean_cai'],
+                                self.__dna['parameters']['mean_cai'],
                                 0, 1, 1))),
                 dict(zip(keys, ('mean_tir',
                                 'TIR',
-                                self.__dna['mean_tir_errs'],
+                                self.__dna['parameters']['mean_tir_errs'],
                                 0, 1, 0))),
                 dict(zip(keys, ('num_invalid_seqs',
                                 'Invalid seqs',
-                                self.__dna['num_inv_seq'],
+                                self.__dna['parameters']['num_inv_seq'],
                                 0, 10, 0))),
                 dict(zip(keys, ('num_rogue_rbs',
                                 'Rogue RBSs',
-                                self.__dna['num_rogue_rbs'],
+                                self.__dna['parameters']['num_rogue_rbs'],
                                 0, 10, 0)))]
 
     def get_result(self):
@@ -78,7 +78,7 @@ class PartsSolution(object):
 
                 if feature['typ'] == sbol_utils.SO_CDS:
                     for tir, cds in zip(tirs, feature['options']):
-                        cds['TIR'] = float("{0:.2f}".format(tir))
+                        cds['parameters']['TIR'] = float("{0:.2f}".format(tir))
                         _add_feature(all_dnas, cds)
                 else:
                     _add_feature(all_dnas, feature)
@@ -90,22 +90,22 @@ class PartsSolution(object):
 
     def get_energy(self, dna=None):
         '''Gets the (simulated annealing) energy.'''
-        return float('inf') if dna is None else dna['energy']
+        return float('inf') if dna is None else dna['parameters']['energy']
 
     def mutate(self):
         '''Mutates and scores whole design.'''
         for feature in self.__dna_new['features']:
-            if not feature['fixed']:
-                if feature['typ'] == sbol_utils.SO_CDS:
-                    for idx, cds in enumerate(feature['options']):
-                        cds = feature['options'][idx]
-                        mutation_rate = 5.0 / len(cds['aa_seq'])
-                        cds['seq'] = self.__cod_opt.mutate(cds['aa_seq'],
-                                                           cds['seq'],
-                                                           mutation_rate)
-                else:
-                    feature['seq'] = seq_utils.mutate_seq(feature['seq'],
-                                                          mutations=3)
+            if feature['typ'] == sbol_utils.SO_CDS:
+                for cds in feature['options']:
+                    if not cds['parameters']['fixed']:
+                        mutation_rate = 5.0 / len(cds['parameters']['aa_seq'])
+                        cds['seq'] = self.__cod_opt.mutate(
+                            cds['parameters']['aa_seq'],
+                            cds['seq'],
+                            mutation_rate)
+            elif not feature['parameters']['fixed']:
+                feature['seq'] = seq_utils.mutate_seq(feature['seq'],
+                                                      mutations=3)
 
         return self.__update(self.__dna_new)
 
@@ -127,18 +127,19 @@ class PartsSolution(object):
         for feature in self.__dna['features']:
             if feature['typ'] == sbol_utils.SO_CDS:
                 for cds in feature['options']:
-                    if re.match(uniprot_id_pattern, cds['aa_seq']):
-                        _get_uniprot_data(cds, cds['aa_seq'])
+                    if re.match(uniprot_id_pattern,
+                                cds['parameters']['aa_seq']):
+                        _get_uniprot_data(cds, cds['parameters']['aa_seq'])
 
-                    if cds['aa_seq'][-1] != '*':
-                        cds['aa_seq'] += '*'
+                    if cds['parameters']['aa_seq'][-1] != '*':
+                        cds['parameters']['aa_seq'] += '*'
 
                     cds['links'].append(
                         'http://identifiers.org/taxonomy/' +
                         self.__organism['taxonomy_id'])
 
                     cds['seq'] = self.__cod_opt.get_codon_optim_seq(
-                        cds['aa_seq'],
+                        cds['parameters']['aa_seq'],
                         self.__filters['excl_codons'],
                         self.__inv_patt,
                         tolerant=False)
@@ -149,9 +150,9 @@ class PartsSolution(object):
             if feature['typ'] == sbol_utils.SO_RBS:
                 rbs = self.__dna['features'][idx]
                 rbs['seq'] = self.__calc.get_initial_rbs(
-                    rbs['len'],
+                    rbs['end'],
                     self.__dna['features'][idx + 1]['options'][0]['seq'],
-                    rbs['dg_target'])
+                    rbs['parameters']['dg_target'])
 
     def __update(self, dna):
         '''Calculates (simulated annealing) energies for given RBS.'''
@@ -172,21 +173,23 @@ class PartsSolution(object):
 
             elif feature['typ'] == sbol_utils.SO_CDS:
                 for cds in feature['options']:
-                    cds['cai'] = self.__cod_opt.get_cai(cds['seq'])
-                    cais.append(cds['cai'])
+                    cds['parameters']['cai'] = \
+                        self.__cod_opt.get_cai(cds['seq'])
+                    cais.append(cds['parameters']['cai'])
 
-        dna['cais'] = cais
-        dna['mean_cai'] = mean(cais)
-        dna['mean_tir_errs'] = mean(mean_tir_errs)
-        dna['num_rogue_rbs'] = num_rogue_rbs
+        dna['parameters']['cais'] = cais
+        dna['parameters']['mean_cai'] = mean(cais)
+        dna['parameters']['mean_tir_errs'] = mean(mean_tir_errs)
+        dna['parameters']['num_rogue_rbs'] = num_rogue_rbs
 
         # Get number of invalid seqs:
-        dna['num_inv_seq'] = sum([seq_utils.count_pattern(seq, self.__inv_patt)
-                                  for seq in _get_all_seqs(dna)])
+        dna['parameters']['num_inv_seq'] = \
+            sum([seq_utils.count_pattern(seq, self.__inv_patt)
+                 for seq in _get_all_seqs(dna)])
 
-        dna['energy'] = dna['mean_tir_errs'] + \
-            dna['num_inv_seq'] + \
-            dna['num_rogue_rbs']
+        dna['parameters']['energy'] = dna['parameters']['mean_tir_errs'] + \
+            dna['parameters']['num_inv_seq'] + \
+            dna['parameters']['num_rogue_rbs']
 
         return self.get_energy(dna)
 
@@ -200,11 +203,9 @@ class PartsSolution(object):
 
         return '\t'.join(['' if tirs is None
                           else str(tirs),
-                          str(self.__dna['cais']),
-                          str(self.__dna['num_inv_seq']),
-                          str(self.__dna['num_rogue_rbs']),
-                          ' '.join([str(feat)
-                                    for feat in self.__dna['features']])])
+                          str(self.__dna['parameters']['cais']),
+                          str(self.__dna['parameters']['num_inv_seq']),
+                          str(self.__dna['parameters']['num_rogue_rbs'])])
 
     def __print__(self):
         return self.__repr__
@@ -234,12 +235,15 @@ def _process_query(query):
             if 'seq' in feature:
                 feature['seq'] = feature['seq'].upper()
 
-            if 'tir_target' in feature:
-                feature['dg_target'] = \
-                    rbs_calc.get_dg(feature['tir_target'])
+            if 'parameters' in feature and \
+                    'tir_target' in feature['parameters']:
+                feature['parameters']['dg_target'] = \
+                    rbs_calc.get_dg(feature['parameters']['tir_target'])
 
-            for cds in feature.get('options', []):
-                cds['aa_seq'] = cds['aa_seq'].upper()
+            for option in feature.get('options', []):
+                if 'parameters' in option and 'aa_seq' in option['parameters']:
+                    option['parameters']['aa_seq'] = \
+                        option['parameters']['aa_seq'].upper()
 
     # Filters:
     filters = query['filters']
@@ -272,7 +276,8 @@ def _get_rogue_rbs(rbs, cutoff=0.1):
     return [(pos, terms)
             for rbs_vals in rbs['rbs_vals']
             for pos, terms in rbs_vals.iteritems()
-            if pos != rbs['len'] and terms[1] > rbs['tir_target'] * cutoff]
+            if pos != rbs['end'] and terms[1] >
+            rbs['parameters']['tir_target'] * cutoff]
 
 
 def _get_non_rogue_tirs(rbs):
@@ -280,14 +285,15 @@ def _get_non_rogue_tirs(rbs):
     return [terms[1]
             for rbs_vals in rbs['rbs_vals']
             for pos, terms in rbs_vals.iteritems()
-            if pos == rbs['len']]
+            if pos == rbs['end']]
 
 
 def _get_mean_tir_err(rbs):
     '''Gets mean TIR error of RBS sites (not rogue RBSs) as proportion of
     target TIR.'''
-    return abs(rbs['tir_target'] - mean(_get_non_rogue_tirs(rbs))) / \
-        rbs['tir_target']
+    return abs(rbs['parameters']['tir_target'] -
+               mean(_get_non_rogue_tirs(rbs))) / \
+        rbs['parameters']['tir_target']
 
 
 def _get_uniprot_data(cds, uniprot_id):
@@ -300,8 +306,8 @@ def _get_uniprot_data(cds, uniprot_id):
                        'organism-id',
                        'ec'])
 
-    cds['uniprot'] = uniprot_id
-    cds['aa_seq'] = uniprot_vals[uniprot_id]['Sequence']
+    cds['parameters']['uniprot'] = uniprot_id
+    cds['parameters']['aa_seq'] = uniprot_vals[uniprot_id]['Sequence']
     cds['name'] = uniprot_vals[uniprot_id]['Entry name']
     prot_names = uniprot_vals[uniprot_id]['Protein names']
     org = uniprot_vals[uniprot_id]['Organism']
@@ -309,7 +315,7 @@ def _get_uniprot_data(cds, uniprot_id):
     ec_number = \
         uniprot_vals[uniprot_id].get('EC number', None)
 
-    cds['Organism'] = org
+    cds['parameters']['Organism'] = org
     cds['links'] = [
         'http://identifiers.org/uniprot/' + uniprot_id,
     ]
@@ -329,7 +335,7 @@ def _add_feature(dnas, feature):
                             links=feature.get('links', None),
                             parameters=feature.get('parameters', None))
         dna['features'].append(dna.copy())
-        dna['parameters'].append({'Name': 'Type', 'Value': 'PART'})
+        dna['parameters']['Type'] = 'PART'
         dnas.append(dna)
     else:
         for dna in dnas:
