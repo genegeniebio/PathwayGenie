@@ -13,20 +13,6 @@
 			set-feature="setFeature(args)">
 		</dna-panel>
 		
-		<dl class="parameters">
-			<dt data-ng-repeat-start="parameter in result().metadata.parameters">{{parameter.name}}</dt>
-			<dd data-ng-repeat-end>{{parameter.value}}</dd>
-		</dl>
-		
-		<div>
-			<label>Links</label>
-			<ul>
-				<li data-ng-repeat="link in result().metadata.links">
-					<a data-ng-href="{{link}}" target="_blank">{{link}}</a>
-				</li>
-			</ul>
-		</div>
-		
 		<div class="text-center" data-ng-if="results().length > 1">
 			<uib-pagination
 				data-ng-model="currentResult"

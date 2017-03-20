@@ -79,9 +79,12 @@ class PartsSolution(object):
                 if feature['typ'] == sbol_utils.SO_CDS:
                     for tir, cds in zip(tirs, feature['options']):
                         cds['TIR'] = float("{0:.2f}".format(tir))
-                        _add_feature_to_all(all_dnas, cds)
+                        _add_feature(all_dnas, cds)
                 else:
-                    _add_feature_to_all(all_dnas, feature)
+                    _add_feature(all_dnas, feature)
+
+        import json
+        print json.dumps(all_dnas, indent=2)
 
         return all_dnas
 
@@ -316,32 +319,22 @@ def _get_uniprot_data(cds, uniprot_id):
             'http://identifiers.org/ec-code/' + ec_number)
 
 
-def _add_feature_to_all(all_dnas, feature):
-    if not len(all_dnas):
+def _add_feature(dnas, feature):
+    if not len(dnas):
         dna = dna_utils.DNA(name=feature['name'],
                             desc=feature.get('desc', None),
-                            seq='',
-                            forward=feature.get('forward', True))
-        dna['Type'] = 'PART'
-        _add_feature(dna, feature)
-        dna['seq'] = feature['seq']
-        all_dnas.append(dna)
+                            seq=feature['seq'],
+                            typ=feature['typ'],
+                            forward=feature.get('forward', True),
+                            links=feature.get('links', None),
+                            parameters=feature.get('parameters', None))
+        dna['features'].append(dna.copy())
+        dna['parameters'].append({'Name': 'Type', 'Value': 'PART'})
+        dnas.append(dna)
     else:
-        for dna in all_dnas:
-            _add_feature(dna, feature)
-
-
-def _add_feature(dna, feature):
-    '''Adds a subcompartment.'''
-    start = len(dna['seq']) + 1
-    seq = feature['seq']
-
-    if seq is not None and len(seq):
-        end = start + len(seq) - 1
-        feature = dna_utils.DNA(name=feature['name'],
-                                desc=feature.get('desc', None),
-                                typ=feature['typ'],
-                                start=start,
-                                end=end,
-                                forward=feature.get('forward', True))
-        dna['features'].append(feature)
+        for dna in dnas:
+            dna['typ'] = 'http://purl.obolibrary.org/obo/SO_0000804'
+            feature['start'] = 1
+            feature['end'] = len(feature['seq'])
+            feature['features'] = [feature.copy()]
+            dna_utils.add(dna, feature)

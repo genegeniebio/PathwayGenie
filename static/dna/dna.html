@@ -6,7 +6,7 @@
 	<div data-ng-repeat="f in dna.features | orderBy: f.start"
 		class="component SO{{f.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}"
 		data-ng-mouseover="setFeature({args: {ft: f}})"
-		data-ng-mouseleave="setFeature({args: {ft: {}}})">
+		data-ng-mouseleave="setFeature({args: {ft: {dna}}})">
 	</div>
 	
 	<table class="table table-condensed table-striped">
@@ -20,10 +20,6 @@
 				<td>{{feature().desc ? feature().desc : ''}}</td>
 			</tr>
 			<tr>
-				<td>Type</td>
-				<td>{{feature().typ ? feature().typ : ''}}</td>
-			</tr>
-			<tr>
 				<td>Strand</td>
 				<td>{{feature().forward ? '+' : '-'}}</td>
 			</tr>
@@ -31,6 +27,18 @@
 				<td>Sequence</td>
 				<td class="seq">{{(feature().seq ? feature().seq :
 					dna.seq.substring(feature().start - 1, feature().end)) | uppercase }}</td>
+			</tr>
+			<tr data-ng-repeat="parameter in feature().parameters">
+				<td>{{parameter.name}}</td>
+				<td>{{parameter.value}}</td>
+			</tr>
+			<tr data-ng-show="feature().links">
+				<td>Links</td>
+				<td>
+					<div data-ng-repeat="link in feature().links">
+						<a data-ng-href="{{link}}" target="_blank">{{link}}</a>
+					</div>
+				</td>
 			</tr>
 		</tbody>
 	</table>
