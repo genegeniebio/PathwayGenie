@@ -13,6 +13,7 @@ import sys
 from synbiochem.utils import plate_utils
 from synbiochem.utils.ice_utils import ICEClient
 
+
 _WORKLIST_COLS = ['DestinationPlateBarcode',
                   'DestinationPlateWell',
                   'SourcePlateBarcode',
