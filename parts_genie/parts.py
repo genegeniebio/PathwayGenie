@@ -310,16 +310,9 @@ def _get_uniprot_data(cds, uniprot_id):
 
 def _add_feature(dnas, feature):
     if not len(dnas):
-        dna = dna_utils.DNA(name=feature['name'],
-                            desc=feature.get('desc', None),
-                            seq=feature['seq'],
-                            typ=feature['typ'],
-                            forward=feature.get('forward', True),
-                            links=feature.get('links', None),
-                            parameters=feature.get('parameters', None))
-        dna['features'].append(dna.copy())
-        dna['parameters']['Type'] = 'PART'
-        dnas.append(dna)
+        feature['features'].append(feature.copy())
+        feature['parameters']['Type'] = 'PART'
+        dnas.append(feature)
     else:
         for dna in dnas:
             dna['typ'] = 'http://purl.obolibrary.org/obo/SO_0000804'
