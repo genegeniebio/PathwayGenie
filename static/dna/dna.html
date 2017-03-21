@@ -32,7 +32,7 @@
 				<td>{{key}}</td>
 				<td>{{value}}</td>
 			</tr>
-			<tr data-ng-show="feature().links">
+			<tr data-ng-show="feature().links && feature().links.length">
 				<td>Links</td>
 				<td>
 					<div data-ng-repeat="link in feature().links">

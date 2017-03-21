@@ -8,10 +8,10 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PathwayGe
 						"name": "",
 						"desc": "",
 						"features": [
-							{"typ": "http://purl.obolibrary.org/obo/SO_0001416", "seq": "", "name": "5\' flanking region", "parameters": {"fixed": true}},
-							{"typ": "http://purl.obolibrary.org/obo/SO_0000139", "end": 60, "name": "ribosome entry site", "parameters": {"fixed": false, "tir_target": 15000}},
-							{"typ": "http://purl.obolibrary.org/obo/SO_0000316", "options": [{"typ": "http://purl.obolibrary.org/obo/SO_0000316", "name": "coding sequence", "parameters": {"fixed": false, "aa_seq": ""}}]},
-							{"typ": "http://purl.obolibrary.org/obo/SO_0001417", "seq": "", "name": "3\' flanking region", "parameters": {"fixed": true}}
+							{"typ": "http://purl.obolibrary.org/obo/SO_0001416", "seq": "", "name": "5\' flanking region", "parameters": {"Fixed": true}},
+							{"typ": "http://purl.obolibrary.org/obo/SO_0000139", "end": 60, "name": "ribosome entry site", "parameters": {"Fixed": false, "TIR target": 15000}},
+							{"typ": "http://purl.obolibrary.org/obo/SO_0000316", "options": [{"typ": "http://purl.obolibrary.org/obo/SO_0000316", "name": "coding sequence", "parameters": {"Fixed": false, "AA seq": ""}}]},
+							{"typ": "http://purl.obolibrary.org/obo/SO_0001417", "seq": "", "name": "3\' flanking region", "parameters": {"Fixed": true}}
 						]
 					}
 				}

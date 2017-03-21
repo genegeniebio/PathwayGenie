@@ -32,7 +32,7 @@
 							<label class="col-xs-4 col-form-label">RBS TIR:</label>
 							<div class="col-xs-8">
 								<input type="number" class="form-control"
-									data-ng-model="ctrl.query.designs[0].dna.features[1].parameters.tir_target" min="0" max="200000"
+									data-ng-model="ctrl.query.designs[0].dna.features[1].parameters['TIR target']" min="0" max="200000"
 									step="100"
 									placeholder="Enter target RBS translation initiation rate"
 									required>
@@ -50,7 +50,7 @@
 							<label class="col-xs-4 col-form-label">Protein:</label>
 							<div class="col-xs-8">
 								<input type="text" class="form-control"
-									data-ng-model="ctrl.query.designs[0].dna.features[2].options[0].parameters.aa_seq"
+									data-ng-model="ctrl.query.designs[0].dna.features[2].options[0].parameters['AA seq']"
 									placeholder="Enter protein (Uniprot id or sequence)" required>
 							</div>
 						</div>
