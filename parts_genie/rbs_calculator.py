@@ -81,9 +81,10 @@ class RbsCalculator(object):
 
         return float(largest_range_helix) / float(len(sub_m_rna))
 
-    def get_initial_rbs(self, rbs_len, cds, dg_target_rel):
+    def get_initial_rbs(self, rbs_len, cds, tir_target_rel):
         '''Generates random initial condition for designing a synthetic rbs
         sequence.'''
+        dg_target_rel = get_dg(tir_target_rel)
         cds = cds.upper()
 
         dg_range_high = 25.0

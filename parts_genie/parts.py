@@ -73,12 +73,8 @@ class PartsSolution(object):
 
         for feature in self.__dna['features']:
             if len(feature.get('seq', '')) or len(feature.get('options', '')):
-                if feature['typ'] == sbol_utils.SO_RBS:
-                    tirs = _get_non_rogue_tirs(feature)
-
                 if feature['typ'] == sbol_utils.SO_CDS:
-                    for tir, cds in zip(tirs, feature['options']):
-                        cds['parameters']['TIR'] = float("{0:.2f}".format(tir))
+                    for cds in feature['options']:
                         _add_feature(all_dnas, cds)
                 else:
                     _add_feature(all_dnas, feature)
@@ -148,39 +144,32 @@ class PartsSolution(object):
         # using the first CDS as the upstream sequence:
         for idx, feature in enumerate(self.__dna['features']):
             if feature['typ'] == sbol_utils.SO_RBS:
-                rbs = self.__dna['features'][idx]
-                rbs['seq'] = self.__calc.get_initial_rbs(
-                    rbs['end'],
+                feature['seq'] = self.__calc.get_initial_rbs(
+                    feature['end'],
                     self.__dna['features'][idx + 1]['options'][0]['seq'],
-                    rbs['parameters']['dG target'])
+                    feature['parameters']['TIR target'])
 
     def __update(self, dna):
         '''Calculates (simulated annealing) energies for given RBS.'''
         cais = []
-        mean_tir_errs = []
+        tir_errs = []
         num_rogue_rbs = 0
 
         for idx, feature in enumerate(dna['features']):
             if feature['typ'] == sbol_utils.SO_RBS:
-                cdss = dna['features'][idx + 1]['options']
-
-                feature['rbs_vals'] = [self.__calc.calc_dgs(feature['seq'] +
-                                                            cds['seq'])
-                                       for cds in cdss]
-
-                mean_tir_errs.append(_get_mean_tir_err(feature))
-                num_rogue_rbs += len(_get_rogue_rbs(feature))
+                for cds in dna['features'][idx + 1]['options']:
+                    tir_err, rogue_rbs = self.__calc_tirs(feature, cds)
+                    tir_errs.append(tir_err)
+                    num_rogue_rbs += len(rogue_rbs)
 
             elif feature['typ'] == sbol_utils.SO_CDS:
                 for cds in feature['options']:
                     cai = self.__cod_opt.get_cai(cds['seq'])
-                    cds['parameters']['CAI'] = \
-                        float("{0:.3f}".format(cai))
+                    cds['parameters']['CAI'] = float("{0:.3f}".format(cai))
                     cais.append(cai)
 
-        dna['parameters']['cais'] = cais
         dna['parameters']['mean_cai'] = mean(cais)
-        dna['parameters']['mean_tir_errs'] = mean(mean_tir_errs)
+        dna['parameters']['mean_tir_errs'] = mean(tir_errs)
         dna['parameters']['num_rogue_rbs'] = num_rogue_rbs
 
         # Get number of invalid seqs:
@@ -194,17 +183,40 @@ class PartsSolution(object):
 
         return self.get_energy(dna)
 
+    def __calc_tirs(self, rbs, cds):
+        '''Performs TIR calculations.'''
+        tir_vals = self.__calc.calc_dgs(rbs['seq'] + cds['seq'])
+
+        cds['parameters']['tir_vals'] = tir_vals
+
+        # Get TIR:
+        tir = tir_vals[rbs['end']][1]
+        cds['parameters']['TIR'] = float("{0:.2f}".format(tir))
+        tir_err = abs(rbs['parameters']['TIR target'] - tir) / \
+            rbs['parameters']['TIR target']
+
+        # Get rogue RBS sites:
+        cutoff = 0.1
+        rogue_rbs = [(pos, terms)
+                     for pos, terms in tir_vals.iteritems()
+                     if pos != rbs['end'] and terms[1] >
+                     rbs['parameters']['TIR target'] * cutoff]
+
+        return tir_err, rogue_rbs
+
     def __repr__(self):
         # return '%r' % (self.__dict__)
         tirs = []
+        cais = []
 
         for feature in self.__dna['features']:
-            if feature['typ'] == sbol_utils.SO_RBS:
-                tirs.append(_get_non_rogue_tirs(feature))
+            if feature['typ'] == sbol_utils.SO_CDS:
+                for cds in feature['options']:
+                    tirs.append(cds['parameters']['TIR'])
+                    cais.append(cds['parameters']['CAI'])
 
-        return '\t'.join(['' if tirs is None
-                          else str(tirs),
-                          str(self.__dna['parameters']['cais']),
+        return '\t'.join([str(tirs),
+                          str(cais),
                           str(self.__dna['parameters']['num_inv_seq']),
                           str(self.__dna['parameters']['num_rogue_rbs'])])
 
@@ -236,11 +248,6 @@ def _process_query(query):
             if 'seq' in feature:
                 feature['seq'] = feature['seq'].upper()
 
-            if 'parameters' in feature and \
-                    'TIR target' in feature['parameters']:
-                feature['parameters']['dG target'] = \
-                    rbs_calc.get_dg(feature['parameters']['TIR target'])
-
             for option in feature.get('options', []):
                 if 'parameters' in option and 'AA seq' in option['parameters']:
                     option['parameters']['AA seq'] = \
@@ -270,31 +277,6 @@ def _get_all_seqs(dna):
                 all_seqs[idx] = seq + feature['seq']
 
     return all_seqs
-
-
-def _get_rogue_rbs(rbs, cutoff=0.1):
-    '''Returns rogue RBS sites.'''
-    return [(pos, terms)
-            for rbs_vals in rbs['rbs_vals']
-            for pos, terms in rbs_vals.iteritems()
-            if pos != rbs['end'] and terms[1] >
-            rbs['parameters']['TIR target'] * cutoff]
-
-
-def _get_non_rogue_tirs(rbs):
-    '''Gets all non-rogue TIRs for RBS sites.'''
-    return [terms[1]
-            for rbs_vals in rbs['rbs_vals']
-            for pos, terms in rbs_vals.iteritems()
-            if pos == rbs['end']]
-
-
-def _get_mean_tir_err(rbs):
-    '''Gets mean TIR error of RBS sites (not rogue RBSs) as proportion of
-    target TIR.'''
-    return abs(rbs['parameters']['TIR target'] -
-               mean(_get_non_rogue_tirs(rbs))) / \
-        rbs['parameters']['TIR target']
 
 
 def _get_uniprot_data(cds, uniprot_id):
