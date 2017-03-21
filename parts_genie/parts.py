@@ -173,9 +173,10 @@ class PartsSolution(object):
 
             elif feature['typ'] == sbol_utils.SO_CDS:
                 for cds in feature['options']:
+                    cai = self.__cod_opt.get_cai(cds['seq'])
                     cds['parameters']['CAI'] = \
-                        self.__cod_opt.get_cai(cds['seq'])
-                    cais.append(cds['parameters']['CAI'])
+                        float("{0:.3f}".format(cai))
+                    cais.append(cai)
 
         dna['parameters']['cais'] = cais
         dna['parameters']['mean_cai'] = mean(cais)
