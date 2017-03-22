@@ -23,6 +23,9 @@ class PartsSolution(object):
 
     def __init__(self, dna, organism, filters):
         self.__dna = dna_utils.get_dna(dna)
+        self.__dna['typ'] = 'http://purl.obolibrary.org/obo/SO_0000804'
+        self.__dna['parameters']['Type'] = 'PART'
+
         self.__organism = organism
         self.__filters = filters
 
@@ -69,20 +72,19 @@ class PartsSolution(object):
 
     def get_result(self):
         '''Return result of solution.'''
-        all_dnas = []
+        dnas = []
 
         for feature in self.__dna['features']:
-            if len(feature.get('seq', '')) or len(feature.get('options', '')):
-                if feature['typ'] == sbol_utils.SO_CDS:
-                    for cds in feature['options']:
-                        _add_feature(all_dnas, cds)
-                else:
-                    _add_feature(all_dnas, feature)
+            if len(feature.get('options', '')):
+                for option in feature['options']:
+                    _add_feature(dnas, option)
+            else:
+                _add_feature(dnas, feature)
 
         import json
-        print json.dumps(all_dnas, indent=2)
+        print json.dumps(dnas, indent=2)
 
-        return all_dnas
+        return dnas
 
     def get_energy(self, dna=None):
         '''Gets the (simulated annealing) energy.'''
@@ -95,13 +97,13 @@ class PartsSolution(object):
                 for cds in feature['options']:
                     if not cds['parameters']['Fixed']:
                         mutation_rate = 5.0 / len(cds['parameters']['AA seq'])
-                        cds['seq'] = self.__cod_opt.mutate(
+                        cds.set_seq(self.__cod_opt.mutate(
                             cds['parameters']['AA seq'],
                             cds['seq'],
-                            mutation_rate)
+                            mutation_rate))
             elif not feature['parameters']['Fixed']:
-                feature['seq'] = seq_utils.mutate_seq(feature['seq'],
-                                                      mutations=3)
+                feature.set_seq(seq_utils.mutate_seq(feature['seq'],
+                                                     mutations=3))
 
         return self.__update(self.__dna_new)
 
@@ -134,20 +136,20 @@ class PartsSolution(object):
                         'http://identifiers.org/taxonomy/' +
                         self.__organism['taxonomy_id'])
 
-                    cds['seq'] = self.__cod_opt.get_codon_optim_seq(
+                    cds.set_seq(self.__cod_opt.get_codon_optim_seq(
                         cds['parameters']['AA seq'],
-                        self.__filters['excl_codons'],
+                        self.__filters.get('excl_codons', None),
                         self.__inv_patt,
-                        tolerant=False)
+                        tolerant=False))
 
         # Randomly choose an RBS that is a decent starting point,
         # using the first CDS as the upstream sequence:
         for idx, feature in enumerate(self.__dna['features']):
             if feature['typ'] == sbol_utils.SO_RBS:
-                feature['seq'] = self.__calc.get_initial_rbs(
+                feature.set_seq(self.__calc.get_initial_rbs(
                     feature['end'],
                     self.__dna['features'][idx + 1]['options'][0]['seq'],
-                    feature['parameters']['TIR target'])
+                    feature['parameters']['TIR target']))
 
     def __update(self, dna):
         '''Calculates (simulated annealing) energies for given RBS.'''
@@ -165,7 +167,7 @@ class PartsSolution(object):
             elif feature['typ'] == sbol_utils.SO_CDS:
                 for cds in feature['options']:
                     cai = self.__cod_opt.get_cai(cds['seq'])
-                    cds['parameters']['CAI'] = float("{0:.3f}".format(cai))
+                    cds['parameters']['CAI'] = float('{0:.3g}'.format(cai))
                     cais.append(cai)
 
         dna['parameters']['mean_cai'] = mean(cais)
@@ -191,7 +193,7 @@ class PartsSolution(object):
 
         # Get TIR:
         tir = tir_vals[rbs['end']][1]
-        cds['parameters']['TIR'] = float("{0:.2f}".format(tir))
+        cds['parameters']['TIR'] = float('{0:.3g}'.format(tir))
         tir_err = abs(rbs['parameters']['TIR target'] - tir) / \
             rbs['parameters']['TIR target']
 
@@ -228,38 +230,11 @@ class PartsThread(SimulatedAnnealer):
     '''Wraps a PartsGenie job into a thread.'''
 
     def __init__(self, query):
-        _process_query(query)
-
         solution = PartsSolution(query['designs'][0]['dna'],
                                  query['organism'],
                                  query['filters'])
 
         SimulatedAnnealer.__init__(self, solution, verbose=True)
-
-
-def _process_query(query):
-    '''Perform application-specific pre-processing of query.'''
-
-    # Designs:
-    for design in query['designs']:
-        features = design['dna']['features']
-
-        for feature in features:
-            if 'seq' in feature:
-                feature['seq'] = feature['seq'].upper()
-
-            for option in feature.get('options', []):
-                if 'parameters' in option and 'AA seq' in option['parameters']:
-                    option['parameters']['AA seq'] = \
-                        option['parameters']['AA seq'].upper()
-
-    # Filters:
-    filters = query['filters']
-
-    filters['excl_codons'] = \
-        list(set([x.strip().upper()
-                  for x in filters['excl_codons'].split()])) \
-        if 'excl_codons' in filters else []
 
 
 def _get_all_seqs(dna):
@@ -289,7 +264,6 @@ def _get_uniprot_data(cds, uniprot_id):
                        'organism-id',
                        'ec'])
 
-    cds['parameters']['uniprot'] = uniprot_id
     cds['parameters']['AA seq'] = uniprot_vals[uniprot_id]['Sequence']
     cds['name'] = uniprot_vals[uniprot_id]['Entry name']
     prot_names = uniprot_vals[uniprot_id]['Protein names']
@@ -309,14 +283,11 @@ def _get_uniprot_data(cds, uniprot_id):
 
 
 def _add_feature(dnas, feature):
-    if not len(dnas):
-        feature['features'].append(feature.copy())
-        feature['parameters']['Type'] = 'PART'
-        dnas.append(feature)
-    else:
-        for dna in dnas:
-            dna['typ'] = 'http://purl.obolibrary.org/obo/SO_0000804'
-            feature['start'] = 1
-            feature['end'] = len(feature['seq'])
-            feature['features'] = [feature.copy()]
-            dna_utils.add(dna, feature)
+    if len(feature['seq']):
+        if not len(dnas):
+            feature['features'].append(feature.copy())
+            dnas.append(feature)
+        else:
+            for dna in dnas:
+                feature['features'] = [feature.copy()]
+                dna_utils.add(dna, feature)
