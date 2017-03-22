@@ -52,22 +52,23 @@ class PartsSolution(object):
     def get_values(self):
         '''Return update of in-progress solution.'''
         keys = ['id', 'name', 'value', 'min', 'max', 'target']
+        params = self.__dna['temp_params']
 
         return [dict(zip(keys, ('mean_cai',
                                 'CAI',
-                                self.__dna['parameters']['mean_cai'],
+                                params['mean_cai'],
                                 0, 1, 1))),
                 dict(zip(keys, ('mean_tir',
                                 'TIR',
-                                self.__dna['parameters']['mean_tir_errs'],
+                                params['mean_tir_errs'],
                                 0, 1, 0))),
                 dict(zip(keys, ('num_invalid_seqs',
                                 'Invalid seqs',
-                                self.__dna['parameters']['num_inv_seq'],
+                                params['num_inv_seq'],
                                 0, 10, 0))),
                 dict(zip(keys, ('num_rogue_rbs',
                                 'Rogue RBSs',
-                                self.__dna['parameters']['num_rogue_rbs'],
+                                params['num_rogue_rbs'],
                                 0, 10, 0)))]
 
     def get_result(self):
@@ -81,20 +82,20 @@ class PartsSolution(object):
 
     def get_energy(self, dna=None):
         '''Gets the (simulated annealing) energy.'''
-        return float('inf') if dna is None else dna['parameters']['energy']
+        return float('inf') if dna is None else dna['temp_params']['energy']
 
     def mutate(self):
         '''Mutates and scores whole design.'''
         for feature in self.__dna_new['features']:
             if feature['typ'] == sbol_utils.SO_CDS:
                 for cds in feature['options']:
-                    if not cds['parameters']['Fixed']:
+                    if not cds['temp_params']['fixed']:
                         mutation_rate = 5.0 / len(cds['parameters']['AA seq'])
                         cds.set_seq(self.__cod_opt.mutate(
                             cds['parameters']['AA seq'],
                             cds['seq'],
                             mutation_rate))
-            elif not feature['parameters']['Fixed']:
+            elif not feature['temp_params']['fixed']:
                 feature.set_seq(seq_utils.mutate_seq(feature['seq'],
                                                      mutations=3))
 
@@ -163,18 +164,18 @@ class PartsSolution(object):
                     cds['parameters']['CAI'] = float('{0:.3g}'.format(cai))
                     cais.append(cai)
 
-        dna['parameters']['mean_cai'] = mean(cais)
-        dna['parameters']['mean_tir_errs'] = mean(tir_errs)
-        dna['parameters']['num_rogue_rbs'] = num_rogue_rbs
+        dna['temp_params']['mean_cai'] = mean(cais)
+        dna['temp_params']['mean_tir_errs'] = mean(tir_errs)
+        dna['temp_params']['num_rogue_rbs'] = num_rogue_rbs
 
         # Get number of invalid seqs:
-        dna['parameters']['num_inv_seq'] = \
+        dna['temp_params']['num_inv_seq'] = \
             sum([seq_utils.count_pattern(seq, self.__inv_patt)
                  for seq in _get_all_seqs(dna)])
 
-        dna['parameters']['energy'] = dna['parameters']['mean_tir_errs'] + \
-            dna['parameters']['num_inv_seq'] + \
-            dna['parameters']['num_rogue_rbs']
+        dna['temp_params']['energy'] = dna['temp_params']['mean_tir_errs'] + \
+            dna['temp_params']['num_inv_seq'] + \
+            dna['temp_params']['num_rogue_rbs']
 
         return self.get_energy(dna)
 
@@ -182,7 +183,7 @@ class PartsSolution(object):
         '''Performs TIR calculations.'''
         tir_vals = self.__calc.calc_dgs(rbs['seq'] + cds['seq'])
 
-        cds['parameters']['tir_vals'] = tir_vals
+        cds['temp_params']['tir_vals'] = tir_vals
 
         # Get TIR:
         tir = tir_vals[rbs['end']][1]
@@ -212,8 +213,8 @@ class PartsSolution(object):
 
         return '\t'.join([str(tirs),
                           str(cais),
-                          str(self.__dna['parameters']['num_inv_seq']),
-                          str(self.__dna['parameters']['num_rogue_rbs'])])
+                          str(self.__dna['temp_params']['num_inv_seq']),
+                          str(self.__dna['temp_params']['num_rogue_rbs'])])
 
     def __print__(self):
         return self.__repr__
@@ -265,7 +266,6 @@ def _get_uniprot_data(cds, uniprot_id):
     ec_number = \
         uniprot_vals[uniprot_id].get('EC number', None)
 
-    cds['parameters']['Organism'] = org
     cds['links'] = [
         'http://identifiers.org/uniprot/' + uniprot_id,
     ]
