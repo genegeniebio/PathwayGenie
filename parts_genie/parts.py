@@ -72,14 +72,7 @@ class PartsSolution(object):
 
     def get_result(self):
         '''Return result of solution.'''
-        dnas = []
-
-        for feature in self.__dna['features']:
-            if len(feature.get('options', '')):
-                for option in feature['options']:
-                    _add_feature(dnas, option)
-            else:
-                _add_feature(dnas, feature)
+        dnas = dna_utils.expand(self.__dna)
 
         import json
         print json.dumps(dnas, indent=2)
@@ -280,14 +273,3 @@ def _get_uniprot_data(cds, uniprot_id):
     if ec_number:
         cds['links'].append(
             'http://identifiers.org/ec-code/' + ec_number)
-
-
-def _add_feature(dnas, feature):
-    if len(feature['seq']):
-        if not len(dnas):
-            feature['features'].append(feature.copy())
-            dnas.append(feature)
-        else:
-            for dna in dnas:
-                feature['features'] = [feature.copy()]
-                dna_utils.add(dna, feature)
