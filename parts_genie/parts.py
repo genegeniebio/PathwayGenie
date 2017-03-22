@@ -90,9 +90,9 @@ class PartsSolution(object):
             if feature['typ'] == sbol_utils.SO_CDS:
                 for cds in feature['options']:
                     if not cds['temp_params']['fixed']:
-                        mutation_rate = 5.0 / len(cds['parameters']['AA seq'])
+                        mutation_rate = 5.0 / len(cds['temp_params']['aa_seq'])
                         cds.set_seq(self.__cod_opt.mutate(
-                            cds['parameters']['AA seq'],
+                            cds['temp_params']['aa_seq'],
                             cds['seq'],
                             mutation_rate))
             elif not feature['temp_params']['fixed']:
@@ -120,18 +120,18 @@ class PartsSolution(object):
             if feature['typ'] == sbol_utils.SO_CDS:
                 for cds in feature['options']:
                     if re.match(uniprot_id_pattern,
-                                cds['parameters']['AA seq']):
-                        _get_uniprot_data(cds, cds['parameters']['AA seq'])
+                                cds['temp_params']['aa_seq']):
+                        _get_uniprot_data(cds, cds['temp_params']['aa_seq'])
 
-                    if cds['parameters']['AA seq'][-1] != '*':
-                        cds['parameters']['AA seq'] += '*'
+                    if cds['temp_params']['aa_seq'][-1] != '*':
+                        cds['temp_params']['aa_seq'] += '*'
 
                     cds['links'].append(
                         'http://identifiers.org/taxonomy/' +
                         self.__organism['taxonomy_id'])
 
                     cds.set_seq(self.__cod_opt.get_codon_optim_seq(
-                        cds['parameters']['AA seq'],
+                        cds['temp_params']['aa_seq'],
                         self.__filters.get('excl_codons', None),
                         self.__inv_patt,
                         tolerant=False))
@@ -258,7 +258,7 @@ def _get_uniprot_data(cds, uniprot_id):
                        'organism-id',
                        'ec'])
 
-    cds['parameters']['AA seq'] = uniprot_vals[uniprot_id]['Sequence']
+    cds['temp_params']['aa_seq'] = uniprot_vals[uniprot_id]['Sequence']
     cds['name'] = uniprot_vals[uniprot_id]['Entry name']
     prot_names = uniprot_vals[uniprot_id]['Protein names']
     org = uniprot_vals[uniprot_id]['Organism']

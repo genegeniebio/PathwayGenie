@@ -25,7 +25,7 @@ resultApp.factory("ResultService", ["$http", "ICEService", "ErrorService", funct
 		$http.post("/save", {'result': obj.results, 'ice': ICEService.ice}).then(
 				function(resp) {
 					for (i = 0; i < resp.data.length; i++) {
-						obj.results[i].metadata.links.push(resp.data[i]);
+						obj.results[i].links.push(resp.data[i]);
 					}
 				},
 				function(errResp) {
