@@ -75,13 +75,12 @@ def save(req):
     req_obj = json.loads(req.data)
 
     for result in req_obj['result']:
-        dna = result['dna']
         url = req_obj['ice']['url']
         url = url[:-1] if url[-1] == '/' else url
         ice_id = sbol_writer.submit(url,
                                     req_obj['ice']['username'],
                                     req_obj['ice']['password'],
-                                    dna, result['metadata'])
+                                    result)
         ice_entry_urls.append(url + '/entry/' + str(ice_id))
 
     return json.dumps(ice_entry_urls)

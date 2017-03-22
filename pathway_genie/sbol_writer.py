@@ -10,8 +10,27 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 from synbiochem.utils import ice_utils
 
 
-def submit(url, username, pssword, dna, metadata):
+def submit(url, username, pssword, dna):
     '''Forms SBOL document and submits to ICE.'''
     ice_client = ice_utils.ICEClient(url, username, pssword)
-    ice_entry = ice_utils.ICEEntry(dna, 'PART', metadata)
+    ice_entry = ice_utils.ICEEntry(dna, 'PART')
+
+    ice_entry.set_value('name', dna['name'])
+    ice_entry.set_value('shortDescription', dna['desc'])
+
+    _add_params(ice_entry, dna)
+    links = set(dna['links'])
+
+    for feature in dna['features']:
+        _add_params(ice_entry, feature)
+        links |= set(feature['links'])
+
+    ice_entry.set_value('links', list(links))
+
     return ice_client.set_ice_entry(ice_entry)
+
+
+def _add_params(ice_entry, dna):
+    '''Adds parameter values to ICEENtry.'''
+    for key, value in dna['parameters'].iteritems():
+        ice_entry.set_parameter(key, value)
