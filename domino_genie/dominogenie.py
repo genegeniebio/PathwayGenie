@@ -45,6 +45,7 @@ class DominoThread(JobThread):
 
             # Generate plasmid DNA object:
             dna = dna_utils.concat(design['components'][:-1])
+            dna['typ'] = dna_utils.SO_PLASMID
             dna['desc'] = ' - '.join(design['design'])
 
             # Generate domino sequences:

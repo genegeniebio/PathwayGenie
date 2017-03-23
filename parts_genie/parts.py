@@ -13,7 +13,7 @@ import re
 
 from numpy import mean
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
-from synbiochem.utils import dna_utils, sbol_utils, seq_utils
+from synbiochem.utils import dna_utils, seq_utils
 
 from parts_genie import rbs_calculator as rbs_calc
 
@@ -23,7 +23,7 @@ class PartsSolution(object):
 
     def __init__(self, dna, organism, filters):
         self.__dna = dna_utils.get_dna(dna)
-        self.__dna['typ'] = 'http://purl.obolibrary.org/obo/SO_0000804'
+        self.__dna['typ'] = dna_utils.SO_PART
         self.__dna['parameters']['Type'] = 'PART'
 
         self.__organism = organism
@@ -87,7 +87,7 @@ class PartsSolution(object):
     def mutate(self):
         '''Mutates and scores whole design.'''
         for feature in self.__dna_new['features']:
-            if feature['typ'] == sbol_utils.SO_CDS:
+            if feature['typ'] == dna_utils.SO_CDS:
                 for cds in feature['options']:
                     if not cds['temp_params']['fixed']:
                         mutation_rate = 5.0 / len(cds['temp_params']['aa_seq'])
@@ -117,7 +117,7 @@ class PartsSolution(object):
             '[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}'
 
         for feature in self.__dna['features']:
-            if feature['typ'] == sbol_utils.SO_CDS:
+            if feature['typ'] == dna_utils.SO_CDS:
                 for cds in feature['options']:
                     if re.match(uniprot_id_pattern,
                                 cds['temp_params']['aa_seq']):
@@ -139,7 +139,7 @@ class PartsSolution(object):
         # Randomly choose an RBS that is a decent starting point,
         # using the first CDS as the upstream sequence:
         for idx, feature in enumerate(self.__dna['features']):
-            if feature['typ'] == sbol_utils.SO_RBS:
+            if feature['typ'] == dna_utils.SO_RBS:
                 feature.set_seq(self.__calc.get_initial_rbs(
                     feature['end'],
                     self.__dna['features'][idx + 1]['options'][0]['seq'],
@@ -152,13 +152,13 @@ class PartsSolution(object):
         num_rogue_rbs = 0
 
         for idx, feature in enumerate(dna['features']):
-            if feature['typ'] == sbol_utils.SO_RBS:
+            if feature['typ'] == dna_utils.SO_RBS:
                 for cds in dna['features'][idx + 1]['options']:
                     tir_err, rogue_rbs = self.__calc_tirs(feature, cds)
                     tir_errs.append(tir_err)
                     num_rogue_rbs += len(rogue_rbs)
 
-            elif feature['typ'] == sbol_utils.SO_CDS:
+            elif feature['typ'] == dna_utils.SO_CDS:
                 for cds in feature['options']:
                     cai = self.__cod_opt.get_cai(cds['seq'])
                     cds['parameters']['CAI'] = float('{0:.3g}'.format(cai))
@@ -206,7 +206,7 @@ class PartsSolution(object):
         cais = []
 
         for feature in self.__dna['features']:
-            if feature['typ'] == sbol_utils.SO_CDS:
+            if feature['typ'] == dna_utils.SO_CDS:
                 for cds in feature['options']:
                     tirs.append(cds['parameters']['TIR'])
                     cais.append(cds['parameters']['CAI'])
@@ -236,7 +236,7 @@ def _get_all_seqs(dna):
     all_seqs = ['']
 
     for feature in dna['features']:
-        if feature['typ'] == sbol_utils.SO_CDS:
+        if feature['typ'] == dna_utils.SO_CDS:
             all_seqs = [''.join(term)
                         for term in product([option['seq']
                                              for option in feature['options']],
