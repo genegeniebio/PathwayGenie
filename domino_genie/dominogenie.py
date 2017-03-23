@@ -23,38 +23,43 @@ class DominoThread(JobThread):
 
         self.__query = query
         self.__ice_int = None
+        self.__results = []
 
     def run(self):
         '''Designs dominoes (bridging oligos) for LCR.'''
         iteration = 0
 
-        if 'dna' not in self.__query:
-            self.__get_dna()
+        if 'components' not in self.__query:
+            self.__get_components()
 
         self.__fire_event('running', iteration, 'Running...')
 
         for design in self.__query['designs']:
-            design['name'] = ' - '.join([dna['name']
-                                         for dna in design['dna']])
-
             # Apply restriction site digestion to PARTs not PLASMIDs.
             # (Assumes PLASMID at positions 1 and -1 - first and last).
             if self.__query.get('restr_enzs', None) is not None:
-                design['dna'] = [design['dna'][0]] + \
+                design['components'] = [design['components'][0]] + \
                     [self.__apply_restricts(dna)
-                     for dna in design['dna'][1:-1]] + \
-                    [design['dna'][-1]]
+                     for dna in design['components'][1:-1]] + \
+                    [design['components'][-1]]
 
             # Generate plasmid DNA object:
-            design['plasmid'] = dna_utils.concat(design['dna'][:-1])
+            dna = dna_utils.concat(design['components'][:-1])
+            dna['desc'] = ' - '.join(design['design'])
 
             # Generate domino sequences:
-            seqs = [dna['seq'] for dna in design['dna']]
+            seqs = [comp['seq'] for comp in design['components']]
 
             oligos = [self.__get_domino(pair)
                       for pair in pairwise(seqs)]
             pairs = [pair for pair in pairwise(design['design'])]
             design['dominoes'] = zip(pairs, oligos)
+
+            import json
+            print json.dumps(dna, indent=2)
+            print
+
+            self.__results.append(dna)
 
             iteration += 1
             self.__fire_event('running', iteration, 'Running...')
@@ -81,8 +86,8 @@ class DominoThread(JobThread):
             except ValueError as err:
                 print err
 
-    def __get_dna(self):
-        '''Gets DNA sequences from ICE.'''
+    def __get_components(self):
+        '''Gets DNA components from ICE.'''
         self.__ice_int = self.__get_ice_interface()
 
         iteration = 0
@@ -91,8 +96,8 @@ class DominoThread(JobThread):
                           'Extracting sequences from ICE...')
 
         for design in self.__query['designs']:
-            design['dna'] = [self.__ice_int.get_dna(iceid)
-                             for iceid in design['design']]
+            design['components'] = [self.__ice_int.get_dna(iceid)
+                                    for iceid in design['design']]
 
             iteration += 1
             self.__fire_event('running', iteration,
@@ -107,14 +112,22 @@ class DominoThread(JobThread):
             self.__ice_int = ICEInterface(self.__query['ice']['url'],
                                           self.__query['ice']['username'],
                                           self.__query['ice']['password'],
-                                          self.__query['ice']['groups'])
+                                          self.__query['ice'].get('groups',
+                                                                  None))
 
         return self.__ice_int
 
     def __apply_restricts(self, dna):
         '''Cleave off prefix and suffix, according to restriction sites.'''
-        restrict_dnas = dna_utils.apply_restricts(
-            dna, self.__query.get('restr_enzs', None))
+        if 'pQLINK' in dna['name']:
+            restrict_dnas = [dna]
+        else:
+            if 'restr_enzs' in self.__query:
+                restricts = [res['name'] for res in self.__query['restr_enzs']]
+            else:
+                restricts = []
+
+            restrict_dnas = dna_utils.apply_restricts(dna, restricts)
 
         # This is a bit fudgy...
         # Essentially, return the longest fragment remaining after digestion.
@@ -144,6 +157,6 @@ class DominoThread(JobThread):
                  }
 
         if status == 'finished':
-            event['result'] = self.__query['designs']
+            event['result'] = self.__results
 
         self._fire_event(event)
