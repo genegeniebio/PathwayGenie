@@ -7,6 +7,7 @@ resultApp.directive("resultPanel", function() {
     		"connected": "&",
     		"feature": "&",
     		"setFeature": "&",
+    		"pagination": "=",
     	},
         templateUrl: "/static/result/result.html"
     };

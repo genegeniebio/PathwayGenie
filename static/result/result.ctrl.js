@@ -1,7 +1,11 @@
-resultApp.controller("resultCtrl", ["ICEService", "ResultService", function(ICEService, ResultService) {
+resultApp.controller("resultCtrl", ["$scope", "ICEService", "ResultService", function($scope, ICEService, ResultService) {
 	var self = this;
 	
-	self.feat = {}
+	self.pagination = {
+		current: 1
+	};
+	
+	var feat = {}
 
 	self.connected = function() {
 		return ICEService.connected
@@ -12,18 +16,23 @@ resultApp.controller("resultCtrl", ["ICEService", "ResultService", function(ICES
 	};
 	
 	self.result = function() {
-		return ResultService.result;
-	};
+		if(self.results()) {
+			return self.results()[self.pagination.current - 1];
+		}
+		else {
+			return null;
+		}
+	}
 
 	self.saveResults = function() {
 		return ResultService.saveResults();
 	};
 	
 	self.feature = function() {
-		return self.feat;
+		return feat;
 	};
 	
 	self.setFeature = function(ft) {
-		self.feat = ft;
+		feat = ft;
 	}
 }]);
