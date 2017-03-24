@@ -1,3 +1,10 @@
+.horizontal_scroll
+{
+	overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+
 .component
 {
 	display: inline-block;

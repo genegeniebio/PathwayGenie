@@ -3,11 +3,13 @@
 	<div class="title">{{dna.name}}</div>
 	<div>{{dna.desc}}</div>
 
-	<div data-ng-repeat="f in dna.features | orderBy: f.start"
-		class="component SO{{f.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}"
-		data-ng-init="setFeature({args: {ft: dna}})"
-		data-ng-mouseover="setFeature({args: {ft: f}})"
-		data-ng-mouseleave="setFeature({args: {ft: dna}})">
+	<div class="horizontal_scroll">
+		<div data-ng-repeat="f in dna.features | orderBy: f.start"
+			class="component SO{{f.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}"
+			data-ng-init="setFeature({args: {ft: dna}})"
+			data-ng-mouseover="setFeature({args: {ft: f}})"
+			data-ng-mouseleave="setFeature({args: {ft: dna}})">
+		</div>
 	</div>
 	
 	<table class="table table-condensed table-striped">
