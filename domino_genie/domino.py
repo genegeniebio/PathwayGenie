@@ -9,10 +9,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 from __future__ import division
 
-from synbiochem.utils import pairwise, seq_utils, dna_utils
+from synbiochem.utils import dna_utils, ice_utils, pairwise, seq_utils
 from synbiochem.utils.job import JobThread
-
-from domino_genie.ice_interface import ICEInterface
 
 
 class DominoThread(JobThread):
@@ -22,7 +20,12 @@ class DominoThread(JobThread):
         JobThread.__init__(self)
 
         self.__query = query
-        self.__ice_int = None
+        self.__ice_client = ice_utils.ICEClient(
+            query['ice']['url'],
+            query['ice']['username'],
+            query['ice']['password'],
+            group_names=query['ice'].get('groups', None))
+
         self.__results = []
 
     def run(self):
@@ -35,6 +38,9 @@ class DominoThread(JobThread):
         self.__fire_event('running', iteration, 'Running...')
 
         for design in self.__query['designs']:
+            orig_comps = [comp.copy()
+                          for comp in design['components'][:-1]]
+
             # Apply restriction site digestion to PARTs not PLASMIDs.
             # (Assumes PLASMID at positions 1 and -1 - first and last).
             if self.__query.get('restr_enzs', None) is not None:
@@ -47,6 +53,7 @@ class DominoThread(JobThread):
             dna = dna_utils.concat(design['components'][:-1])
             dna['typ'] = dna_utils.SO_PLASMID
             dna['desc'] = ' - '.join(design['design'])
+            dna['parents'].extend(orig_comps)
 
             # Generate domino sequences:
             seqs = [comp['seq'] for comp in design['components']]
@@ -89,34 +96,19 @@ class DominoThread(JobThread):
 
     def __get_components(self):
         '''Gets DNA components from ICE.'''
-        self.__ice_int = self.__get_ice_interface()
-
         iteration = 0
 
         self.__fire_event('running', iteration,
                           'Extracting sequences from ICE...')
 
         for design in self.__query['designs']:
-            design['components'] = [self.__ice_int.get_dna(iceid)
-                                    for iceid in design['design']]
+            design['components'] = \
+                [self.__ice_client.get_ice_entry(ice_id).get_dna()
+                 for ice_id in design['design']]
 
             iteration += 1
             self.__fire_event('running', iteration,
                               'Extracting sequences from ICE...')
-
-    def __get_ice_interface(self):
-        '''Gets an ICEClient if not already instantiated.'''
-        if not self.__ice_int:
-            self.__fire_event('running', 0,
-                              'Connecting to ICE...')
-
-            self.__ice_int = ICEInterface(self.__query['ice']['url'],
-                                          self.__query['ice']['username'],
-                                          self.__query['ice']['password'],
-                                          self.__query['ice'].get('groups',
-                                                                  None))
-
-        return self.__ice_int
 
     def __apply_restricts(self, dna):
         '''Cleave off prefix and suffix, according to restriction sites.'''

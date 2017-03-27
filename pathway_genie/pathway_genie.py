@@ -80,6 +80,7 @@ def save(req):
         ice_id = sbol_writer.submit(url,
                                     req_obj['ice']['username'],
                                     req_obj['ice']['password'],
+                                    req_obj['ice'].get('groups', None),
                                     result)
         ice_entry_urls.append(url + '/entry/' + str(ice_id))
 

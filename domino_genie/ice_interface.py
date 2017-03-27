@@ -8,32 +8,11 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 from synbiochem.utils import dna_utils
-from synbiochem.utils.ice_utils import ICEClient, ICEEntry
+from synbiochem.utils.ice_utils import ICEEntry
 
 
 class ICEInterface(object):
     '''Class to inferface with ICE.'''
-
-    def __init__(self, url, username, psswrd, group_names=None):
-        self.__ice_client = ICEClient(url, username, psswrd)
-
-        if group_names is None:
-            group_names = []
-
-        self.__group_ids = [group_id
-                            for name, group_id
-                            in self.__ice_client.get_groups().iteritems()
-                            if name in group_names]
-
-    def get_dna(self, ice_id):
-        '''Gets DNA object from ICE.'''
-        return self.__ice_client.get_ice_entry(ice_id).get_dna()
-
-    def submit(self, designs):
-        '''Writes plasmids and dominoes to ICE.'''
-        for design in designs:
-            self.__write_plasmid(design)
-            self.__write_dominoes(design)
 
     def __write_plasmid(self, design):
         '''Writes plasmids to ICE.'''

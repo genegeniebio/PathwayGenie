@@ -10,9 +10,10 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 from synbiochem.utils import dna_utils, ice_utils
 
 
-def submit(url, username, pssword, dna):
+def submit(url, username, pssword, group_names, dna):
     '''Forms SBOL document and submits to ICE.'''
-    ice_client = ice_utils.ICEClient(url, username, pssword)
+    ice_client = ice_utils.ICEClient(url, username, pssword,
+                                     group_names=[group_names])
 
     typ = 'PLASMID' if dna.get('typ', None) == dna_utils.SO_PLASMID \
         else 'PART'
