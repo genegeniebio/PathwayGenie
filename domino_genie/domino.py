@@ -53,7 +53,7 @@ class DominoThread(JobThread):
             dna = dna_utils.concat(design['components'][:-1])
             dna['typ'] = dna_utils.SO_PLASMID
             dna['desc'] = ' - '.join(design['design'])
-            dna['parents'].extend(orig_comps)
+            dna['children'].extend(orig_comps)
 
             # Generate domino sequences:
             seqs = [comp['seq'] for comp in design['components']]

@@ -32,7 +32,13 @@ def submit(url, username, pssword, group_names, dna):
 
     ice_entry.set_value('links', list(links))
 
-    return ice_client.set_ice_entry(ice_entry)
+    entry_id = ice_client.set_ice_entry(ice_entry)
+
+    for child in dna['children']:
+        par_ice_entry = submit(url, username, pssword, group_names, child)
+        ice_client.add_link(entry_id, par_ice_entry)
+
+    return entry_id
 
 
 def _add_params(ice_entry, dna):
