@@ -13,12 +13,12 @@ import time
 from flask import Response
 
 from domino_genie.domino import DominoThread
-# from metabolomics_genie.metabolomics import MetabolomicsThread
 from parts_genie.parts import PartsThread
 
 from . import sbol_writer
 
 
+# from metabolomics_genie.metabolomics import MetabolomicsThread
 class PathwayGenie(object):
     '''Class to run PathwayGenie application.'''
 
@@ -77,11 +77,11 @@ def save(req):
     for result in req_obj['result']:
         url = req_obj['ice']['url']
         url = url[:-1] if url[-1] == '/' else url
-        ice_id = sbol_writer.submit(url,
-                                    req_obj['ice']['username'],
-                                    req_obj['ice']['password'],
-                                    req_obj['ice'].get('groups', None),
-                                    result)
+        writer = sbol_writer.DNAWriter(url,
+                                       req_obj['ice']['username'],
+                                       req_obj['ice']['password'],
+                                       req_obj['ice'].get('groups', None))
+        ice_id = writer.submit(result)
         ice_entry_urls.append(url + '/entry/' + str(ice_id))
 
     return json.dumps(ice_entry_urls)

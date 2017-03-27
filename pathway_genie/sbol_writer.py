@@ -10,35 +10,48 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 from synbiochem.utils import dna_utils, ice_utils
 
 
-def submit(url, username, pssword, group_names, dna):
-    '''Forms SBOL document and submits to ICE.'''
-    ice_client = ice_utils.ICEClient(url, username, pssword,
-                                     group_names=[group_names])
+class DNAWriter(object):
+    '''Class for writing DNA objects to ICE.'''
 
-    typ = 'PLASMID' if dna.get('typ', None) == dna_utils.SO_PLASMID \
-        else 'PART'
+    def __init__(self, url, username, pssword, group_names):
+        self.__ice_client = ice_utils.ICEClient(url, username, pssword,
+                                                group_names=[group_names])
 
-    ice_entry = ice_utils.ICEEntry(dna, typ)
+    def submit(self, dna):
+        '''Submits DNA to ICE (or checks for existing entry.'''
+        ice_entries = self.__ice_client.get_ice_entries_by_seq(dna['seq'])
 
-    ice_entry.set_value('name', dna['name'])
-    ice_entry.set_value('shortDescription', dna['desc'])
+        if len(ice_entries):
+            return ice_entries[0].get_ice_id()
+        else:
+            return self.__write(dna)
 
-    _add_params(ice_entry, dna)
-    links = set(dna['links'])
+    def __write(self, dna):
+        '''Writes DNA document to ICE.'''
+        typ = 'PLASMID' if dna.get('typ', None) == dna_utils.SO_PLASMID \
+            else 'PART'
 
-    for feature in dna['features']:
-        _add_params(ice_entry, feature)
-        links |= set(feature['links'])
+        ice_entry = ice_utils.ICEEntry(dna, typ)
 
-    ice_entry.set_value('links', list(links))
+        ice_entry.set_value('name', dna['name'])
+        ice_entry.set_value('shortDescription', dna['desc'])
 
-    entry_id = ice_client.set_ice_entry(ice_entry)
+        _add_params(ice_entry, dna)
+        links = set(dna['links'])
 
-    for child in dna['children']:
-        par_ice_entry = submit(url, username, pssword, group_names, child)
-        ice_client.add_link(entry_id, par_ice_entry)
+        for feature in dna['features']:
+            _add_params(ice_entry, feature)
+            links |= set(feature['links'])
 
-    return entry_id
+        ice_entry.set_value('links', list(links))
+
+        entry_id = self.__ice_client.set_ice_entry(ice_entry)
+
+        for child in dna['children']:
+            par_ice_entry = self.submit(child)
+            self.__ice_client.add_link(entry_id, par_ice_entry)
+
+        return entry_id
 
 
 def _add_params(ice_entry, dna):
