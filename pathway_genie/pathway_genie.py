@@ -73,13 +73,14 @@ def save(req):
     ice_entry_urls = []
     req_obj = json.loads(req.data)
 
+    url = req_obj['ice']['url']
+    url = url[:-1] if url[-1] == '/' else url
+    writer = DNAWriter(url,
+                       req_obj['ice']['username'],
+                       req_obj['ice']['password'],
+                       req_obj['ice'].get('groups', None))
+
     for result in req_obj['result']:
-        url = req_obj['ice']['url']
-        url = url[:-1] if url[-1] == '/' else url
-        writer = DNAWriter(url,
-                           req_obj['ice']['username'],
-                           req_obj['ice']['password'],
-                           req_obj['ice'].get('groups', None))
         ice_id = writer.submit(result)
         ice_entry_urls.append(url + '/entry/' + str(ice_id))
 
