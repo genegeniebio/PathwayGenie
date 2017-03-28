@@ -39,6 +39,9 @@ class DNAWriter(object):
         _add_params(ice_entry, dna)
         links = set(dna['links'])
 
+        if dna.get('typ', None):
+            links.add(dna['typ'])
+
         for feature in dna['features']:
             _add_params(ice_entry, feature)
             links |= set(feature['links'])

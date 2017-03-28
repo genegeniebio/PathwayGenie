@@ -133,8 +133,10 @@ class DominoThread(JobThread):
 
     def __get_domino(self, pair):
         '''Gets a domino from a pair of DNA objects.'''
-        return dna_utils.concat([self.__get_domino_branch(pair[0], False),
-                                 self.__get_domino_branch(pair[1])])
+        dna = dna_utils.concat([self.__get_domino_branch(pair[0], False),
+                                self.__get_domino_branch(pair[1])])
+        dna['parameters']['Type'] = 'DOMINO'
+        return dna
 
     def __get_domino_branch(self, comp, forward=True):
         '''Gets domino branch from DNA object.'''
