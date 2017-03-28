@@ -57,4 +57,6 @@ class DNAWriter(object):
 def _add_params(ice_entry, dna):
     '''Adds parameter values to ICEENtry.'''
     for key, value in dna['parameters'].iteritems():
-        ice_entry.set_parameter(key, value)
+        param = ice_entry.get_parameter(key)
+        ice_entry.set_parameter(key, (value if param is None
+                                      else ', '.join([param, value])))

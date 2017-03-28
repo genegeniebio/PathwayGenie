@@ -11,6 +11,7 @@ from __future__ import division
 
 from synbiochem.utils import dna_utils, ice_utils, pairwise, seq_utils
 from synbiochem.utils.job import JobThread
+from synbiochem.utils.seq_utils import get_seq_by_melt_temp
 
 
 class DominoThread(JobThread):
@@ -38,30 +39,26 @@ class DominoThread(JobThread):
         self.__fire_event('running', iteration, 'Running...')
 
         for design in self.__query['designs']:
+            comps = design['components']
             orig_comps = [comp.copy()
-                          for comp in design['components'][:-1]]
+                          for comp in comps[:-1]]
 
             # Apply restriction site digestion to PARTs not PLASMIDs.
             # (Assumes PLASMID at positions 1 and -1 - first and last).
             if self.__query.get('restr_enzs', None) is not None:
-                design['components'] = [design['components'][0]] + \
+                design['components'] = [comps[0]] + \
                     [self.__apply_restricts(dna)
-                     for dna in design['components'][1:-1]] + \
-                    [design['components'][-1]]
+                     for dna in comps[1:-1]] + \
+                    [comps[-1]]
 
             # Generate plasmid DNA object:
-            dna = dna_utils.concat(design['components'][:-1])
+            dna = dna_utils.concat(comps[:-1])
             dna['typ'] = dna_utils.SO_PLASMID
-            dna['desc'] = ' - '.join(design['design'])
             dna['children'].extend(orig_comps)
 
             # Generate domino sequences:
-            seqs = [comp['seq'] for comp in design['components']]
-
-            oligos = [self.__get_domino(pair)
-                      for pair in pairwise(seqs)]
-            pairs = [pair for pair in pairwise(design['design'])]
-            design['dominoes'] = zip(pairs, oligos)
+            dna['children'].extend([self.__get_domino(pair)
+                                    for pair in pairwise(comps)])
 
             import json
             print json.dumps(dna, indent=2)
@@ -103,12 +100,18 @@ class DominoThread(JobThread):
 
         for design in self.__query['designs']:
             design['components'] = \
-                [self.__ice_client.get_ice_entry(ice_id).get_dna()
-                 for ice_id in design['design']]
+                [self.__get_component(ice_id) for ice_id in design['design']]
 
             iteration += 1
             self.__fire_event('running', iteration,
                               'Extracting sequences from ICE...')
+
+    def __get_component(self, ice_id):
+        '''Gets a DNA component from ICE.'''
+        ice_entry = self.__ice_client.get_ice_entry(ice_id)
+        dna = ice_entry.get_dna()
+        dna['desc'] = ice_id
+        return dna
 
     def __apply_restricts(self, dna):
         '''Cleave off prefix and suffix, according to restriction sites.'''
@@ -129,14 +132,30 @@ class DominoThread(JobThread):
         return restrict_dnas[0]
 
     def __get_domino(self, pair):
-        '''Get bridging oligo for pair of sequences.'''
-        melt_temp = self.__query['melt_temp']
-        reagent_concs = self.__query.get('reagent_concs', None)
+        '''Gets a domino from a pair of DNA objects.'''
+        return dna_utils.concat([self.__get_domino_branch(pair[0], False),
+                                 self.__get_domino_branch(pair[1])])
 
-        return (seq_utils.get_seq_by_melt_temp(pair[0], melt_temp,
-                                               False, reagent_concs),
-                seq_utils.get_seq_by_melt_temp(pair[1], melt_temp,
-                                               reagent_concs))
+    def __get_domino_branch(self, comp, forward=True):
+        '''Gets domino branch from DNA object.'''
+        target_melt_temp = self.__query['melt_temp']
+        reag_concs = self.__query.get('reagent_concs', None)
+
+        seq, melt_temp = get_seq_by_melt_temp(comp['seq'],
+                                              target_melt_temp,
+                                              forward,
+                                              reag_concs)
+
+        dna = dna_utils.DNA(name=comp['name'],
+                            desc=comp['desc'],
+                            seq=seq,
+                            typ=dna_utils.SO_ASS_COMP,
+                            forward=True)
+
+        dna['features'].append(dna.copy())
+        dna['parameters']['Tm'] = float('{0:.3g}'.format(melt_temp))
+
+        return dna
 
     def __fire_event(self, status, iteration, message=''):
         '''Fires an event.'''
