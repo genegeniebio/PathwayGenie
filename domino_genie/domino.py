@@ -38,27 +38,26 @@ class DominoThread(JobThread):
 
         self.__fire_event('running', iteration, 'Running...')
 
-        for design in self.__query['designs']:
-            comps = design['components']
+        for dsgn in self.__query['designs']:
             orig_comps = [comp.copy()
-                          for comp in comps[:-1]]
+                          for comp in dsgn['components'][:-1]]
 
             # Apply restriction site digestion to PARTs not PLASMIDs.
             # (Assumes PLASMID at positions 1 and -1 - first and last).
             if self.__query.get('restr_enzs', None) is not None:
-                design['components'] = [comps[0]] + \
+                dsgn['components'] = [dsgn['components'][0]] + \
                     [self.__apply_restricts(dna)
-                     for dna in comps[1:-1]] + \
-                    [comps[-1]]
+                     for dna in dsgn['components'][1:-1]] + \
+                    [dsgn['components'][-1]]
 
             # Generate plasmid DNA object:
-            dna = dna_utils.concat(comps[:-1])
+            dna = dna_utils.concat(dsgn['components'][:-1])
             dna['typ'] = dna_utils.SO_PLASMID
             dna['children'].extend(orig_comps)
 
             # Generate domino sequences:
             dna['children'].extend([self.__get_domino(pair)
-                                    for pair in pairwise(comps)])
+                                    for pair in pairwise(dsgn['components'])])
 
             import json
             print json.dumps(dna, indent=2)
