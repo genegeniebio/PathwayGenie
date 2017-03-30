@@ -21,6 +21,7 @@ _WORKLIST_COLS = ['DestinationPlateBarcode',
                   'SourcePlateWell',
                   'Volume',
                   'ComponentName',
+                  'description',
                   'plasmid_id']
 
 
@@ -105,7 +106,8 @@ class AssemblyGenie(object):
             for domino in pools[ice_id]['dominoes']:
                 src_well = self.__comp_well[domino[1]]
                 print '\t'.join([dest_plate_id, dest_well, src_well[1],
-                                 src_well[0], str(vol), domino[2], ice_id])
+                                 src_well[0], str(vol), domino[2], domino[5],
+                                 ice_id])
 
             self.__comp_well[ice_id + '_domino_pool'] = \
                 (dest_well, dest_plate_id)
@@ -124,7 +126,7 @@ class AssemblyGenie(object):
 
                 print '\t'.join([dest_plate_id, dest_well, well[1],
                                  well[0], str(vols['backbone']), comp[2],
-                                 ice_id])
+                                 comp[5], ice_id])
                 curr_vol += vols['backbone']
 
             # Write parts:
@@ -133,7 +135,7 @@ class AssemblyGenie(object):
 
                 print '\t'.join([dest_plate_id, dest_well, well[1],
                                  well[0], str(vols['parts']), comp[2],
-                                 ice_id])
+                                 comp[5], ice_id])
                 curr_vol += vols['parts']
 
             # Write domino pools:
@@ -141,21 +143,21 @@ class AssemblyGenie(object):
 
             print '\t'.join([dest_plate_id, dest_well, well[1],
                              well[0], str(vols['dom_pool']), 'domino pool',
-                             ice_id])
+                             'domino pool', ice_id])
             curr_vol += vols['dom_pool']
 
             # Write default reagents:
             for reagent, vol in def_reagents.iteritems():
                 well = self.__comp_well[reagent]
                 print '\t'.join([dest_plate_id, dest_well, well[1],
-                                 well[0], str(vol), reagent, ice_id])
+                                 well[0], str(vol), reagent, reagent, ice_id])
                 curr_vol += vol
 
             # Write water:
             well = self.__comp_well['H2O']
             print '\t'.join([dest_plate_id, dest_well, well[1],
                              well[0], str(vols['total'] - curr_vol), 'H2O',
-                             ice_id])
+                             'H2O', ice_id])
 
     def __get_data(self, ice_id):
         '''Gets data from ICE entry.'''
@@ -169,7 +171,7 @@ class AssemblyGenie(object):
             metadata['name'], \
             metadata['type'], \
             ice_entry.get_parameter('Type'), \
-            re.sub(r'\\s*\\[[^\\]]*\\]\\s*', ' ',
+            re.sub('\\s*\\[[^\\]]*\\]\\s*', ' ',
                    metadata['shortDescription']).replace(' - ', '_'), \
             ice_entry.get_seq()
 
@@ -201,7 +203,8 @@ def main(args):
                            'password': args[2]},
                           args[4:],
                           args[3].split(','))
-    genie.export_lcr_recipe()
+    plate_ids = {'domino_pools': 'SBC50042389', 'lcr': 'lcr'}
+    genie.export_lcr_recipe(plate_ids)
 
 
 if __name__ == '__main__':
