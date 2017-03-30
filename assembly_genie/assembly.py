@@ -20,7 +20,7 @@ _WORKLIST_COLS = ['DestinationPlateBarcode',
                   'SourcePlateBarcode',
                   'SourcePlateWell',
                   'Volume',
-                  'component',
+                  'ComponentName',
                   'plasmid_id']
 
 
