@@ -1,4 +1,4 @@
-DestinationPlateBarcode	DestinationPlateWell	SourcePlateBarcode	SourcePlateWell	Volume	component	plasmid_id
+DestinationPlateBarcode	DestinationPlateWell	SourcePlateBarcode	SourcePlateWell	Volume	ComponentName	plasmid_id
 domino_pools	A1	dominoes_new	B4	3	At-lCHI [25:649] - PlacUV5 2 (deprecated) [25:490]	SBC003394
 domino_pools	A1	dominoes_new	C2	3	Ptrc2 (deprecated) [25:407] - Sc-4CL [25:1684]	SBC003394
 domino_pools	A1	dominoes_new	C1	3	At-CHS [25:1273] - Ptrc2 (deprecated) [25:407]	SBC003394
