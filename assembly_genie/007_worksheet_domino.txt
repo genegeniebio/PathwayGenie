@@ -1,0 +1,229 @@
+DestinationPlateBarcode	DestinationPlateWell	SourcePlateBarcode	SourcePlateWell	Volume	component	plasmid_id
+domino_pools	A1	dominoes_new	B4	3	At-lCHI [25:649] - PlacUV5 2 (deprecated) [25:490]	SBC003394
+domino_pools	A1	dominoes_new	C2	3	Ptrc2 (deprecated) [25:407] - Sc-4CL [25:1684]	SBC003394
+domino_pools	A1	dominoes_new	C1	3	At-CHS [25:1273] - Ptrc2 (deprecated) [25:407]	SBC003394
+domino_pools	A1	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003394
+domino_pools	A1	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003394
+domino_pools	A1	dominoes_new	C6	3	PlacUV5 2 (deprecated) [25:490] - At-CHS [25:1273]	SBC003394
+domino_pools	A1	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003394
+domino_pools	A2	dominoes_new	C3	3	At-CHS [25:1273] - PlacUV5 3 (deprecated) [25:488]	SBC003395
+domino_pools	A2	dominoes_new	B4	3	At-lCHI [25:649] - PlacUV5 2 (deprecated) [25:490]	SBC003395
+domino_pools	A2	dominoes_new	C4	3	PlacUV5 3 (deprecated) [25:488] - Sc-4CL [25:1684]	SBC003395
+domino_pools	A2	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003395
+domino_pools	A2	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003395
+domino_pools	A2	dominoes_new	C6	3	PlacUV5 2 (deprecated) [25:490] - At-CHS [25:1273]	SBC003395
+domino_pools	A2	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003395
+domino_pools	A3	dominoes_new	C3	3	At-CHS [25:1273] - PlacUV5 3 (deprecated) [25:488]	SBC003392
+domino_pools	A3	dominoes_new	B2	3	At-lCHI [25:649] - Ptrc (deprecated) [25:412]	SBC003392
+domino_pools	A3	dominoes_new	C4	3	PlacUV5 3 (deprecated) [25:488] - Sc-4CL [25:1684]	SBC003392
+domino_pools	A3	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003392
+domino_pools	A3	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003392
+domino_pools	A3	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003392
+domino_pools	A3	dominoes_new	C5	3	Ptrc (deprecated) [25:412] - At-CHS [25:1273]	SBC003392
+domino_pools	A4	dominoes_new	B4	3	At-lCHI [25:649] - PlacUV5 2 (deprecated) [25:490]	SBC003393
+domino_pools	A4	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003393
+domino_pools	A4	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003393
+domino_pools	A4	dominoes_new	C6	3	PlacUV5 2 (deprecated) [25:490] - At-CHS [25:1273]	SBC003393
+domino_pools	A4	dominoes_new	B7	3	At-CHS [25:1273] - Sc-4CL [25:1684]	SBC003393
+domino_pools	A4	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003393
+domino_pools	A5	dominoes_new	B2	3	At-lCHI [25:649] - Ptrc (deprecated) [25:412]	SBC003390
+domino_pools	A5	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003390
+domino_pools	A5	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003390
+domino_pools	A5	dominoes_new	B7	3	At-CHS [25:1273] - Sc-4CL [25:1684]	SBC003390
+domino_pools	A5	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003390
+domino_pools	A5	dominoes_new	C5	3	Ptrc (deprecated) [25:412] - At-CHS [25:1273]	SBC003390
+domino_pools	A6	dominoes_new	B2	3	At-lCHI [25:649] - Ptrc (deprecated) [25:412]	SBC003391
+domino_pools	A6	dominoes_new	C2	3	Ptrc2 (deprecated) [25:407] - Sc-4CL [25:1684]	SBC003391
+domino_pools	A6	dominoes_new	C1	3	At-CHS [25:1273] - Ptrc2 (deprecated) [25:407]	SBC003391
+domino_pools	A6	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003391
+domino_pools	A6	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003391
+domino_pools	A6	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003391
+domino_pools	A6	dominoes_new	C5	3	Ptrc (deprecated) [25:412] - At-CHS [25:1273]	SBC003391
+domino_pools	A7	dominoes_new	A3	3	Sc-4CL [25:1684] - At-CHS [25:1273]	SBC003338
+domino_pools	A7	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003338
+domino_pools	A7	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003338
+domino_pools	A7	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003338
+domino_pools	A7	dominoes_new	A2	3	At-lCHI [25:649] - Sc-4CL [25:1684]	SBC003338
+domino_pools	A8	dominoes_new	B2	3	At-lCHI [25:649] - Ptrc (deprecated) [25:412]	SBC003370
+domino_pools	A8	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003370
+domino_pools	A8	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003370
+domino_pools	A8	dominoes_new	B7	3	At-CHS [25:1273] - Sc-4CL [25:1684]	SBC003370
+domino_pools	A8	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003370
+domino_pools	A8	dominoes_new	C5	3	Ptrc (deprecated) [25:412] - At-CHS [25:1273]	SBC003370
+domino_pools	B1	dominoes_new	B4	3	At-lCHI [25:649] - PlacUV5 2 (deprecated) [25:490]	SBC003358
+domino_pools	B1	dominoes_new	B5	3	PlacUV5 2 (deprecated) [25:490] - Sc-4CL [25:1684]	SBC003358
+domino_pools	B1	dominoes_new	A6	3	Sc-4CL [25:1684] - Ptrc2 (deprecated) [25:407]	SBC003358
+domino_pools	B1	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003358
+domino_pools	B1	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003358
+domino_pools	B1	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003358
+domino_pools	B1	dominoes_new	A7	3	Ptrc2 (deprecated) [25:407] - At-CHS [25:1273]	SBC003358
+domino_pools	B2	dominoes_new	B4	3	At-lCHI [25:649] - PlacUV5 2 (deprecated) [25:490]	SBC003359
+domino_pools	B2	dominoes_new	B5	3	PlacUV5 2 (deprecated) [25:490] - Sc-4CL [25:1684]	SBC003359
+domino_pools	B2	dominoes_new	A8	3	Sc-4CL [25:1684] - PlacUV5 3 (deprecated) [25:488]	SBC003359
+domino_pools	B2	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003359
+domino_pools	B2	dominoes_new	B1	3	PlacUV5 3 (deprecated) [25:488] - At-CHS [25:1273]	SBC003359
+domino_pools	B2	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003359
+domino_pools	B2	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003359
+domino_pools	B3	dominoes_new	B4	3	At-lCHI [25:649] - PlacUV5 2 (deprecated) [25:490]	SBC003374
+domino_pools	B3	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003374
+domino_pools	B3	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003374
+domino_pools	B3	dominoes_new	C6	3	PlacUV5 2 (deprecated) [25:490] - At-CHS [25:1273]	SBC003374
+domino_pools	B3	dominoes_new	B7	3	At-CHS [25:1273] - Sc-4CL [25:1684]	SBC003374
+domino_pools	B3	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003374
+domino_pools	B4	dominoes_new	B4	3	At-lCHI [25:649] - PlacUV5 2 (deprecated) [25:490]	SBC003376
+domino_pools	B4	dominoes_new	C2	3	Ptrc2 (deprecated) [25:407] - Sc-4CL [25:1684]	SBC003376
+domino_pools	B4	dominoes_new	C1	3	At-CHS [25:1273] - Ptrc2 (deprecated) [25:407]	SBC003376
+domino_pools	B4	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003376
+domino_pools	B4	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003376
+domino_pools	B4	dominoes_new	C6	3	PlacUV5 2 (deprecated) [25:490] - At-CHS [25:1273]	SBC003376
+domino_pools	B4	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003376
+domino_pools	B5	dominoes_new	C3	3	At-CHS [25:1273] - PlacUV5 3 (deprecated) [25:488]	SBC003377
+domino_pools	B5	dominoes_new	B4	3	At-lCHI [25:649] - PlacUV5 2 (deprecated) [25:490]	SBC003377
+domino_pools	B5	dominoes_new	C4	3	PlacUV5 3 (deprecated) [25:488] - Sc-4CL [25:1684]	SBC003377
+domino_pools	B5	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003377
+domino_pools	B5	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003377
+domino_pools	B5	dominoes_new	C6	3	PlacUV5 2 (deprecated) [25:490] - At-CHS [25:1273]	SBC003377
+domino_pools	B5	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003377
+domino_pools	B6	dominoes_new	A3	3	Sc-4CL [25:1684] - At-CHS [25:1273]	SBC003378
+domino_pools	B6	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003378
+domino_pools	B6	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003378
+domino_pools	B6	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003378
+domino_pools	B6	dominoes_new	A2	3	At-lCHI [25:649] - Sc-4CL [25:1684]	SBC003378
+domino_pools	B7	dominoes_new	B2	3	At-lCHI [25:649] - Ptrc (deprecated) [25:412]	SBC003353
+domino_pools	B7	dominoes_new	A6	3	Sc-4CL [25:1684] - Ptrc2 (deprecated) [25:407]	SBC003353
+domino_pools	B7	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003353
+domino_pools	B7	dominoes_new	B3	3	Ptrc (deprecated) [25:412] - Sc-4CL [25:1684]	SBC003353
+domino_pools	B7	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003353
+domino_pools	B7	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003353
+domino_pools	B7	dominoes_new	A7	3	Ptrc2 (deprecated) [25:407] - At-CHS [25:1273]	SBC003353
+domino_pools	B8	dominoes_new	A3	3	Sc-4CL [25:1684] - At-CHS [25:1273]	SBC003350
+domino_pools	B8	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003350
+domino_pools	B8	dominoes_new	B2	3	At-lCHI [25:649] - Ptrc (deprecated) [25:412]	SBC003350
+domino_pools	B8	dominoes_new	B3	3	Ptrc (deprecated) [25:412] - Sc-4CL [25:1684]	SBC003350
+domino_pools	B8	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003350
+domino_pools	B8	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003350
+domino_pools	C1	dominoes_new	B2	3	At-lCHI [25:649] - Ptrc (deprecated) [25:412]	SBC003354
+domino_pools	C1	dominoes_new	A8	3	Sc-4CL [25:1684] - PlacUV5 3 (deprecated) [25:488]	SBC003354
+domino_pools	C1	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003354
+domino_pools	C1	dominoes_new	B3	3	Ptrc (deprecated) [25:412] - Sc-4CL [25:1684]	SBC003354
+domino_pools	C1	dominoes_new	B1	3	PlacUV5 3 (deprecated) [25:488] - At-CHS [25:1273]	SBC003354
+domino_pools	C1	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003354
+domino_pools	C1	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003354
+domino_pools	C2	dominoes_new	A3	3	Sc-4CL [25:1684] - At-CHS [25:1273]	SBC003355
+domino_pools	C2	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003355
+domino_pools	C2	dominoes_new	B4	3	At-lCHI [25:649] - PlacUV5 2 (deprecated) [25:490]	SBC003355
+domino_pools	C2	dominoes_new	B5	3	PlacUV5 2 (deprecated) [25:490] - Sc-4CL [25:1684]	SBC003355
+domino_pools	C2	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003355
+domino_pools	C2	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003355
+domino_pools	C3	dominoes_new	C4	3	PlacUV5 3 (deprecated) [25:488] - Sc-4CL [25:1684]	SBC003389
+domino_pools	C3	dominoes_new	C3	3	At-CHS [25:1273] - PlacUV5 3 (deprecated) [25:488]	SBC003389
+domino_pools	C3	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003389
+domino_pools	C3	dominoes_new	B6	3	At-lCHI [25:649] - At-CHS [25:1273]	SBC003389
+domino_pools	C3	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003389
+domino_pools	C3	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003389
+domino_pools	C4	dominoes_new	C1	3	At-CHS [25:1273] - Ptrc2 (deprecated) [25:407]	SBC003388
+domino_pools	C4	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003388
+domino_pools	C4	dominoes_new	B6	3	At-lCHI [25:649] - At-CHS [25:1273]	SBC003388
+domino_pools	C4	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003388
+domino_pools	C4	dominoes_new	C2	3	Ptrc2 (deprecated) [25:407] - Sc-4CL [25:1684]	SBC003388
+domino_pools	C4	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003388
+domino_pools	C5	dominoes_new	B4	3	At-lCHI [25:649] - PlacUV5 2 (deprecated) [25:490]	SBC003385
+domino_pools	C5	dominoes_new	B5	3	PlacUV5 2 (deprecated) [25:490] - Sc-4CL [25:1684]	SBC003385
+domino_pools	C5	dominoes_new	A6	3	Sc-4CL [25:1684] - Ptrc2 (deprecated) [25:407]	SBC003385
+domino_pools	C5	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003385
+domino_pools	C5	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003385
+domino_pools	C5	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003385
+domino_pools	C5	dominoes_new	A7	3	Ptrc2 (deprecated) [25:407] - At-CHS [25:1273]	SBC003385
+domino_pools	C6	dominoes_new	A3	3	Sc-4CL [25:1684] - At-CHS [25:1273]	SBC003384
+domino_pools	C6	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003384
+domino_pools	C6	dominoes_new	B4	3	At-lCHI [25:649] - PlacUV5 2 (deprecated) [25:490]	SBC003384
+domino_pools	C6	dominoes_new	B5	3	PlacUV5 2 (deprecated) [25:490] - Sc-4CL [25:1684]	SBC003384
+domino_pools	C6	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003384
+domino_pools	C6	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003384
+domino_pools	C7	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003387
+domino_pools	C7	dominoes_new	B6	3	At-lCHI [25:649] - At-CHS [25:1273]	SBC003387
+domino_pools	C7	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003387
+domino_pools	C7	dominoes_new	B7	3	At-CHS [25:1273] - Sc-4CL [25:1684]	SBC003387
+domino_pools	C7	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003387
+domino_pools	C8	dominoes_new	B4	3	At-lCHI [25:649] - PlacUV5 2 (deprecated) [25:490]	SBC003386
+domino_pools	C8	dominoes_new	B5	3	PlacUV5 2 (deprecated) [25:490] - Sc-4CL [25:1684]	SBC003386
+domino_pools	C8	dominoes_new	A8	3	Sc-4CL [25:1684] - PlacUV5 3 (deprecated) [25:488]	SBC003386
+domino_pools	C8	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003386
+domino_pools	C8	dominoes_new	B1	3	PlacUV5 3 (deprecated) [25:488] - At-CHS [25:1273]	SBC003386
+domino_pools	C8	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003386
+domino_pools	C8	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003386
+domino_pools	D1	dominoes_new	A3	3	Sc-4CL [25:1684] - At-CHS [25:1273]	SBC003381
+domino_pools	D1	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003381
+domino_pools	D1	dominoes_new	B2	3	At-lCHI [25:649] - Ptrc (deprecated) [25:412]	SBC003381
+domino_pools	D1	dominoes_new	B3	3	Ptrc (deprecated) [25:412] - Sc-4CL [25:1684]	SBC003381
+domino_pools	D1	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003381
+domino_pools	D1	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003381
+domino_pools	D2	dominoes_new	B2	3	At-lCHI [25:649] - Ptrc (deprecated) [25:412]	SBC003372
+domino_pools	D2	dominoes_new	C2	3	Ptrc2 (deprecated) [25:407] - Sc-4CL [25:1684]	SBC003372
+domino_pools	D2	dominoes_new	C1	3	At-CHS [25:1273] - Ptrc2 (deprecated) [25:407]	SBC003372
+domino_pools	D2	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003372
+domino_pools	D2	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003372
+domino_pools	D2	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003372
+domino_pools	D2	dominoes_new	C5	3	Ptrc (deprecated) [25:412] - At-CHS [25:1273]	SBC003372
+domino_pools	D3	dominoes_new	B2	3	At-lCHI [25:649] - Ptrc (deprecated) [25:412]	SBC003383
+domino_pools	D3	dominoes_new	A8	3	Sc-4CL [25:1684] - PlacUV5 3 (deprecated) [25:488]	SBC003383
+domino_pools	D3	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003383
+domino_pools	D3	dominoes_new	B3	3	Ptrc (deprecated) [25:412] - Sc-4CL [25:1684]	SBC003383
+domino_pools	D3	dominoes_new	B1	3	PlacUV5 3 (deprecated) [25:488] - At-CHS [25:1273]	SBC003383
+domino_pools	D3	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003383
+domino_pools	D3	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003383
+domino_pools	D4	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003380
+domino_pools	D4	dominoes_new	B1	3	PlacUV5 3 (deprecated) [25:488] - At-CHS [25:1273]	SBC003380
+domino_pools	D4	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003380
+domino_pools	D4	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003380
+domino_pools	D4	dominoes_new	A8	3	Sc-4CL [25:1684] - PlacUV5 3 (deprecated) [25:488]	SBC003380
+domino_pools	D4	dominoes_new	A2	3	At-lCHI [25:649] - Sc-4CL [25:1684]	SBC003380
+domino_pools	D5	dominoes_new	C3	3	At-CHS [25:1273] - PlacUV5 3 (deprecated) [25:488]	SBC003373
+domino_pools	D5	dominoes_new	B2	3	At-lCHI [25:649] - Ptrc (deprecated) [25:412]	SBC003373
+domino_pools	D5	dominoes_new	C4	3	PlacUV5 3 (deprecated) [25:488] - Sc-4CL [25:1684]	SBC003373
+domino_pools	D5	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003373
+domino_pools	D5	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003373
+domino_pools	D5	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003373
+domino_pools	D5	dominoes_new	C5	3	Ptrc (deprecated) [25:412] - At-CHS [25:1273]	SBC003373
+domino_pools	D6	dominoes_new	B2	3	At-lCHI [25:649] - Ptrc (deprecated) [25:412]	SBC003382
+domino_pools	D6	dominoes_new	A6	3	Sc-4CL [25:1684] - Ptrc2 (deprecated) [25:407]	SBC003382
+domino_pools	D6	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003382
+domino_pools	D6	dominoes_new	B3	3	Ptrc (deprecated) [25:412] - Sc-4CL [25:1684]	SBC003382
+domino_pools	D6	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003382
+domino_pools	D6	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003382
+domino_pools	D6	dominoes_new	A7	3	Ptrc2 (deprecated) [25:407] - At-CHS [25:1273]	SBC003382
+domino_pools	D7	dominoes_new	C4	3	PlacUV5 3 (deprecated) [25:488] - Sc-4CL [25:1684]	SBC003367
+domino_pools	D7	dominoes_new	C3	3	At-CHS [25:1273] - PlacUV5 3 (deprecated) [25:488]	SBC003367
+domino_pools	D7	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003367
+domino_pools	D7	dominoes_new	B6	3	At-lCHI [25:649] - At-CHS [25:1273]	SBC003367
+domino_pools	D7	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003367
+domino_pools	D7	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003367
+domino_pools	D8	dominoes_new	C1	3	At-CHS [25:1273] - Ptrc2 (deprecated) [25:407]	SBC003364
+domino_pools	D8	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003364
+domino_pools	D8	dominoes_new	B6	3	At-lCHI [25:649] - At-CHS [25:1273]	SBC003364
+domino_pools	D8	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003364
+domino_pools	D8	dominoes_new	C2	3	Ptrc2 (deprecated) [25:407] - Sc-4CL [25:1684]	SBC003364
+domino_pools	D8	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003364
+domino_pools	E1	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003344
+domino_pools	E1	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003344
+domino_pools	E1	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003344
+domino_pools	E1	dominoes_new	A2	3	At-lCHI [25:649] - Sc-4CL [25:1684]	SBC003344
+domino_pools	E1	dominoes_new	A6	3	Sc-4CL [25:1684] - Ptrc2 (deprecated) [25:407]	SBC003344
+domino_pools	E1	dominoes_new	A7	3	Ptrc2 (deprecated) [25:407] - At-CHS [25:1273]	SBC003344
+domino_pools	E2	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003347
+domino_pools	E2	dominoes_new	B1	3	PlacUV5 3 (deprecated) [25:488] - At-CHS [25:1273]	SBC003347
+domino_pools	E2	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003347
+domino_pools	E2	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003347
+domino_pools	E2	dominoes_new	A8	3	Sc-4CL [25:1684] - PlacUV5 3 (deprecated) [25:488]	SBC003347
+domino_pools	E2	dominoes_new	A2	3	At-lCHI [25:649] - Sc-4CL [25:1684]	SBC003347
+domino_pools	E3	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003360
+domino_pools	E3	dominoes_new	B6	3	At-lCHI [25:649] - At-CHS [25:1273]	SBC003360
+domino_pools	E3	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003360
+domino_pools	E3	dominoes_new	B7	3	At-CHS [25:1273] - Sc-4CL [25:1684]	SBC003360
+domino_pools	E3	dominoes_new	B8	3	Sc-4CL [25:1684] - At-PAL1 [25:2263]	SBC003360
+domino_pools	E4	dominoes_new	A4	3	At-CHS [25:1273] - At-PAL1 [25:2263]	SBC003379
+domino_pools	E4	dominoes_new	A1	3	pBbE1a - At-lCHI [25:649]	SBC003379
+domino_pools	E4	dominoes_new	A5	3	At-PAL1 [25:2263] - pBbE1a	SBC003379
+domino_pools	E4	dominoes_new	A2	3	At-lCHI [25:649] - Sc-4CL [25:1684]	SBC003379
+domino_pools	E4	dominoes_new	A6	3	Sc-4CL [25:1684] - Ptrc2 (deprecated) [25:407]	SBC003379
+domino_pools	E4	dominoes_new	A7	3	Ptrc2 (deprecated) [25:407] - At-CHS [25:1273]	SBC003379

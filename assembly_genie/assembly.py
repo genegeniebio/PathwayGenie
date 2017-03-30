@@ -8,6 +8,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 from _collections import defaultdict
+import re
 import sys
 
 from synbiochem.utils import plate_utils
@@ -23,22 +24,6 @@ _WORKLIST_COLS = ['DestinationPlateBarcode',
                   'plasmid_id']
 
 
-def export_order(url, username, password, ice_ids):
-    '''Exports a plasmids constituent parts for ordering.'''
-    ice_client = ICEClient(url, username, password)
-    entries = {}
-
-    for ice_id in ice_ids:
-        data = _get_data(ice_client, ice_id)
-
-        for part in data[0].get_metadata()['linkedParts']:
-            data = _get_data(ice_client, part['partId'])
-            entries[data[1]] = data[2:]
-
-    for entry_id, entry in entries.iteritems():
-        print '\t'.join([entry_id] + [str(item) for item in entry])
-
-
 class AssemblyGenie(object):
     '''Class implementing AssemblyGenie algorithms.'''
 
@@ -48,6 +33,7 @@ class AssemblyGenie(object):
                                       ice_details['password'])
         self.__ice_ids = ice_ids
         self.__comp_well = _get_src_comp_well(src_filenames)
+        self.__data = {}
 
     def export_lcr_recipe(self,
                           plate_ids=None,
@@ -59,7 +45,7 @@ class AssemblyGenie(object):
             plate_ids = {'domino_pools': 'domino_pools', 'lcr': 'lcr'}
 
         if def_reagents is None:
-            def_reagents = {'mastermix': 7.5, 'ampligase': 1.5}
+            def_reagents = {'mastermix': 7.5, 'Ampligase': 1.5}
 
         if vols is None:
             vols = {'backbone': 1, 'parts': 1, 'dom_pool': 1, 'total': 25}
@@ -67,10 +53,10 @@ class AssemblyGenie(object):
         pools = defaultdict(lambda: defaultdict(list))
 
         for ice_id in self.__ice_ids:
-            data = _get_data(self.__ice_client, ice_id)
+            data = self.__get_data(ice_id)
 
             for part in data[0].get_metadata()['linkedParts']:
-                data = _get_data(self.__ice_client, part['partId'])
+                data = self.__get_data(part['partId'])
 
                 if data[4] == 'ORF':
                     pools[ice_id]['parts'].append(data)
@@ -82,6 +68,20 @@ class AssemblyGenie(object):
 
         self.__output_lcr_recipe(pools, plate_ids, def_reagents, vols,
                                  domino_vol)
+
+    def export_order(self):
+        '''Exports a plasmids constituent parts for ordering.'''
+        entries = {}
+
+        for ice_id in self.__ice_ids:
+            data = self.__get_data(ice_id)
+
+            for part in data[0].get_metadata()['linkedParts']:
+                data = self.__get_data(part['partId'])
+                entries[data[1]] = data[2:]
+
+        for entry_id, entry in entries.iteritems():
+            print '\t'.join([entry_id] + [str(item) for item in entry])
 
     def __output_lcr_recipe(self, pools, plate_ids, def_reagents, vols,
                             domino_vol):
@@ -157,18 +157,25 @@ class AssemblyGenie(object):
                              well[0], str(vols['total'] - curr_vol), 'H2O',
                              ice_id])
 
+    def __get_data(self, ice_id):
+        '''Gets data from ICE entry.'''
+        if ice_id in self.__data:
+            return self.__data[ice_id]
 
-def _get_data(ice_client, ice_id):
-    '''Gets data from ICE entry.'''
-    ice_entry = ice_client.get_ice_entry(ice_id)
-    metadata = ice_entry.get_metadata()
+        ice_entry = self.__ice_client.get_ice_entry(ice_id)
+        metadata = ice_entry.get_metadata()
+        data = ice_entry, \
+            metadata['partId'], \
+            metadata['name'], \
+            metadata['type'], \
+            ice_entry.get_parameter('Type'), \
+            re.sub(r'\\s*\\[[^\\]]*\\]\\s*', ' ',
+                   metadata['shortDescription']).replace(' - ', '_'), \
+            ice_entry.get_seq()
 
-    return ice_entry, \
-        metadata['partId'], \
-        metadata['name'], \
-        metadata['type'], \
-        ice_entry.get_parameter('Type'), \
-        ice_entry.get_seq()
+        self.__data[ice_id] = data
+
+        return data
 
 
 def _get_src_comp_well(src_filenames):
@@ -179,9 +186,10 @@ def _get_src_comp_well(src_filenames):
         with open(src_filename) as fle:
             plate_id = src_filename[:src_filename.find('.')]
 
-            for line in fle:
-                terms = line.split()
-                comp_well[terms[1]] = (terms[0], plate_id)
+            for line in fle.read().splitlines():
+                if line.strip():
+                    terms = line.split('\t')
+                    comp_well[terms[1]] = (terms[0], plate_id)
 
     return comp_well
 
