@@ -49,7 +49,8 @@ class AssemblyGenie(object):
             def_reagents = {'mastermix': 7.5, 'Ampligase': 1.5}
 
         if vols is None:
-            vols = {'backbone': 1, 'parts': 1, 'dom_pool': 1, 'total': 25}
+            vols = {'backbone': 1, 'parts': 1, 'dom_pool': 1, 'total': 25,
+                    'domino': domino_vol}
 
         pools = defaultdict(lambda: defaultdict(list))
 
@@ -67,8 +68,7 @@ class AssemblyGenie(object):
                     # Assume backbone:
                     pools[ice_id]['backbone'].append(data)
 
-        self.__output_lcr_recipe(pools, plate_ids, def_reagents, vols,
-                                 domino_vol)
+        self.__output_lcr_recipe(pools, plate_ids, def_reagents, vols)
 
     def export_order(self):
         '''Exports a plasmids constituent parts for ordering.'''
@@ -84,12 +84,11 @@ class AssemblyGenie(object):
         for entry_id, entry in entries.iteritems():
             print '\t'.join([entry_id] + [str(item) for item in entry])
 
-    def __output_lcr_recipe(self, pools, plate_ids, def_reagents, vols,
-                            domino_vol):
+    def __output_lcr_recipe(self, pools, plate_ids, def_reagents, vols):
         '''Outputs recipes.'''
         # Write domino pools worklist:
         self.__write_dom_pool_worklist(pools, plate_ids['domino_pools'],
-                                       domino_vol)
+                                       vols['domino'])
 
         print ''
 

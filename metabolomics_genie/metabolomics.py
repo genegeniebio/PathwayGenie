@@ -10,7 +10,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 from __future__ import division
 
 from tempfile import NamedTemporaryFile
-import traceback
 
 from neo4j.v1 import GraphDatabase
 from synbiochem.utils.job import JobThread
@@ -28,40 +27,36 @@ class MetabolomicsThread(JobThread):
 
     def run(self):
         '''Runs MetabolomicsGenie job.'''
-        try:
-            iteration = 0
+        iteration = 0
 
-            self.__fire_event('running', 'Parsing spectra...')
+        self.__fire_event('running', 'Parsing spectra...')
 
-            spec_file = NamedTemporaryFile(delete=False)
+        spec_file = NamedTemporaryFile(delete=False)
 
-            with open(spec_file.name, 'w') as fle:
-                fle.write(self.__query['spectra'])
+        with open(spec_file.name, 'w') as fle:
+            fle.write(self.__query['spectra'])
 
-            spectra = pymzml.run.Reader(spec_file.name)
+        spectra = pymzml.run.Reader(spec_file.name)
 
-            for spectrum in spectra:
-                if spectrum['ms level'] == 2:
-                    hits = self.__analyse_spec(spectrum)
+        for spectrum in spectra:
+            if spectrum['ms level'] == 2:
+                hits = self.__analyse_spec(spectrum)
 
-                    if len(hits):
-                        spectrum['peaks'] = spectrum.peaks
-                        self.__results.append({'spectrum': spectrum,
-                                               'hits': [hits[0]]})
+                if len(hits):
+                    spectrum['peaks'] = spectrum.peaks
+                    self.__results.append({'spectrum': spectrum,
+                                           'hits': [hits[0]]})
 
-                iteration += 1
-                self.__fire_event('running', 'Identifying spectra...')
+            iteration += 1
+            self.__fire_event('running', 'Identifying spectra...')
 
-                if iteration == 5:
-                    break
+            if iteration == 5:
+                break
 
-            if self._cancelled:
-                self.__fire_event('cancelled', 'Job cancelled')
-            else:
-                self.__fire_event('finished', 'Job completed')
-        except Exception, err:
-            self.__fire_event('error', str(err))
-            traceback.print_exc(err)
+        if self._cancelled:
+            self.__fire_event('cancelled', 'Job cancelled')
+        else:
+            self.__fire_event('finished', 'Job completed')
 
     def __analyse_spec(self, spectrum):
         '''Analyse a given spectra.'''
