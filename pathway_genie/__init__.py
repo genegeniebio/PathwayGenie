@@ -37,7 +37,7 @@ APP = Flask(__name__, static_folder=_STATIC_FOLDER)
 APP.config.from_object(__name__)
 
 _MANAGER = pathway_genie.PathwayGenie()
-_ORGANISMS = seq_utils.get_codon_usage_organisms(expand=True)
+_ORGANISMS = seq_utils.get_codon_usage_organisms(expand=True, verbose=True)
 
 
 @APP.route('/')
