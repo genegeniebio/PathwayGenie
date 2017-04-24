@@ -116,21 +116,25 @@ class AssemblyGenie(object):
         print '\t'.join(_WORKLIST_COLS)
 
         for idx, ice_id in enumerate(self.__ice_ids):
-            curr_vol = 0
             dest_well = plate_utils.get_well(idx)
 
             # Write water:
             well = self.__comp_well['H2O']
+
+            h2o_vol = vols['total'] - \
+                sum(def_reagents.values()) - \
+                len(pools[ice_id]['backbone']) * vols['backbone'] - \
+                len(pools[ice_id]['parts']) * vols['parts'] - \
+                vols['dom_pool']
+
             print '\t'.join([dest_plate_id, dest_well, well[1],
-                             well[0], str(vols['total'] - curr_vol), 'H2O',
-                             'H2O', ice_id])
+                             well[0], str(h2o_vol), 'H2O', 'H2O', ice_id])
 
             # Write default reagents:
             for reagent, vol in def_reagents.iteritems():
                 well = self.__comp_well[reagent]
                 print '\t'.join([dest_plate_id, dest_well, well[1],
                                  well[0], str(vol), reagent, reagent, ice_id])
-                curr_vol += vol
 
             # Write backbone:
             for comp in pools[ice_id]['backbone']:
@@ -139,7 +143,6 @@ class AssemblyGenie(object):
                 print '\t'.join([dest_plate_id, dest_well, well[1],
                                  well[0], str(vols['backbone']), comp[2],
                                  comp[5], ice_id])
-                curr_vol += vols['backbone']
 
             # Write parts:
             for comp in pools[ice_id]['parts']:
@@ -148,7 +151,6 @@ class AssemblyGenie(object):
                 print '\t'.join([dest_plate_id, dest_well, well[1],
                                  well[0], str(vols['parts']), comp[2],
                                  comp[5], ice_id])
-                curr_vol += vols['parts']
 
             # Write domino pools:
             well = self.__comp_well[ice_id + '_domino_pool']
@@ -156,7 +158,6 @@ class AssemblyGenie(object):
             print '\t'.join([dest_plate_id, dest_well, well[1],
                              well[0], str(vols['dom_pool']), 'domino pool',
                              'domino pool', ice_id])
-            curr_vol += vols['dom_pool']
 
     def __get_data(self, ice_id):
         '''Gets data from ICE entry.'''
