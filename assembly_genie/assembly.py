@@ -46,7 +46,7 @@ class AssemblyGenie(object):
             plate_ids = {'domino_pools': 'domino_pools', 'lcr': 'lcr'}
 
         if def_reagents is None:
-            def_reagents = {'mastermix': 7.5, 'Ampligase': 1.5}
+            def_reagents = {'mastermix': 7.0, 'Ampligase': 1.5}
 
         if vols is None:
             vols = {'backbone': 1, 'parts': 1, 'dom_pool': 1, 'total': 25,
@@ -119,6 +119,19 @@ class AssemblyGenie(object):
             curr_vol = 0
             dest_well = plate_utils.get_well(idx)
 
+            # Write water:
+            well = self.__comp_well['H2O']
+            print '\t'.join([dest_plate_id, dest_well, well[1],
+                             well[0], str(vols['total'] - curr_vol), 'H2O',
+                             'H2O', ice_id])
+
+            # Write default reagents:
+            for reagent, vol in def_reagents.iteritems():
+                well = self.__comp_well[reagent]
+                print '\t'.join([dest_plate_id, dest_well, well[1],
+                                 well[0], str(vol), reagent, reagent, ice_id])
+                curr_vol += vol
+
             # Write backbone:
             for comp in pools[ice_id]['backbone']:
                 well = self.__comp_well[comp[1]]
@@ -144,19 +157,6 @@ class AssemblyGenie(object):
                              well[0], str(vols['dom_pool']), 'domino pool',
                              'domino pool', ice_id])
             curr_vol += vols['dom_pool']
-
-            # Write default reagents:
-            for reagent, vol in def_reagents.iteritems():
-                well = self.__comp_well[reagent]
-                print '\t'.join([dest_plate_id, dest_well, well[1],
-                                 well[0], str(vol), reagent, reagent, ice_id])
-                curr_vol += vol
-
-            # Write water:
-            well = self.__comp_well['H2O']
-            print '\t'.join([dest_plate_id, dest_well, well[1],
-                             well[0], str(vols['total'] - curr_vol), 'H2O',
-                             'H2O', ice_id])
 
     def __get_data(self, ice_id):
         '''Gets data from ICE entry.'''
