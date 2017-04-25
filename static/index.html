@@ -19,6 +19,8 @@
 <script src="static/assemblyGenie/assemblyGenie.ctrl.js"></script>
 <script src="static/dna/dna.module.js"></script>
 <script src="static/dna/dna.directive.js"></script>
+<script src="static/digestGenie/digestGenie.module.js"></script>
+<script src="static/digestGenie/digestGenie.ctrl.js"></script>
 <script src="static/dominoGenie/dominoGenie.module.js"></script>
 <script src="static/dominoGenie/dominoGenie.ctrl.js"></script>
 <script src="static/error/error.module.js"></script>
@@ -27,12 +29,6 @@
 <script src="static/ice/ice.module.js"></script>
 <script src="static/ice/ice.ctrl.js"></script>
 <script src="static/ice/ice.service.js"></script>
-<script src="static/metabolomicsGenie/metabolomicsGenie.module.js"></script>
-<script src="static/metabolomicsGenie/metabolomicsGenie.ctrl.js"></script>
-<script src="static/metabolomicsGenie/metResult.module.js"></script>
-<script src="static/metabolomicsGenie/metResult.ctrl.js"></script>
-<script src="static/metabolomicsGenie/metResult.service.js"></script>
-<script src="static/metabolomicsGenie/metResult.directive.js"></script>
 <script src="static/pathwayGenie/pathwayGenie.module.js"></script>
 <script src="static/pathwayGenie/pathwayGenie.service.js"></script>
 <script src="static/pathwayGenie/pathwayGenie.ctrl.js"></script>
@@ -103,6 +99,9 @@
 							<li data-ng-class="{active: ctrl.route.current.app === 'AssemblyGenie'}">
 								<a data-ng-class="{disabled: !ctrl.connected()}" href="./#/assemblyGenie">AssemblyGenie</a>
 							</li>
+							<li data-ng-class="{active: ctrl.route.current.app === 'DigestGenie'}">
+								<a data-ng-class="{disabled: !ctrl.connected()}" href="./#/digestGenie">DigestGenie</a>
+							</li>
 						</ul>
 					</li>
 					<li class="dropdown">
@@ -110,11 +109,6 @@
 							data-toggle="dropdown" role="button" aria-haspopup="true"
 							aria-expanded="false">Test<span class="caret"></span>
 						</a>
-						<ul class="dropdown-menu">
-							<li data-ng-class="{active: ctrl.route.current.app === 'MetabolomicsGenie'}">
-								<a href="./#/metabolomicsGenie">MetabolomicsGenie</a>
-							</li>
-						</ul>
 					</li>
 					<li class="dropdown">
 						<a href="#" class="dropdown-toggle"

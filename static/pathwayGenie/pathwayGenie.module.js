@@ -1,4 +1,4 @@
-var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "assemblyGenieApp", "dominoGenieApp", "iceApp", "metabolomicsGenieApp", "partsGenieApp", "sbcdoeApp"]);
+var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "assemblyGenieApp", "digestGenieApp", "dominoGenieApp", "iceApp", "partsGenieApp", "sbcdoeApp"]);
 
 pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 	$routeProvider.when("/", {
@@ -28,6 +28,13 @@ pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 		templateUrl: "static/sbcdoe.html",
 		app: "SBC-DoE"
 		}
+	)
+	.when("/digestGenie", {
+		controller: "digestGenieCtrl",
+		controllerAs: "ctrl",
+		templateUrl: "static/digestGenie.html",
+		app: "DigestGenie"
+		}
 	).when("/dominoGenie", {
 		controller: "dominoGenieCtrl",
 		controllerAs: "ctrl",
@@ -43,12 +50,6 @@ pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 		controllerAs: "ctrl",
 		templateUrl: "static/assemblyGenie.html",
 		app: "AssemblyGenie"
-		}
-	).when("/metabolomicsGenie", {
-		controller: "metabolomicsGenieCtrl",
-		controllerAs: "ctrl",
-		templateUrl: "static/metabolomicsGenie.html",
-		app: "MetabolomicsGenie"
 		}
 	).when("/ice", {
 		controller: "iceCtrl",

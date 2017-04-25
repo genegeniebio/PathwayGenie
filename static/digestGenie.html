@@ -1,0 +1,49 @@
+<!-- Submission form -->
+<div class="col-md-6">
+	<div class="panel panel-default">
+  		<div class="panel-heading">
+	  		Query
+			<button type="submit" data-ng-click="ctrl.submit()" data-ng-disabled="form.$invalid || !ctrl.connected()" class="pull-right btn btn-default btn-xs">Submit</button>
+		</div>
+  		<div class="result-panel panel-body">
+			<form class="form-horizontal" role="form" name="form">
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">ICE ids:</label>
+					<div class="col-xs-8">
+						<input class="form-control"
+							data-ng-model="ctrl.query.ice_ids"
+							min="60" max="80"
+							placeholder="Enter ICE ids" required>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-4 col-form-label">Digest reagents:</label>
+					<div class="col-xs-8">
+						<select
+							data-ng-model="ctrl.query.restr_enzs"
+							data-ng-options="restr_enz as restr_enz.name for restr_enz in ctrl.restr_enzs() | orderBy:'name'"
+							data-ng-multiple="true"
+							multiple
+							class="form-control">
+						</select>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+
+<!-- Results panel -->
+<div class="col-md-6" data-ng-controller="resultCtrl as result_ctrl"
+	data-ng-show="result_ctrl.results()">
+	<result-panel
+		results="result_ctrl.results()"
+		result="result_ctrl.result()"
+		save-results="result_ctrl.saveResults()"
+		connected="result_ctrl.connected()"
+		feature="result_ctrl.feature()"
+		set-feature="result_ctrl.setFeature(ft)"
+		pagination="result_ctrl.pagination">
+	</result-panel>
+</div>

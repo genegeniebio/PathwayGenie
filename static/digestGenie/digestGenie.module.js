@@ -1,0 +1,1 @@
+var digestGenieApp = angular.module("digestGenieApp", []);
