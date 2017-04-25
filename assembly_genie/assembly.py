@@ -22,6 +22,7 @@ _WORKLIST_COLS = ['DestinationPlateBarcode',
                   'Volume',
                   'ComponentName',
                   'description',
+                  'ice_id',
                   'plasmid_id']
 
 
@@ -105,7 +106,8 @@ class AssemblyGenie(object):
             for domino in pools[ice_id]['dominoes']:
                 src_well = self.__comp_well[domino[1]]
                 print '\t'.join([dest_plate_id, dest_well, src_well[1],
-                                 src_well[0], str(vol), domino[2], domino[5],
+                                 src_well[0], str(vol),
+                                 domino[2], domino[5], domino[1],
                                  ice_id])
 
             self.__comp_well[ice_id + '_domino_pool'] = \
@@ -128,36 +130,43 @@ class AssemblyGenie(object):
                 vols['dom_pool']
 
             print '\t'.join([dest_plate_id, dest_well, well[1],
-                             well[0], str(h2o_vol), 'H2O', 'H2O', ice_id])
+                             well[0], str(h2o_vol),
+                             'H2O', 'H2O', '',
+                             ice_id])
 
             # Write backbone:
             for comp in pools[ice_id]['backbone']:
                 well = self.__comp_well[comp[1]]
 
                 print '\t'.join([dest_plate_id, dest_well, well[1],
-                                 well[0], str(vols['backbone']), comp[2],
-                                 comp[5], ice_id])
+                                 well[0], str(vols['backbone']),
+                                 comp[2], comp[5], comp[1],
+                                 ice_id])
 
             # Write parts:
             for comp in pools[ice_id]['parts']:
                 well = self.__comp_well[comp[1]]
 
                 print '\t'.join([dest_plate_id, dest_well, well[1],
-                                 well[0], str(vols['parts']), comp[2],
-                                 comp[5], ice_id])
+                                 well[0], str(vols['parts']),
+                                 comp[2], comp[5], comp[1],
+                                 ice_id])
 
             # Write domino pools:
             well = self.__comp_well[ice_id + '_domino_pool']
 
             print '\t'.join([dest_plate_id, dest_well, well[1],
-                             well[0], str(vols['dom_pool']), 'domino pool',
-                             'domino pool', ice_id])
+                             well[0], str(vols['dom_pool']),
+                             'domino pool', 'domino pool', '',
+                             ice_id])
 
             # Write default reagents:
             for reagent, vol in def_reagents.iteritems():
                 well = self.__comp_well[reagent]
                 print '\t'.join([dest_plate_id, dest_well, well[1],
-                                 well[0], str(vol), reagent, reagent, ice_id])
+                                 well[0], str(vol),
+                                 reagent, reagent, '',
+                                 ice_id])
 
     def __get_data(self, ice_id):
         '''Gets data from ICE entry.'''
