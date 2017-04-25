@@ -130,12 +130,6 @@ class AssemblyGenie(object):
             print '\t'.join([dest_plate_id, dest_well, well[1],
                              well[0], str(h2o_vol), 'H2O', 'H2O', ice_id])
 
-            # Write default reagents:
-            for reagent, vol in def_reagents.iteritems():
-                well = self.__comp_well[reagent]
-                print '\t'.join([dest_plate_id, dest_well, well[1],
-                                 well[0], str(vol), reagent, reagent, ice_id])
-
             # Write backbone:
             for comp in pools[ice_id]['backbone']:
                 well = self.__comp_well[comp[1]]
@@ -158,6 +152,12 @@ class AssemblyGenie(object):
             print '\t'.join([dest_plate_id, dest_well, well[1],
                              well[0], str(vols['dom_pool']), 'domino pool',
                              'domino pool', ice_id])
+
+            # Write default reagents:
+            for reagent, vol in def_reagents.iteritems():
+                well = self.__comp_well[reagent]
+                print '\t'.join([dest_plate_id, dest_well, well[1],
+                                 well[0], str(vol), reagent, reagent, ice_id])
 
     def __get_data(self, ice_id):
         '''Gets data from ICE entry.'''
