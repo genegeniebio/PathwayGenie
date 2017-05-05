@@ -14,7 +14,7 @@ pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 	).when("/ice", {
 		controller: "iceCtrl",
 		controllerAs: "ctrl",
-		templateUrl: "static/ice.html",
+		templateUrl: "static/ice/ice.html",
 		app: "ICE"
 		}
 	)
