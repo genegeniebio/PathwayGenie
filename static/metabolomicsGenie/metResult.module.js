@@ -1,1 +1,0 @@
-var metResultApp = angular.module("metResultApp", ["ui.bootstrap", "ui.bootstrap.modal"]);

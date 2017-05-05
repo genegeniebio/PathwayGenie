@@ -1,3 +1,0 @@
-assemblyGenieApp.controller("assemblyGenieCtrl", [function() {
-	
-}]);

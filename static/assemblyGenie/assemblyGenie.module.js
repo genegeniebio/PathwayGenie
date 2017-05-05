@@ -1,1 +1,0 @@
-var assemblyGenieApp = angular.module("assemblyGenieApp", []);
