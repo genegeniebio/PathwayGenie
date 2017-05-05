@@ -1,25 +1,6 @@
-partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PathwayGenieService", "ProgressService", "ResultService", function($scope, ErrorService, PathwayGenieService, ProgressService, ResultService) {
+partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGenieService", "PathwayGenieService", "ProgressService", "ResultService", function($scope, ErrorService, PartsGenieService, PathwayGenieService, ProgressService, ResultService) {
 	var self = this;
-	self.query = {
-			"app": "PartsGenie",
-			"designs": [
-				{
-					"dna": {
-						"name": "",
-						"desc": "",
-						"features": [
-							{"typ": "http://purl.obolibrary.org/obo/SO_0001416", "seq": "", "name": "5\' flanking region", "temp_params": {"fixed": true}},
-							{"typ": "http://purl.obolibrary.org/obo/SO_0000139", "end": 60, "name": "ribosome entry site", "parameters": {"TIR target": 15000}, "temp_params": {"fixed": false}},
-							{"typ": "http://purl.obolibrary.org/obo/SO_0000316", "options": [{"typ": "http://purl.obolibrary.org/obo/SO_0000316", "name": "coding sequence", "temp_params": {"aa_seq": "", "fixed": false}}]},
-							{"typ": "http://purl.obolibrary.org/obo/SO_0001417", "seq": "", "name": "3\' flanking region", "temp_params": {"fixed": true}}
-						]
-					}
-				}
-			], 
-			"filters": {
-				"max_repeats": 6
-			},
-		};
+
 	self.response = {"update": {"values": []}};
 	self.excl_codons_regex = "([ACGTacgt]{3}(\s[ACGTacgt]{3})+)*";
 	
@@ -28,6 +9,8 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PathwayGe
 	self.restr_enzs = function() {
 		return PathwayGenieService.restr_enzs();
 	};
+	
+	self.query = PartsGenieService.query;
 	
 	self.submit = function() {
 		reset();
