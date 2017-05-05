@@ -1,4 +1,4 @@
-iceApp.controller("iceCtrl", ["ICEService", function(ICEService) {
+iceApp.controller("iceInstanceCtrl", ["$uibModalInstance", "ICEService", function($uibModalInstance, ICEService) {
 	var self = this;
 	
 	self.ice = function() {
@@ -12,4 +12,12 @@ iceApp.controller("iceCtrl", ["ICEService", function(ICEService) {
 	self.connect = function() {
 		return ICEService.connect();
 	}
+	
+	self.disconnect = function() {
+		return ICEService.disconnect();
+	}
+	
+	self.close = function() {
+		$uibModalInstance.close();
+	};
 }]);

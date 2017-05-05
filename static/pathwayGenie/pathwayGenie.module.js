@@ -11,12 +11,6 @@ pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 				return PathwayGenieService.restr_enzymes_promise;
 			}
 		}}
-	).when("/ice", {
-		controller: "iceCtrl",
-		controllerAs: "ctrl",
-		templateUrl: "static/ice/ice.html",
-		app: "ICE"
-		}
 	)
 	
 	// Use the HTML5 History API:

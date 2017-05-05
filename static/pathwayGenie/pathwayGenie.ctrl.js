@@ -2,6 +2,10 @@ pathwayGenieApp.controller("pathwayGenieCtrl", ["$route", "ICEService", function
 	var self = this;
 	self.route = $route;
 	
+	self.showIce = function() {
+		ICEService.open();
+	}
+	
 	self.connected = function() {
 		return ICEService.connected;
 	}

@@ -1,4 +1,4 @@
-iceApp.factory("ICEService", ["$http", "$rootScope","ErrorService", function($http, $rootScope, ErrorService) {
+iceApp.factory("ICEService", ["$http", "$rootScope", "$uibModal", function($http, $rootScope, $uibModal) {
 	var obj = {};
 	obj.ice = {'url': 'https://ice.synbiochem.co.uk',
 				'username': null,
@@ -6,6 +6,17 @@ iceApp.factory("ICEService", ["$http", "$rootScope","ErrorService", function($ht
 				'groups': null};
 
 	obj.connected = false;
+	
+	obj.open = function() {
+		$uibModal.open({
+			animation: true,
+			ariaLabelledBy: 'modal-title',
+			ariaDescribedBy: 'modal-body',
+			templateUrl: '/static/ice/ice.html',
+			controller: 'iceInstanceCtrl',
+			controllerAs: 'ctrl',
+		});
+	}
 	
 	obj.connect = function() {
 		$http.post("/ice/connect", {'ice': obj.ice}).then(
@@ -15,6 +26,13 @@ iceApp.factory("ICEService", ["$http", "$rootScope","ErrorService", function($ht
 				function(errResp) {
 					obj.connected = false;
 				});
+	}
+	
+	obj.disconnect = function() {
+		obj.ice.username = null;
+		obj.ice.password = null;
+		obj.ice.groups = null;
+		obj.connected = false;
 	}
 	
 	$rootScope.$watch(function() {

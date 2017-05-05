@@ -63,7 +63,8 @@
 			<div class="collapse navbar-collapse"
 				id="navbar-collapse">
     			<div class="nav navbar-nav navbar-right">
-    				<a href="./#/ice" class="btn navbar-btn" role="button"
+    				<a class="btn navbar-btn" role="button"
+    					data-ng-click="ctrl.showIce()"
     					data-ng-class="{'btn-success': ctrl.connected(), 'btn-danger': !ctrl.connected()}">
   						<span class="glyphicon glyphicon-log-in"></span>
   						<span>&nbsp;ICE</span>
