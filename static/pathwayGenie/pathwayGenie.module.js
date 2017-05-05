@@ -4,7 +4,7 @@ pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 	$routeProvider.when("/", {
 		controller: "partsGenieCtrl",
 		controllerAs: "ctrl",
-		templateUrl: "static/partsGenie.html",
+		templateUrl: "static/partsGenie/partsGenie.html",
 		app: "PartsGenie",
 		resolve: {
 			"unused": function(PathwayGenieService) {
