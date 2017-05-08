@@ -1,4 +1,4 @@
-# PathwayGenie
+# PartsGenie
 
 To run on Google Compute Engine:
 
@@ -14,11 +14,11 @@ gcloud compute instances create instance-1 --image-family gci-stable --image-pro
 
 5. Clone repository:
 
-git clone https://github.com/synbiochem/PathwayGenie.git
+git clone https://github.com/neilswainston/PartsGenie.git
 
-6. Move into PathwayGenie directory:
+6. Move into PartsGenie directory:
 
-cd PathwayGenie
+cd PartsGenie
 
 7. Run start_server script:
 
