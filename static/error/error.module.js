@@ -1,1 +1,1 @@
-var errorApp = angular.module("errorApp", ['ngAnimate', 'ngSanitize', 'ui.bootstrap']);
+var errorApp = angular.module("errorApp", []);

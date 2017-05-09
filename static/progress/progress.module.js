@@ -1,1 +1,1 @@
-var progressApp = angular.module("progressApp", ["ui.bootstrap.modal"]);
+var progressApp = angular.module("progressApp", []);
