@@ -11,6 +11,7 @@
 				<div class="col-sm-8">
 					<input type="text" class="form-control"
 					data-ng-model="ctrl.ice().url"
+					data-ng-blur="!ctrl.connecting() && !form.$invalid && ctrl.connect()"
 					placeholder="ICE URL"
 					required>
 				</div>
@@ -20,6 +21,7 @@
 				<div class="col-sm-8">
 					<input type="text" class="form-control"
 					data-ng-model="ctrl.ice().username"
+					data-ng-blur="!ctrl.connecting() && !form.$invalid && ctrl.connect()"
 					placeholder="ICE username"
 					required>
 				</div>
@@ -29,6 +31,7 @@
 				<div class="col-sm-8">
 					<input type="password" class="form-control"
 					data-ng-model="ctrl.ice().password"
+					data-ng-blur="!ctrl.connecting() && !form.$invalid && ctrl.connect()"
 					placeholder="ICE password"
 					required>
 				</div>
@@ -38,6 +41,7 @@
 				<div class="col-sm-8">
 					<input type="text" class="form-control"
 					data-ng-model="ctrl.ice().groups"
+					data-ng-disabled="ctrl.connecting() || !ctrl.connected()"
 					placeholder="ICE group">
 				</div>
 			</div>
