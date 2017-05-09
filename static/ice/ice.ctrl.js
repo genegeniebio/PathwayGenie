@@ -9,6 +9,14 @@ iceApp.controller("iceInstanceCtrl", ["$uibModalInstance", "ICEService", functio
 		return ICEService.connected;
 	}
 	
+	self.connecting = function() {
+		return ICEService.connecting;
+	}
+	
+	self.error = function() {
+		return ICEService.error;
+	}
+	
 	self.connect = function() {
 		return ICEService.connect();
 	}

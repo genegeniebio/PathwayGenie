@@ -109,11 +109,19 @@ def connect_ice():
         ICEClient(data['ice']['url'],
                   data['ice']['username'],
                   data['ice']['password'])
-        connected = True
-    except (ConnectionError, NetworkError):
-        connected = False
 
-    return json.dumps({'connected': connected})
+        return json.dumps({'connected': True})
+    except ConnectionError, err:
+        print str(err)
+        message = 'Unable to connect. Is the URL correct?'
+        status_code = 503
+    except NetworkError, err:
+        message = 'Unable to connect. Are the username and password correct?'
+        status_code = err.get_status()
+
+    response = jsonify({'message': message})
+    response.status_code = status_code
+    return response
 
 
 @APP.errorhandler(Exception)

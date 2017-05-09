@@ -1,5 +1,2 @@
 Flask
-ijson
-neo4j-driver
-pymzml
 synbiochem-py

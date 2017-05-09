@@ -3,49 +3,50 @@
 	<h3 class="modal-title" id="modal-title">ICE login</h3>
 </div>
 <div class="modal-body" id="modal-body">
+	<div data-ng-show="ctrl.error()" class="alert alert-danger">{{ctrl.error()}}</div>
 	<div class="panel panel-default">
   		<div class="result-panel panel-body">
-				<div class="form-group">
-					<label class="col-xs-4 col-form-label">URL:</label>
-					<div class="col-sm-8">
-						<input type="text" class="form-control"
-						data-ng-model="ctrl.ice().url"
-						placeholder="ICE URL"
-						required>
-					</div>
+			<div class="form-group">
+				<label class="col-xs-4 col-form-label">URL:</label>
+				<div class="col-sm-8">
+					<input type="text" class="form-control"
+					data-ng-model="ctrl.ice().url"
+					placeholder="ICE URL"
+					required>
 				</div>
-				<div class="form-group">
-					<label class="col-xs-4 col-form-label">Username:</label>
-					<div class="col-sm-8">
-						<input type="text" class="form-control"
-						data-ng-model="ctrl.ice().username"
-						placeholder="ICE username"
-						required>
-					</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 col-form-label">Username:</label>
+				<div class="col-sm-8">
+					<input type="text" class="form-control"
+					data-ng-model="ctrl.ice().username"
+					placeholder="ICE username"
+					required>
 				</div>
-				<div class="form-group">
-					<label class="col-xs-4 col-form-label">Password:</label>
-					<div class="col-sm-8">
-						<input type="password" class="form-control"
-						data-ng-model="ctrl.ice().password"
-						placeholder="ICE password"
-						required>
-					</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 col-form-label">Password:</label>
+				<div class="col-sm-8">
+					<input type="password" class="form-control"
+					data-ng-model="ctrl.ice().password"
+					placeholder="ICE password"
+					required>
 				</div>
-				<div class="form-group">
-					<label class="col-xs-4 col-form-label">Group:</label>
-					<div class="col-sm-8">
-						<input type="text" class="form-control"
-						data-ng-model="ctrl.ice().groups"
-						placeholder="ICE group">
-					</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 col-form-label">Group:</label>
+				<div class="col-sm-8">
+					<input type="text" class="form-control"
+					data-ng-model="ctrl.ice().groups"
+					placeholder="ICE group">
 				</div>
+			</div>
 		</div>
 	</div>
 </div>
 <div class="modal-footer">
-	<button class="btn btn-primary" type="submit" data-ng-click="ctrl.connect()" data-ng-show="!ctrl.connected()" data-ng-disabled="form.$invalid">Login</button>
-	<button class="btn btn-primary" type="button" data-ng-click="ctrl.disconnect()" data-ng-show="ctrl.connected()">Logout</button>
+	<button class="btn btn-primary" type="submit" data-ng-click="ctrl.connect()" data-ng-show="!ctrl.connected()" data-ng-disabled="ctrl.connecting() || form.$invalid">Login</button>
+	<button class="btn btn-danger" type="button" data-ng-click="ctrl.disconnect()" data-ng-show="ctrl.connected()">Logout</button>
     <button class="btn btn-default" type="button" data-ng-click="ctrl.close()">Close</button>
 </div>
 </form>
