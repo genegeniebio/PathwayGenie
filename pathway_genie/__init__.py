@@ -70,10 +70,22 @@ def save():
     return pathway_genie.save(request)
 
 
-@APP.route('/organisms/<term>')
-def get_organisms(term):
+@APP.route('/groups/', methods=['POST'])
+def get_groups():
+    '''Gets groups from search term.'''
+    ice_client = _connect_ice(request)
+    data = json.loads(request.data)
+    return json.dumps([group['label']
+                       for group in ice_client.search_groups(data['term'])])
+
+
+@APP.route('/organisms/', methods=['POST'])
+def get_organisms():
     '''Gets organisms from search term.'''
-    url = "https://salislab.net/software/return_species_list?term=" + term
+    query = json.loads(request.data)
+
+    url = "https://salislab.net/software/return_species_list?term=" + \
+        query['term']
 
     response = urllib2.urlopen(url)
     data = [{'taxonomy_id': _ORGANISMS[term[:term.rfind('(')].strip()],
@@ -93,23 +105,11 @@ def get_restr_enzymes():
                        for enz in Restriction.AllEnzymes])
 
 
-@APP.route('/ice/search/<term>')
-def search_ice(term, url, username, password):
-    '''Searches ICE database.'''
-    ice_client = ICEClient(url, username, password)
-    return ice_client.search(term, limit=10)
-
-
 @APP.route('/ice/connect', methods=['POST'])
 def connect_ice():
-    '''Searches ICE database.'''
-    data = json.loads(request.data)
-
+    '''Connects to ICE.'''
     try:
-        ICEClient(data['ice']['url'],
-                  data['ice']['username'],
-                  data['ice']['password'])
-
+        _connect_ice(request)
         return json.dumps({'connected': True})
     except ConnectionError, err:
         print str(err)
@@ -122,6 +122,15 @@ def connect_ice():
     response = jsonify({'message': message})
     response.status_code = status_code
     return response
+
+
+def _connect_ice(req):
+    '''Connects to ICE.'''
+    data = json.loads(req.data)
+
+    return ICEClient(data['ice']['url'],
+                     data['ice']['username'],
+                     data['ice']['password'])
 
 
 @APP.errorhandler(Exception)

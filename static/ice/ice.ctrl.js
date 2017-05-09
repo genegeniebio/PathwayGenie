@@ -1,4 +1,4 @@
-iceApp.controller("iceInstanceCtrl", ["$uibModalInstance", "ICEService", function($uibModalInstance, ICEService) {
+iceApp.controller("iceInstanceCtrl", ["$uibModalInstance", "ICEService", "TypeaheadService", function($uibModalInstance, ICEService, TypeaheadService) {
 	var self = this;
 	
 	self.ice = function() {
@@ -23,6 +23,10 @@ iceApp.controller("iceInstanceCtrl", ["$uibModalInstance", "ICEService", functio
 	
 	self.disconnect = function() {
 		return ICEService.disconnect();
+	}
+	
+	self.searchGroups = function(term) {
+		return TypeaheadService.getItem("/groups/", {"term": term, "ice": ICEService.ice});
 	}
 	
 	self.close = function() {

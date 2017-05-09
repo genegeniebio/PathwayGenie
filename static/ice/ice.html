@@ -42,7 +42,9 @@
 					<input type="text" class="form-control"
 					data-ng-model="ctrl.ice().groups"
 					data-ng-disabled="ctrl.connecting() || !ctrl.connected()"
-					placeholder="ICE group">
+					placeholder="ICE group" autocomplete="off"
+					uib-typeahead="group for group in ctrl.searchGroups($viewValue)"
+					typeahead-min-length="3" typeahead-editable="false">
 				</div>
 			</div>
 		</div>

@@ -64,15 +64,13 @@
 						</div>
 						<div class="form-group">
 							<label class="col-xs-4 col-form-label">Organism:</label>
-							<div class="col-xs-8">
-								<div data-ng-controller="typeaheadCtrl as typeahead_ctrl">
-									<input type="text" class="form-control"
-										data-ng-init="typeahead_ctrl.url='/organisms/'"
-										data-ng-model="ctrl.query.organism"
-										placeholder="Select host organism" required autocomplete="off"
-										uib-typeahead="organism as organism.name for organism in typeahead_ctrl.getItem($viewValue)"
-										typeahead-min-length="3" typeahead-editable="false">
-								</div>
+							<div class="col-xs-8" data-ng-controller="typeaheadCtrl as typeahead_ctrl">
+								<input type="text" class="form-control"
+									data-ng-init="typeahead_ctrl.url='/organisms/'"
+									data-ng-model="ctrl.query.organism"
+									placeholder="Select host organism" required autocomplete="off"
+									uib-typeahead="organism as organism.name for organism in typeahead_ctrl.getItem({'term': $viewValue})"
+									typeahead-min-length="3" typeahead-editable="false">
 							</div>
 						</div>
 					</div>
