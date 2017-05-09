@@ -1,19 +1,24 @@
 partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGenieService", "PathwayGenieService", "ProgressService", "ResultService", function($scope, ErrorService, PartsGenieService, PathwayGenieService, ProgressService, ResultService) {
 	var self = this;
-
-	self.response = {"update": {"values": []}};
-	self.excl_codons_regex = "([ACGTacgt]{3}(\s[ACGTacgt]{3})+)*";
-	
 	var jobId = null;
 	
+	self.excl_codons_regex = "([ACGTacgt]{3}(\s[ACGTacgt]{3})+)*";
+	self.submitting = false;
+	self.query = PartsGenieService.query;
+	self.response = {"update": {"values": [], "message": "Submitting..."}};
+
 	self.restr_enzs = function() {
 		return PathwayGenieService.restr_enzs();
 	};
-	
-	self.query = PartsGenieService.query;
-	
+
 	self.submit = function() {
-		reset();
+		self.submitting = true;
+		jobId = null
+		self.response = {"update": {"values": [], "message": "Submitting..."}};
+		error = null;
+		ResultService.setResults(null);
+		
+		ProgressService.open(self.query["app"] + " dashboard", self.cancel, self.update);
 		
 		PathwayGenieService.submit(self.query).then(
 			function(resp) {
@@ -30,18 +35,19 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 						if(status == "finished") {
 							ResultService.setResults(self.response.result);
 						}
+						
+						self.submitting = false;
 					}
 					
 					$scope.$apply();
 				};
 				
 				source.onerror = function(event) {
+					self.submitting = false;
 					self.response.update.status = "error";
 					self.response.update.message = "Error";
 					$scope.$apply();
 				}
-				
-				ProgressService.open(self.query["app"] + " dashboard", self.cancel, self.update);
 			},
 			function(errResp) {
 				ErrorService.open(errResp.data.message);
@@ -54,11 +60,5 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	
 	self.update = function() {
 		return self.response.update;
-	};
-
-	reset = function() {
-		status = {"update": {"values": []}};
-		error = null;
-		ResultService.setResults(null);
 	};
 }]);
