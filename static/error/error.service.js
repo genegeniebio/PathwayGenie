@@ -6,7 +6,7 @@ errorApp.factory("ErrorService", ["$uibModal", function($uibModal) {
 			animation: true,
 			ariaLabelledBy: 'modal-title',
 			ariaDescribedBy: 'modal-body',
-			templateUrl: '/static/error/errorContent.html',
+			templateUrl: '/static/error/error.html',
 			controller: 'errorInstanceCtrl',
 			controllerAs: 'errorCtrl',
 			resolve: {
