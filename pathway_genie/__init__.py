@@ -116,6 +116,7 @@ def connect_ice():
         message = 'Unable to connect. Is the URL correct?'
         status_code = 503
     except NetworkError, err:
+        print str(err)
         message = 'Unable to connect. Are the username and password correct?'
         status_code = err.get_status()
 
