@@ -5,8 +5,7 @@ iceApp.factory("ICEService", ["$http", "$rootScope", "$uibModal", function($http
 			'password': null,
 			'groups': null};
 
-	obj.connected = false;
-	obj.connecting = false;
+	obj.status = "DISCONNECTED";
 	obj.message = null;
 
 	obj.open = function() {
@@ -21,17 +20,21 @@ iceApp.factory("ICEService", ["$http", "$rootScope", "$uibModal", function($http
 	}
 
 	obj.connect = function() {
-		obj.connecting = true;
+		obj.status = "CONNECTING";
+		obj.message = "Connecting...";
 
 		$http.post("/ice/connect", {'ice': obj.ice}).then(
 				function(resp) {
 					obj.connected = resp.data.connected;
 					obj.connecting = false;
+					obj.status = "CONNECTED";
+					obj.message = "Connected";
 				},
 				function(errResp) {
 					obj.connected = false;
-					obj.error = errResp.data.message;
 					obj.connecting = false;
+					obj.status = "ERROR";
+					obj.message = errResp.data.message;
 				});
 	}
 
@@ -39,19 +42,9 @@ iceApp.factory("ICEService", ["$http", "$rootScope", "$uibModal", function($http
 		obj.ice.username = null;
 		obj.ice.password = null;
 		obj.ice.groups = null;
-		obj.connected = false;
+		obj.status = "DISCONNECTED";
+		obj.message = null;
 	}
-
-	$rootScope.$watch(function() {
-		return obj.ice;
-	},               
-	function(values) {
-		obj.error = null;
-
-		if(obj.connected) {
-			obj.connect();
-		}
-	}, true);
 
 	return obj;
 }]);

@@ -5,12 +5,12 @@ iceApp.controller("iceInstanceCtrl", ["$uibModalInstance", "ICEService", "Typeah
 		return ICEService.ice;
 	};
 	
-	self.connected = function() {
-		return ICEService.connected;
+	self.status = function() {
+		return ICEService.status;
 	}
 	
-	self.connecting = function() {
-		return ICEService.connecting;
+	self.message = function() {
+		return ICEService.message;
 	}
 	
 	self.error = function() {
