@@ -22,7 +22,11 @@ class TestPartsThread(unittest.TestCase):
 
     def test_submit_simple(self):
         '''Tests submit method with simple query.'''
-        self.__test_submit('simple_query.json')
+        # self.__test_submit('simple_query.json')
+
+    def test_submit_complex(self):
+        '''Tests submit method with complex query.'''
+        self.__test_submit('complex_query.json')
 
     def event_fired(self, event):
         '''Responds to event being fired.'''

@@ -40,6 +40,15 @@ class PartsSolution(object):
                                    [x * int(filters['max_repeats'])
                                     for x in seq_utils.NUCLEOTIDES])
 
+        # Get number of invalid sequences in  fixed sequences:
+        fixed_seqs = [feat['seq']
+                      for feat in self.__dna['features']
+                      if feat['temp_params'].get('fixed', False)]
+
+        self.__dna['temp_params']['num_inv_seq_fixed'] = \
+            sum([seq_utils.count_pattern(seq, self.__inv_patt)
+                 for seq in fixed_seqs])
+
         self.__get_seqs()
         self.__update(self.__dna)
         self.__dna_new = copy.deepcopy(self.__dna)
@@ -137,14 +146,20 @@ class PartsSolution(object):
                         self.__inv_patt,
                         tolerant=False))
 
-        # Randomly choose an RBS that is a decent starting point,
-        # using the first CDS as the upstream sequence:
         for idx, feature in enumerate(self.__dna['features']):
+            # Randomly choose an RBS that is a decent starting point,
+            # using the first CDS as the upstream sequence:
             if feature['typ'] == dna_utils.SO_RBS:
                 feature.set_seq(self.__calc.get_initial_rbs(
                     feature['end'],
                     self.__dna['features'][idx + 1]['options'][0]['seq'],
                     feature['parameters']['TIR target']))
+
+            # Randomly choose a sequence:
+            elif feature['typ'] == dna_utils.SO_RANDOM:
+                rand_dna = seq_utils.get_random_dna(feature.pop('end'),
+                                                    self.__inv_patt)
+                feature.set_seq(rand_dna)
 
     def __update(self, dna):
         '''Calculates (simulated annealing) energies for given RBS.'''
@@ -172,7 +187,8 @@ class PartsSolution(object):
         # Get number of invalid seqs:
         dna['temp_params']['num_inv_seq'] = \
             sum([seq_utils.count_pattern(seq, self.__inv_patt)
-                 for seq in _get_all_seqs(dna)])
+                 for seq in _get_all_seqs(dna)]) - \
+            dna['temp_params']['num_inv_seq_fixed']
 
         dna['temp_params']['energy'] = dna['temp_params']['mean_tir_errs'] + \
             dna['temp_params']['num_inv_seq'] + \
