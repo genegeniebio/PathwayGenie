@@ -224,12 +224,12 @@ class PartsSolution(object):
 class PartsThread(SimulatedAnnealer):
     '''Wraps a PartsGenie job into a thread.'''
 
-    def __init__(self, query):
+    def __init__(self, query, verbose=True):
         solution = PartsSolution(query['designs'][0]['dna'],
                                  query['organism'],
                                  query['filters'])
 
-        SimulatedAnnealer.__init__(self, solution, verbose=True)
+        SimulatedAnnealer.__init__(self, solution, verbose=verbose)
 
 
 def _get_all_seqs(dna):
