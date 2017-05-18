@@ -132,13 +132,3 @@ def _connect_ice(req):
     return ICEClient(data['ice']['url'],
                      data['ice']['username'],
                      data['ice']['password'])
-
-
-@APP.errorhandler(Exception)
-def handle_exception(err):
-    '''Exception handling method.'''
-    message = err.__class__.__name__ + ': ' + str(err)
-    APP.logger.error('Exception: ' + message)
-    response = jsonify({'message': message})
-    response.status_code = 500
-    return response
