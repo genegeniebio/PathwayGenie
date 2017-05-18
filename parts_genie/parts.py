@@ -10,6 +10,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=no-self-use
 from itertools import product
 import copy
+import math
 import re
 
 from numpy import mean
@@ -207,8 +208,8 @@ class PartsSolution(object):
         # Get TIR:
         tir = tir_vals[rbs['end']][1]
         cds['parameters']['TIR'] = float('{0:.3g}'.format(tir))
-        tir_err = abs(rbs['parameters']['TIR target'] - tir) / \
-            rbs['parameters']['TIR target']
+        target = rbs['parameters']['TIR target']
+        tir_err = 1 - math.log(target - abs(target - tir), target)
 
         # Get rogue RBS sites:
         cutoff = 0.1
