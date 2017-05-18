@@ -209,7 +209,12 @@ class PartsSolution(object):
         tir = tir_vals[rbs['end']][1]
         cds['parameters']['TIR'] = float('{0:.3g}'.format(tir))
         target = rbs['parameters']['TIR target']
-        tir_err = 1 - math.log(target - abs(target - tir), target)
+
+        try:
+            tir_err = 1 - math.log(target - abs(target - tir), target)
+        except ValueError:
+            print str(target) + '\t' + str(tir)
+            tir_err = float('inf')
 
         # Get rogue RBS sites:
         cutoff = 0.1
