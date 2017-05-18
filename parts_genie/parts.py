@@ -40,15 +40,7 @@ class PartsSolution(object):
                                    [x * int(filters['max_repeats'])
                                     for x in seq_utils.NUCLEOTIDES])
 
-        # Get number of invalid sequences in  fixed sequences:
-        fixed_seqs = [feat['seq']
-                      for feat in self.__dna['features']
-                      if feat['temp_params'].get('fixed', False)]
-
-        self.__dna['temp_params']['num_inv_seq_fixed'] = \
-            sum([seq_utils.count_pattern(seq, self.__inv_patt)
-                 for seq in fixed_seqs])
-
+        self.__calc_num_inv_seq_fixed()
         self.__get_seqs()
         self.__update(self.__dna)
         self.__dna_new = copy.deepcopy(self.__dna)
@@ -118,6 +110,16 @@ class PartsSolution(object):
     def reject(self):
         '''Reject potential update.'''
         self.__dna_new = copy.deepcopy(self.__dna)
+
+    def __calc_num_inv_seq_fixed(self):
+        '''Calculate number of invalid sequences in fixed sequences.'''
+        fixed_seqs = [feat['seq']
+                      for feat in self.__dna['features']
+                      if feat['temp_params'].get('fixed', False)]
+
+        self.__dna['temp_params']['num_inv_seq_fixed'] = \
+            sum([seq_utils.count_pattern(seq, self.__inv_patt)
+                 for seq in fixed_seqs])
 
     def __get_seqs(self):
         '''Returns sequences from protein ids, which may be either Uniprot ids,
