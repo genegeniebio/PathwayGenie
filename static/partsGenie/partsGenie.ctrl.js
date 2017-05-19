@@ -50,6 +50,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 				}
 			},
 			function(errResp) {
+				self.submitting = false;
 				ErrorService.open(errResp.data.message);
 			});
 	};

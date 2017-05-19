@@ -27,23 +27,15 @@ class PartsSolution(object):
         self.__dna = dna_utils.get_dna(dna)
         self.__dna['typ'] = dna_utils.SO_PART
         self.__dna['parameters']['Type'] = 'PART'
-
         self.__organism = organism
         self.__filters = filters
-
         self.__calc = rbs_calc.RbsCalculator(organism['r_rna'])
         self.__cod_opt = seq_utils.CodonOptimiser(organism['taxonomy_id'])
-
-        # Invalid pattern is restriction sites | repeating nucleotides:
-        inv_pat = ([restr_enz for restr_enz in filters['restr_enzs']]
-                   if 'restr_enzs' in filters else [])
-
-        self.__inv_patt = seq_utils.get_invalid_patterns(
-            int(filters['max_repeats']), inv_pat)
 
         self.__calc_num_inv_seq_fixed()
         self.__init_seqs()
         self.__update(self.__dna)
+
         self.__dna_new = copy.deepcopy(self.__dna)
 
     def get_query(self):
@@ -119,7 +111,8 @@ class PartsSolution(object):
                       if feat['temp_params'].get('fixed', False)]
 
         self.__dna['temp_params']['num_inv_seq_fixed'] = \
-            sum([seq_utils.count_pattern(seq, self.__inv_patt)
+            sum([seq_utils.count_pattern(seq, self.__get_max_repeat_nuc(),
+                                         self.__get_inv_seqs())
                  for seq in fixed_seqs])
 
     def __init_seqs(self):
@@ -147,7 +140,7 @@ class PartsSolution(object):
                     cds.set_seq(self.__cod_opt.get_codon_optim_seq(
                         cds['temp_params']['aa_seq'],
                         self.__filters.get('excl_codons', None),
-                        self.__inv_patt,
+                        self.__get_max_repeat_nuc(), self.__get_inv_seqs(),
                         tolerant=False))
 
             elif feature['typ'] == dna_utils.SO_RBS:
@@ -162,7 +155,7 @@ class PartsSolution(object):
                 # Generate bridging oligo site of desired melting temp:
                 seq, melt_temp = seq_utils.get_rand_seq_by_melt_temp(
                     feature['parameters']['Tm target'],
-                    invalid_patterns=self.__inv_patt)
+                    self.__get_max_repeat_nuc(), self.__get_inv_seqs())
 
                 feature.set_seq(seq)
                 feature['parameters']['Tm'] = melt_temp
@@ -170,7 +163,8 @@ class PartsSolution(object):
             elif feature['typ'] == dna_utils.SO_RANDOM:
                 # Randomly choose a sequence:
                 seq = seq_utils.get_random_dna(feature.pop('end'),
-                                               self.__inv_patt)
+                                               self.__get_max_repeat_nuc(),
+                                               self.__get_inv_seqs())
                 feature.set_seq(seq)
 
     def __update(self, dna):
@@ -198,7 +192,8 @@ class PartsSolution(object):
 
         # Get number of invalid seqs:
         dna['temp_params']['num_inv_seq'] = \
-            sum([seq_utils.count_pattern(seq, self.__inv_patt)
+            sum([seq_utils.count_pattern(seq, self.__get_max_repeat_nuc(),
+                                         self.__get_inv_seqs())
                  for seq in _get_all_seqs(dna)]) - \
             dna['temp_params']['num_inv_seq_fixed']
 
@@ -222,7 +217,6 @@ class PartsSolution(object):
         try:
             tir_err = 1 - math.log(target - abs(target - tir), target)
         except ValueError:
-            print str(target) + '\t' + str(tir)
             tir_err = float('inf')
 
         # Get rogue RBS sites:
@@ -233,6 +227,16 @@ class PartsSolution(object):
                      rbs['parameters']['TIR target'] * cutoff]
 
         return tir_err, rogue_rbs
+
+    def __get_inv_seqs(self):
+        '''Gets list of invalid sequences/'''
+        return ([restr_enz['site']
+                 for restr_enz in self.__filters['restr_enzs']]
+                if 'restr_enzs' in self.__filters else [])
+
+    def __get_max_repeat_nuc(self):
+        '''Get number of max repeating nucleotides.'''
+        return int(self.__filters['max_repeats'])
 
     def __repr__(self):
         # return '%r' % (self.__dict__)
