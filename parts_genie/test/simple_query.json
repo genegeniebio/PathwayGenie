@@ -15,6 +15,16 @@
                   }
                },
                {
+                  "typ":"http://purl.obolibrary.org/obo/SO_0000143",
+                  "name":"assembly component",
+                  "parameters":{
+                     "Tm target":70
+                  },
+                  "temp_params":{
+                     "fixed":true
+                  }
+               },
+               {
                   "typ":"http://purl.obolibrary.org/obo/SO_0000139",
                   "end":60,
                   "name":"ribosome entry site",

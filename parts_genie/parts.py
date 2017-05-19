@@ -35,14 +35,14 @@ class PartsSolution(object):
         self.__cod_opt = seq_utils.CodonOptimiser(organism['taxonomy_id'])
 
         # Invalid pattern is restriction sites | repeating nucleotides:
-        self.__inv_patt = '|'.join(([restr_enz['site']
-                                     for restr_enz in filters['restr_enzs']]
-                                    if 'restr_enzs' in filters else []) +
-                                   [x * int(filters['max_repeats'])
-                                    for x in seq_utils.NUCLEOTIDES])
+        inv_pat = ([restr_enz for restr_enz in filters['restr_enzs']]
+                   if 'restr_enzs' in filters else [])
+
+        self.__inv_patt = seq_utils.get_invalid_patterns(
+            int(filters['max_repeats']), inv_pat)
 
         self.__calc_num_inv_seq_fixed()
-        self.__get_seqs()
+        self.__init_seqs()
         self.__update(self.__dna)
         self.__dna_new = copy.deepcopy(self.__dna)
 
@@ -122,15 +122,16 @@ class PartsSolution(object):
             sum([seq_utils.count_pattern(seq, self.__inv_patt)
                  for seq in fixed_seqs])
 
-    def __get_seqs(self):
+    def __init_seqs(self):
         '''Returns sequences from protein ids, which may be either Uniprot ids,
         or a protein sequence itself.'''
-        uniprot_id_pattern = \
-            '[OPQ][0-9][A-Z0-9]{3}[0-9]|' + \
-            '[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}'
-
-        for feature in self.__dna['features']:
+        for idx, feature in enumerate(self.__dna['features']):
             if feature['typ'] == dna_utils.SO_CDS:
+                # Gets sequences from protein ids, which may be either
+                # Uniprot ids, or a protein sequence itself:
+                uniprot_id_pattern = '[OPQ][0-9][A-Z0-9]{3}[0-9]|' + \
+                    '[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}'
+
                 for cds in feature['options']:
                     if re.match(uniprot_id_pattern,
                                 cds['temp_params']['aa_seq']):
@@ -149,20 +150,28 @@ class PartsSolution(object):
                         self.__inv_patt,
                         tolerant=False))
 
-        for idx, feature in enumerate(self.__dna['features']):
-            # Randomly choose an RBS that is a decent starting point,
-            # using the first CDS as the upstream sequence:
-            if feature['typ'] == dna_utils.SO_RBS:
+            elif feature['typ'] == dna_utils.SO_RBS:
+                # Randomly choose an RBS that is a decent starting point,
+                # using the first CDS as the upstream sequence:
                 feature.set_seq(self.__calc.get_initial_rbs(
                     feature['end'],
                     self.__dna['features'][idx + 1]['options'][0]['seq'],
                     feature['parameters']['TIR target']))
 
-            # Randomly choose a sequence:
+            elif feature['typ'] == dna_utils.SO_ASS_COMP:
+                # Generate bridging oligo site of desired melting temp:
+                seq, melt_temp = seq_utils.get_rand_seq_by_melt_temp(
+                    feature['parameters']['Tm target'],
+                    invalid_patterns=self.__inv_patt)
+
+                feature.set_seq(seq)
+                feature['parameters']['Tm'] = melt_temp
+
             elif feature['typ'] == dna_utils.SO_RANDOM:
-                rand_dna = seq_utils.get_random_dna(feature.pop('end'),
-                                                    self.__inv_patt)
-                feature.set_seq(rand_dna)
+                # Randomly choose a sequence:
+                seq = seq_utils.get_random_dna(feature.pop('end'),
+                                               self.__inv_patt)
+                feature.set_seq(seq)
 
     def __update(self, dna):
         '''Calculates (simulated annealing) energies for given RBS.'''

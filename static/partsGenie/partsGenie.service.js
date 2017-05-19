@@ -17,7 +17,7 @@ partsGenieApp.factory("PartsGenieService", [function() {
 				}
 			], 
 			"filters": {
-				"max_repeats": 6
+				"max_repeats": 5
 			},
 		};
 
