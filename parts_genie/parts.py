@@ -217,7 +217,8 @@ class PartsSolution(object):
         try:
             tir_err = 1 - math.log(target - abs(target - tir), target)
         except ValueError:
-            tir_err = float('inf')
+            # If tir is -ve, set tir_err to be a large number:
+            tir_err = 2.0 ** 32
 
         # Get rogue RBS sites:
         cutoff = 0.1
