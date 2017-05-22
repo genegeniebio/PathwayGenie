@@ -10,7 +10,9 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "ICEService", "ErrorS
 		$http.post("/save", {"result": obj.results, "ice": ICEService.ice}).then(
 				function(resp) {
 					for (i = 0; i < resp.data.length; i++) {
-						obj.results[i].links.push(resp.data[i]);
+						if(obj.results[i].links.indexOf(resp.data[i]) == -1 ) {
+							obj.results[i].links.push(resp.data[i]);
+						}
 					}
 				},
 				function(errResp) {
