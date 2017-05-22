@@ -18,6 +18,6 @@
 	</div>
 	<div class="modal-footer">
 	 	<button type="button" class="btn btn-default" data-ng-click="progressCtrl.doCancel()" data-ng-disabled="progressCtrl.update().status != 'running'">Cancel</button>
-		<button type="button" class="btn btn-primary" data-ng-click="progressCtrl.close()" data-ng-disabled="progressCtrl.update().status != 'finished'">OK</button>
+		<button type="button" class="btn btn-primary" data-ng-click="progressCtrl.close()" data-ng-disabled="progressCtrl.update().status == 'running'">OK</button>
 	</div>
 </div>

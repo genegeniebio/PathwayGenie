@@ -3,18 +3,16 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	var jobId = null;
 	
 	self.excl_codons_regex = "([ACGTacgt]{3}(\s[ACGTacgt]{3})+)*";
-	self.submitting = false;
 	self.query = PartsGenieService.query;
-	self.response = {"update": {"values": [], "message": "Submitting..."}};
+	self.response = {"update": {"values": [], "status": "waiting", "message": "Waiting..."}};
 
 	self.restr_enzs = function() {
 		return PathwayGenieService.restr_enzs();
 	};
 
 	self.submit = function() {
-		self.submitting = true;
 		jobId = null
-		self.response = {"update": {"values": [], "message": "Submitting..."}};
+		self.response = {"update": {"values": [], "status": "running", "message": "Submitting..."}};
 		error = null;
 		ResultService.setResults(null);
 		
@@ -35,23 +33,18 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 						if(status == "finished") {
 							ResultService.setResults(self.response.result);
 						}
-						
-						self.submitting = false;
 					}
 					
 					$scope.$apply();
 				};
 				
 				source.onerror = function(event) {
-					self.submitting = false;
-					self.response.update.status = "error";
-					self.response.update.message = "Error";
-					$scope.$apply();
+					source.close();
+					onerror();
 				}
 			},
 			function(errResp) {
-				self.submitting = false;
-				ErrorService.open(errResp.data.message);
+				onerror();
 			});
 	};
 	
@@ -61,5 +54,12 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	
 	self.update = function() {
 		return self.response.update;
+	};
+	
+	onerror = function() {
+		self.response.update.status = "error";
+		self.response.update.message = "Error";
+		$scope.$apply();
+		ErrorService.open(errResp.data.message);
 	};
 }]);
