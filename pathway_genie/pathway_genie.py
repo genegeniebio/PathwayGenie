@@ -22,6 +22,7 @@ class PathwayGenie(object):
     def __init__(self):
         self.__status = {}
         self.__threads = {}
+        self.__writers = {}
 
     def submit(self, data):
         '''Responds to submission.'''
@@ -56,6 +57,30 @@ class PathwayGenie(object):
         self.__threads[job_id].cancel()
         return job_id
 
+    def save(self, data):
+        '''Saves results.'''
+        ice_entry_urls = []
+
+        url = data['ice']['url']
+        data['ice']['url'] = url[:-1] if url[-1] == '/' else url
+
+        ice_key = tuple(sorted(data['ice'].values()))
+
+        if ice_key not in self.__writers:
+            self.__writers[ice_key] = DNAWriter(data['ice']['url'],
+                                                data['ice']['username'],
+                                                data['ice']['password'],
+                                                data['ice'].get('groups',
+                                                                None))
+
+        writer = self.__writers[ice_key]
+
+        for result in data['result']:
+            ice_id = writer.submit(result)
+            ice_entry_urls.append(url + '/entry/' + str(ice_id))
+
+        return ice_entry_urls
+
     def event_fired(self, event):
         '''Responds to event being fired.'''
         self.__status[event['job_id']] = event
@@ -63,24 +88,6 @@ class PathwayGenie(object):
     def __get_response(self, job_id):
         '''Returns current progress for job id.'''
         return json.dumps(self.__status[job_id])
-
-
-def save(data):
-    '''Saves results.'''
-    ice_entry_urls = []
-
-    url = data['ice']['url']
-    url = url[:-1] if url[-1] == '/' else url
-    writer = DNAWriter(url,
-                       data['ice']['username'],
-                       data['ice']['password'],
-                       data['ice'].get('groups', None))
-
-    for result in data['result']:
-        ice_id = writer.submit(result)
-        ice_entry_urls.append(url + '/entry/' + str(ice_id))
-
-    return ice_entry_urls
 
 
 def _get_thread(query):

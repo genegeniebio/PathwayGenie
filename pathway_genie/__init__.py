@@ -68,7 +68,7 @@ def cancel(job_id):
 @APP.route('/save', methods=['POST'])
 def save():
     '''Saves result.'''
-    return json.dumps(pathway_genie.save(json.loads(request.data)))
+    return json.dumps(_MANAGER.save(json.loads(request.data)))
 
 
 @APP.route('/groups/', methods=['POST'])
