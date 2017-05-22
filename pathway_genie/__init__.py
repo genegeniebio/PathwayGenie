@@ -49,13 +49,14 @@ def home():
 @APP.route('/submit', methods=['POST'])
 def submit():
     '''Responds to submission.'''
-    return _MANAGER.submit(request)
+    return json.dumps({'job_id': _MANAGER.submit(request.data)})
 
 
 @APP.route('/progress/<job_id>')
 def progress(job_id):
     '''Returns progress of job.'''
-    return _MANAGER.get_progress(job_id)
+    return Response(_MANAGER.get_progress(job_id),
+                    mimetype='text/event-stream')
 
 
 @APP.route('/cancel/<job_id>')
@@ -67,7 +68,7 @@ def cancel(job_id):
 @APP.route('/save', methods=['POST'])
 def save():
     '''Saves result.'''
-    return pathway_genie.save(request)
+    return json.dumps(pathway_genie.save(json.loads(request.data)))
 
 
 @APP.route('/groups/', methods=['POST'])

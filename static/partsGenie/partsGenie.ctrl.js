@@ -40,11 +40,11 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 				
 				source.onerror = function(event) {
 					source.close();
-					onerror();
+					onerror(event.message);
 				}
 			},
 			function(errResp) {
-				onerror();
+				onerror(errResp.data.message);
 			});
 	};
 	
@@ -56,10 +56,10 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		return self.response.update;
 	};
 	
-	onerror = function() {
+	onerror = function(message) {
 		self.response.update.status = "error";
 		self.response.update.message = "Error";
 		$scope.$apply();
-		ErrorService.open(errResp.data.message);
+		ErrorService.open(message);
 	};
 }]);
