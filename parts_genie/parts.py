@@ -186,8 +186,9 @@ class PartsSolution(object):
                     cds['parameters']['CAI'] = float('{0:.3g}'.format(cai))
                     cais.append(cai)
 
-        dna['temp_params']['mean_cai'] = mean(cais)
-        dna['temp_params']['mean_tir_errs'] = mean(tir_errs)
+        dna['temp_params']['mean_cai'] = mean(cais) if len(cais) else 0
+        dna['temp_params']['mean_tir_errs'] = mean(tir_errs) \
+            if len(tir_errs) else 0
         dna['temp_params']['num_rogue_rbs'] = num_rogue_rbs
 
         # Get number of invalid seqs:
