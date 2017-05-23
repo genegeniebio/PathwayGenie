@@ -153,11 +153,15 @@ class PartsSolution(object):
 
             elif feature['typ'] == dna_utils.SO_ASS_COMP:
                 # Generate bridging oligo site of desired melting temp:
-                seq, melt_temp = seq_utils.get_rand_seq_by_melt_temp(
-                    feature['parameters']['Tm target'],
-                    self.__get_max_repeat_nuc(), self.__get_inv_seqs())
+                if not feature['seq']:
+                    seq, melt_temp = seq_utils.get_rand_seq_by_melt_temp(
+                        feature['parameters']['Tm target'],
+                        self.__get_max_repeat_nuc(), self.__get_inv_seqs())
 
-                feature.set_seq(seq)
+                    feature.set_seq(seq)
+                else:
+                    melt_temp = seq_utils.get_melting_temp(feature['seq'])
+
                 feature['parameters']['Tm'] = melt_temp
 
             elif feature['typ'] == dna_utils.SO_RANDOM:
