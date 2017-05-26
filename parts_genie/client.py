@@ -53,6 +53,7 @@ class PartsGenieClient(object):
             data['ice']['url'] = ice_params[0]
             data['ice']['username'] = ice_params[1]
             data['ice']['password'] = ice_params[2]
+            data['ice']['groups'] = ice_params[3]
             data['result'] = [val for result in results for val in result]
             return self.__pathway_genie.save(data)
 
