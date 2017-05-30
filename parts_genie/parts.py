@@ -111,8 +111,9 @@ class PartsSolution(object):
                       if feat['temp_params'].get('fixed', False)]
 
         self.__dna['temp_params']['num_inv_seq_fixed'] = \
-            sum([seq_utils.count_pattern(seq, self.__get_max_repeat_nuc(),
-                                         self.__get_inv_seqs())
+            sum([sum(seq_utils.find_invalid(seq,
+                                            self.__filters['max_repeats'],
+                                            self.__filters['restr_enzs']))
                  for seq in fixed_seqs])
 
     def __init_seqs(self):
@@ -140,7 +141,8 @@ class PartsSolution(object):
                     cds.set_seq(self.__cod_opt.get_codon_optim_seq(
                         cds['temp_params']['aa_seq'],
                         self.__filters.get('excl_codons', None),
-                        self.__get_max_repeat_nuc(), self.__get_inv_seqs(),
+                        self.__filters['max_repeats'],
+                        self.__filters['restr_enzs'],
                         tolerant=False))
 
             elif feature['typ'] == dna_utils.SO_RBS:
@@ -156,7 +158,8 @@ class PartsSolution(object):
                 if not feature['seq']:
                     seq, melt_temp = seq_utils.get_rand_seq_by_melt_temp(
                         feature['parameters']['Tm target'],
-                        self.__get_max_repeat_nuc(), self.__get_inv_seqs())
+                        self.__filters['max_repeats'],
+                        self.__filters['restr_enzs'])
 
                     feature.set_seq(seq)
                 else:
@@ -167,8 +170,8 @@ class PartsSolution(object):
             elif feature['typ'] == dna_utils.SO_RANDOM:
                 # Randomly choose a sequence:
                 seq = seq_utils.get_random_dna(feature.pop('end'),
-                                               self.__get_max_repeat_nuc(),
-                                               self.__get_inv_seqs())
+                                               self.__filters['max_repeats'],
+                                               self.__filters['restr_enzs'])
                 feature.set_seq(seq)
 
     def __update(self, dna):
@@ -197,8 +200,9 @@ class PartsSolution(object):
 
         # Get number of invalid seqs:
         dna['temp_params']['num_inv_seq'] = \
-            sum([seq_utils.count_pattern(seq, self.__get_max_repeat_nuc(),
-                                         self.__get_inv_seqs())
+            sum([len(seq_utils.find_invalid(seq,
+                                            self.__filters['max_repeats'],
+                                            self.__filters['restr_enzs']))
                  for seq in _get_all_seqs(dna)]) - \
             dna['temp_params']['num_inv_seq_fixed']
 
@@ -233,16 +237,6 @@ class PartsSolution(object):
                      rbs['parameters']['TIR target'] * cutoff]
 
         return tir_err, rogue_rbs
-
-    def __get_inv_seqs(self):
-        '''Gets list of invalid sequences/'''
-        return ([restr_enz['site']
-                 for restr_enz in self.__filters['restr_enzs']]
-                if 'restr_enzs' in self.__filters else [])
-
-    def __get_max_repeat_nuc(self):
-        '''Get number of max repeating nucleotides.'''
-        return int(self.__filters['max_repeats'])
 
     def __repr__(self):
         # return '%r' % (self.__dict__)

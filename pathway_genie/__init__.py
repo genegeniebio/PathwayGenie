@@ -101,9 +101,7 @@ def get_organisms():
 @APP.route('/restr_enzymes')
 def get_restr_enzymes():
     '''Gets supported restriction enzymes.'''
-    return json.dumps([{'name': str(enz),
-                        'site': seq_utils.ambiguous_to_regex(enz.site)}
-                       for enz in Restriction.AllEnzymes])
+    return json.dumps([str(enz) for enz in Restriction.AllEnzymes])
 
 
 @APP.route('/ice/connect', methods=['POST'])

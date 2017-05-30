@@ -105,7 +105,7 @@
 							<label class="col-xs-4 col-form-label">Excluded restriction sites:</label>
 							<div class="col-xs-8">
 								<select data-ng-model="ctrl.query.filters.restr_enzs"
-									data-ng-options="restr_enz as restr_enz.name for restr_enz in ctrl.restr_enzs() | orderBy:'name'"
+									data-ng-options="restr_enz for restr_enz in ctrl.restr_enzs() | orderBy:'toString()'"
 									data-ng-multiple="true" multiple class="form-control">
 								</select>
 							</div>
