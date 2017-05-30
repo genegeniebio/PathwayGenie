@@ -28,6 +28,10 @@ class TestPartsThread(unittest.TestCase):
         '''Tests submit method with complex query.'''
         self.__test_submit('complex_query.json')
 
+    def test_submit_promoter(self):
+        '''Tests submit method with simple query.'''
+        self.__test_submit('promoter_query.json')
+
     def test_submit_multiple(self):
         '''Tests submit method with simple query.'''
         self.__test_submit('multiple_query.json')

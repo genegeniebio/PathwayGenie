@@ -84,12 +84,7 @@
    ],
    "filters":{
       "max_repeats":6,
-      "restr_enzs":[
-         {
-            "name":"AasI",
-            "site":"GAC[GATC][GATC][GATC][GATC][GATC][GATC]GTC"
-         }
-      ]
+      "restr_enzs":["AasI"]
    },
    "organism":{
       "taxonomy_id":"83333",

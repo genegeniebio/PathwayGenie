@@ -36,14 +36,14 @@ class TestRbsCalculator(unittest.TestCase):
             'AAGGCTCAGTATTCCCACTGAG'
 
         dgs = calc.calc_dgs(m_rna)
-        self.assertEqual(dgs[0], [41, 74])
-        self.assertAlmostEqual(dgs[1][0], -8.070025836938619)
-        self.assertAlmostEqual(dgs[1][1], 3.312588580920539)
+        self.assertEqual(dgs.keys(), [41, 74])
+        self.assertAlmostEqual(dgs[41][0], -8.070025836938619)
+        self.assertAlmostEqual(dgs[74][0], 3.312588580920539)
 
         dgs = calc.calc_dgs(m_rna)
-        self.assertEqual(dgs[0], [41, 74])
-        self.assertAlmostEqual(dgs[1][0], -8.070025836938619)
-        self.assertAlmostEqual(dgs[1][1], 3.312588580920539)
+        self.assertEqual(dgs.keys(), [41, 74])
+        self.assertAlmostEqual(dgs[41][0], -8.070025836938619)
+        self.assertAlmostEqual(dgs[74][0], 3.312588580920539)
 
 
 if __name__ == "__main__":
