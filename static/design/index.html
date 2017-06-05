@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Design</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-route.min.js"></script>
+    <script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-2.5.0.js"></script>
+    <script src="angular-drag-and-drop-lists.js"></script>
+	<script src="design.module.js"></script>
+	<script src="design.service.js"></script>
+    <script src="design.ctrl.js"></script>
+    <script src="design.directive.js"></script>
+    <script src="feature.directive.js"></script>
+</head>
+<body data-ng-app="design" data-ng-controller="designCtrl as ctrl" style="margin-top: 15px">
+	<div class="container">
+		<div class="col-md-6">
+			<design-panel
+				templates="ctrl.templates"
+				query="ctrl.query()"
+				selected="ctrl.selected()"
+				toggle-selected="ctrl.toggleSelected(args)"
+				add-design="ctrl.addDesign()"
+				remove-design="ctrl.removeDesign(args)">
+			</design-panel>
+    	</div>
+   		<div class="col-md-6" data-ng-show="ctrl.selected()">
+			<feature-panel
+				selected="ctrl.selected()">
+			</feature-panel>
+    	</div>
+    	<div class="col-md-12">
+    		<pre>{{ctrl.queryJson}}</pre>
+    	</div>
+    </div>
+</body>

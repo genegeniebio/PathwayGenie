@@ -10,27 +10,27 @@
 	display: inline-block;
 	width: 50px;
 	height: 100px;
- 	background-image: url("sbolv/user-defined.svg");
+ 	background-image: url("../sbolv/user-defined.svg");
 }
 
 .component.SO0000139
 {
-	background-image: url("sbolv/ribosome-entry-site.svg");
+	background-image: url("../sbolv/ribosome-entry-site.svg");
 }
 
 .component.SO0000141
 {
-	background-image: url("sbolv/terminator.svg");
+	background-image: url("../sbolv/terminator.svg");
 }
 
 .component.SO0000167
 {
-	background-image: url("sbolv/promoter.svg");
+	background-image: url("../sbolv/promoter.svg");
 }
 
 .component.SO0000316
 {
-	background-image: url("sbolv/cds.svg");
+	background-image: url("../sbolv/cds.svg");
 }
 
 .table
