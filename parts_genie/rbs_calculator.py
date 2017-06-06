@@ -50,9 +50,11 @@ class RbsCalculator(object):
 
             try:
                 d_g = self.__calc_dg(m_rna, start_pos)
-                start_positions.append(start_pos)
-                dgs_tirs.append((d_g, get_tir(d_g)))
-                count += 1
+
+                if not math.isinf(d_g):
+                    start_positions.append(start_pos)
+                    dgs_tirs.append((d_g, get_tir(d_g)))
+                    count += 1
             except ValueError:
                 # Occurs when start codon appears at start of sequence, and is
                 # therefore leaderless. Take no action, as safe to ignore.
