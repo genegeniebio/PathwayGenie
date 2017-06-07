@@ -106,14 +106,14 @@ class PartsSolution(object):
         '''Reject potential update.'''
         self.__dna_new = copy.deepcopy(self.__dna)
 
-    def __calc_num_inv_seq_fixed(self):
+    def __calc_num_inv_seq_fixed(self, flank=16):
         '''Calculate number of invalid sequences in fixed sequences.'''
-        fixed_seqs = [feat['seq']
+        fixed_seqs = ['N' * flank + feat['seq'] + 'N' * flank
                       for feat in self.__dna['features']
                       if feat['temp_params'].get('fixed', False)]
 
         self.__dna['temp_params']['num_inv_seq_fixed'] = \
-            sum([sum(seq_utils.find_invalid(seq,
+            sum([len(seq_utils.find_invalid(seq,
                                             self.__filters['max_repeats'],
                                             self.__filters['restr_enzs']))
                  for seq in fixed_seqs])
@@ -277,10 +277,8 @@ def _get_all_seqs(dna):
 
     for feature in dna['features']:
         if feature['typ'] == dna_utils.SO_CDS:
-            all_seqs = [''.join(term)
-                        for term in product([option['seq']
-                                             for option in feature['options']],
-                                            all_seqs)]
+            options = [option['seq'] for option in feature['options']]
+            all_seqs = [''.join(term) for term in product(all_seqs, options)]
         else:
             for idx, seq in enumerate(all_seqs):
                 all_seqs[idx] = seq + feature['seq']
