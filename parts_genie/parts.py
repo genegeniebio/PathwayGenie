@@ -13,7 +13,6 @@ import copy
 import math
 import re
 
-from numpy import mean
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import dna_utils, seq_utils
 
@@ -195,8 +194,8 @@ class PartsSolution(object):
                     cds['parameters']['CAI'] = float('{0:.3g}'.format(cai))
                     cais.append(cai)
 
-        dna['temp_params']['mean_cai'] = mean(cais) if len(cais) else 0
-        dna['temp_params']['mean_tir_errs'] = mean(tir_errs) \
+        dna['temp_params']['mean_cai'] = _mean(cais)
+        dna['temp_params']['mean_tir_errs'] = _mean(tir_errs) \
             if len(tir_errs) else 0
         dna['temp_params']['num_rogue_rbs'] = num_rogue_rbs
 
@@ -269,6 +268,11 @@ class PartsThread(SimulatedAnnealer):
                                  query['filters'])
 
         SimulatedAnnealer.__init__(self, solution, verbose=verbose)
+
+
+def _mean(lst):
+    '''Gets mean of list.'''
+    return float(sum(lst)) / len(lst) if len(lst) > 0 else 0.0
 
 
 def _get_all_seqs(dna):

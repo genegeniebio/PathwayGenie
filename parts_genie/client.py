@@ -70,5 +70,6 @@ def main(args):
     ice_params = None if len(args) == 1 else args[1:]
     client.submit(args[0], ice_params)
 
+
 if __name__ == "__main__":
     main(sys.argv[1:])
