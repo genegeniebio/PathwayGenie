@@ -1,7 +1,7 @@
 '''
-PathwayGenie (c) University of Manchester 2017
+PartsGenie (c) University of Manchester 2017
 
-PathwayGenie is licensed under the MIT License.
+PartsGenie is licensed under the MIT License.
 
 To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
@@ -13,14 +13,15 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-statements
 import math
 import random
+import re
 
 from Bio.Seq import Seq
 from synbiochem.utils import seq_utils
 
 from parts_genie.nucl_acid_utils import NuPackRunner
-import regex as re
 
 
+_START_CODON_PATT = r'(?=([ACGT]TG))'
 _RT_EFF = 2.222
 _K = 2500.0
 
@@ -43,16 +44,17 @@ class RbsCalculator(object):
         dgs_tirs = []
         count = 0
 
-        for match in re.finditer(seq_utils.START_CODON_PATT, m_rna,
-                                 overlapped=True):
+        for match in re.finditer(_START_CODON_PATT, m_rna):
 
             start_pos = match.start()
 
             try:
                 d_g = self.__calc_dg(m_rna, start_pos)
-                start_positions.append(start_pos)
-                dgs_tirs.append((d_g, get_tir(d_g)))
-                count += 1
+
+                if not math.isinf(d_g):
+                    start_positions.append(start_pos)
+                    dgs_tirs.append((d_g, get_tir(d_g)))
+                    count += 1
             except ValueError:
                 # Occurs when start codon appears at start of sequence, and is
                 # therefore leaderless. Take no action, as safe to ignore.

@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-docker build -t pathwaygenie .
-docker run -d -p 80:80 pathwaygenie
+docker build -t partsgenie .
+docker run -d -p $1:5000 partsgenie

@@ -1,25 +1,13 @@
-# PathwayGenie
+# To run with Docker:
 
-To run on Google Compute Engine:
+1. Clone repository:
 
-1. Create instance from client:
+git clone https://github.com/synbiochem/PartsGenie.git
 
-gcloud compute instances create instance-1 --image-family gci-stable --image-project google-containers --zone europe-west1-b --machine-type n1-standard-1
+2. Navigate to PartsGenie directory:
 
-2. Set External IP to static.
+cd PartsGenie
 
-3. Firewalls: Allow HTTP traffic.
+3. Run start_server script, with optional port (if port is not provided, a randomly assigned empty port will be provided):
 
-4. SSH into instance (from GCE console).
-
-5. Clone repository:
-
-git clone https://github.com/synbiochem/PathwayGenie.git
-
-6. Move into PathwayGenie directory:
-
-cd PathwayGenie
-
-7. Run start_server script:
-
-bash start_server.sh
+bash start_server.sh 80

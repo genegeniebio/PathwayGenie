@@ -1,1 +1,0 @@
-var sbcdoeApp = angular.module("sbcdoeApp", []);

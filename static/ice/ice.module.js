@@ -1,1 +1,1 @@
-var iceApp = angular.module("iceApp", ["ui.bootstrap", "ui.bootstrap.modal"]);
+var iceApp = angular.module("iceApp", []);

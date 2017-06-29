@@ -1,36 +1,22 @@
-partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PathwayGenieService", "ProgressService", "ResultService", function($scope, ErrorService, PathwayGenieService, ProgressService, ResultService) {
+partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGenieService", "PathwayGenieService", "ProgressService", "ResultService", function($scope, ErrorService, PartsGenieService, PathwayGenieService, ProgressService, ResultService) {
 	var self = this;
-	self.query = {
-			"app": "PartsGenie",
-			"designs": [
-				{
-					"dna": {
-						"name": "",
-						"desc": "",
-						"features": [
-							{"typ": "http://purl.obolibrary.org/obo/SO_0001416", "seq": "", "name": "5\' flanking region", "temp_params": {"fixed": true}},
-							{"typ": "http://purl.obolibrary.org/obo/SO_0000139", "end": 60, "name": "ribosome entry site", "parameters": {"TIR target": 15000}, "temp_params": {"fixed": false}},
-							{"typ": "http://purl.obolibrary.org/obo/SO_0000316", "options": [{"typ": "http://purl.obolibrary.org/obo/SO_0000316", "name": "coding sequence", "temp_params": {"aa_seq": "", "fixed": false}}]},
-							{"typ": "http://purl.obolibrary.org/obo/SO_0001417", "seq": "", "name": "3\' flanking region", "temp_params": {"fixed": true}}
-						]
-					}
-				}
-			], 
-			"filters": {
-				"max_repeats": 6
-			},
-		};
-	self.response = {"update": {"values": []}};
-	self.excl_codons_regex = "([ACGTacgt]{3}(\s[ACGTacgt]{3})+)*";
-	
 	var jobId = null;
 	
+	self.excl_codons_regex = "([ACGTacgt]{3}(\s[ACGTacgt]{3})+)*";
+	self.query = PartsGenieService.query;
+	self.response = {"update": {"values": [], "status": "waiting", "message": "Waiting..."}};
+
 	self.restr_enzs = function() {
 		return PathwayGenieService.restr_enzs();
 	};
-	
+
 	self.submit = function() {
-		reset();
+		jobId = null
+		self.response = {"update": {"values": [], "status": "running", "message": "Submitting..."}};
+		error = null;
+		ResultService.setResults(null);
+		
+		ProgressService.open(self.query["app"] + " dashboard", self.cancel, self.update);
 		
 		PathwayGenieService.submit(self.query).then(
 			function(resp) {
@@ -53,15 +39,12 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PathwayGe
 				};
 				
 				source.onerror = function(event) {
-					self.response.update.status = "error";
-					self.response.update.message = "Error";
-					$scope.$apply();
+					source.close();
+					onerror(event.message);
 				}
-				
-				ProgressService.open(self.query["app"] + " dashboard", self.cancel, self.update);
 			},
 			function(errResp) {
-				ErrorService.open(errResp.data.message);
+				onerror(errResp.data.message);
 			});
 	};
 	
@@ -72,10 +55,11 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PathwayGe
 	self.update = function() {
 		return self.response.update;
 	};
-
-	reset = function() {
-		status = {"update": {"values": []}};
-		error = null;
-		ResultService.setResults(null);
+	
+	onerror = function(message) {
+		self.response.update.status = "error";
+		self.response.update.message = "Error";
+		$scope.$apply();
+		ErrorService.open(message);
 	};
 }]);

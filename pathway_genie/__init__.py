@@ -49,13 +49,14 @@ def home():
 @APP.route('/submit', methods=['POST'])
 def submit():
     '''Responds to submission.'''
-    return _MANAGER.submit(request)
+    return json.dumps({'job_id': _MANAGER.submit(request.data)})
 
 
 @APP.route('/progress/<job_id>')
 def progress(job_id):
     '''Returns progress of job.'''
-    return _MANAGER.get_progress(job_id)
+    return Response(_MANAGER.get_progress(job_id),
+                    mimetype='text/event-stream')
 
 
 @APP.route('/cancel/<job_id>')
@@ -67,13 +68,25 @@ def cancel(job_id):
 @APP.route('/save', methods=['POST'])
 def save():
     '''Saves result.'''
-    return pathway_genie.save(request)
+    return json.dumps(_MANAGER.save(json.loads(request.data)))
 
 
-@APP.route('/organisms/<term>')
-def get_organisms(term):
+@APP.route('/groups/', methods=['POST'])
+def get_groups():
+    '''Gets groups from search term.'''
+    ice_client = _connect_ice(request)
+    data = json.loads(request.data)
+    return json.dumps([group['label']
+                       for group in ice_client.search_groups(data['term'])])
+
+
+@APP.route('/organisms/', methods=['POST'])
+def get_organisms():
     '''Gets organisms from search term.'''
-    url = "https://salislab.net/software/return_species_list?term=" + term
+    query = json.loads(request.data)
+
+    url = "https://salislab.net/software/return_species_list?term=" + \
+        query['term']
 
     response = urllib2.urlopen(url)
     data = [{'taxonomy_id': _ORGANISMS[term[:term.rfind('(')].strip()],
@@ -88,39 +101,33 @@ def get_organisms(term):
 @APP.route('/restr_enzymes')
 def get_restr_enzymes():
     '''Gets supported restriction enzymes.'''
-    return json.dumps([{'name': str(enz),
-                        'site': seq_utils.ambiguous_to_regex(enz.site)}
-                       for enz in Restriction.AllEnzymes])
-
-
-@APP.route('/ice/search/<term>')
-def search_ice(term, url, username, password):
-    '''Searches ICE database.'''
-    ice_client = ICEClient(url, username, password)
-    return ice_client.search(term, limit=10)
+    return json.dumps([str(enz) for enz in Restriction.AllEnzymes])
 
 
 @APP.route('/ice/connect', methods=['POST'])
 def connect_ice():
-    '''Searches ICE database.'''
-    data = json.loads(request.data)
-
+    '''Connects to ICE.'''
     try:
-        ICEClient(data['ice']['url'],
-                  data['ice']['username'],
-                  data['ice']['password'])
-        connected = True
-    except (ConnectionError, NetworkError):
-        connected = False
+        _connect_ice(request)
+        return json.dumps({'connected': True})
+    except ConnectionError, err:
+        print str(err)
+        message = 'Unable to connect. Is the URL correct?'
+        status_code = 503
+    except NetworkError, err:
+        print str(err)
+        message = 'Unable to connect. Are the username and password correct?'
+        status_code = err.get_status()
 
-    return json.dumps({'connected': connected})
-
-
-@APP.errorhandler(Exception)
-def handle_exception(err):
-    '''Exception handling method.'''
-    message = err.__class__.__name__ + ': ' + str(err)
-    APP.logger.error('Exception: ' + message)
     response = jsonify({'message': message})
-    response.status_code = 500
+    response.status_code = status_code
     return response
+
+
+def _connect_ice(req):
+    '''Connects to ICE.'''
+    data = json.loads(req.data)
+
+    return ICEClient(data['ice']['url'],
+                     data['ice']['username'],
+                     data['ice']['password'])

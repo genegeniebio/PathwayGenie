@@ -1,13 +1,19 @@
-FROM ubuntu:latest
-RUN apt-get update -y
-RUN apt-get install -y python-pip python-dev build-essential
+FROM python:2.7-alpine
+
 COPY . /
 WORKDIR /
-RUN cd /nupack3.0.6 && make clean && make
+
+RUN apk add --no-cache --virtual build-dependencies gcc musl-dev make \
+  && cd /nupack3.0.6 \
+  && make clean \
+  && make \
+  && cd / \
+  && pip install --upgrade pip \
+  && pip install -r requirements.txt \
+  && apk del build-dependencies
+
 ENV PATH /nupack3.0.6/bin:${PATH}
 ENV NUPACKHOME /nupack3.0.6/
-RUN pip install --upgrade pip
-RUN pip install numpy
-RUN pip install -r requirements.txt
+
 ENTRYPOINT ["python"]
-CMD ["app.py", "80"]
+CMD ["app.py"]

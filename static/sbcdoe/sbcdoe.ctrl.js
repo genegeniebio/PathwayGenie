@@ -1,3 +1,0 @@
-sbcdoeApp.controller("sbcdoeCtrl", [function() {
-	
-}]);

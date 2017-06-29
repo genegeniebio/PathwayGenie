@@ -6,7 +6,7 @@ progressApp.factory("ProgressService", ["$uibModal", function($uibModal) {
 			animation: true,
 			ariaLabelledBy: 'modal-title',
 			ariaDescribedBy: 'modal-body',
-			templateUrl: '/static/progress/progressContent.html',
+			templateUrl: '/static/progress/progress.html',
 			controller: 'progressInstanceCtrl',
 			controllerAs: 'progressCtrl',
 			backdrop: 'static',

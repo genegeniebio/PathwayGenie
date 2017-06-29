@@ -1,7 +1,7 @@
 '''
-PathwayGenie (c) University of Manchester 2017
+PartsGenie (c) University of Manchester 2017
 
-PathwayGenie is licensed under the MIT License.
+PartsGenie is licensed under the MIT License.
 
 To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
@@ -10,9 +10,9 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=no-self-use
 from itertools import product
 import copy
+import math
 import re
 
-from numpy import mean
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import dna_utils, seq_utils
 
@@ -26,22 +26,17 @@ class PartsSolution(object):
         self.__dna = dna_utils.get_dna(dna)
         self.__dna['typ'] = dna_utils.SO_PART
         self.__dna['parameters']['Type'] = 'PART'
-
         self.__organism = organism
         self.__filters = filters
-
+        self.__filters['restr_enzs'] = self.__filters['restr_enzs'] \
+            if 'restr_enzs' in self.__filters else []
         self.__calc = rbs_calc.RbsCalculator(organism['r_rna'])
         self.__cod_opt = seq_utils.CodonOptimiser(organism['taxonomy_id'])
 
-        # Invalid pattern is restriction sites | repeating nucleotides:
-        self.__inv_patt = '|'.join(([restr_enz['site']
-                                     for restr_enz in filters['restr_enzs']]
-                                    if 'restr_enzs' in filters else []) +
-                                   [x * int(filters['max_repeats'])
-                                    for x in seq_utils.NUCLEOTIDES])
-
-        self.__get_seqs()
+        self.__calc_num_inv_seq_fixed()
+        self.__init_seqs()
         self.__update(self.__dna)
+
         self.__dna_new = copy.deepcopy(self.__dna)
 
     def get_query(self):
@@ -110,15 +105,28 @@ class PartsSolution(object):
         '''Reject potential update.'''
         self.__dna_new = copy.deepcopy(self.__dna)
 
-    def __get_seqs(self):
+    def __calc_num_inv_seq_fixed(self, flank=16):
+        '''Calculate number of invalid sequences in fixed sequences.'''
+        fixed_seqs = ['N' * flank + feat['seq'] + 'N' * flank
+                      for feat in self.__dna['features']
+                      if feat['temp_params'].get('fixed', False)]
+
+        self.__dna['temp_params']['num_inv_seq_fixed'] = \
+            sum([len(seq_utils.find_invalid(seq,
+                                            self.__filters['max_repeats'],
+                                            self.__filters['restr_enzs']))
+                 for seq in fixed_seqs])
+
+    def __init_seqs(self):
         '''Returns sequences from protein ids, which may be either Uniprot ids,
         or a protein sequence itself.'''
-        uniprot_id_pattern = \
-            '[OPQ][0-9][A-Z0-9]{3}[0-9]|' + \
-            '[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}'
-
-        for feature in self.__dna['features']:
+        for idx, feature in enumerate(self.__dna['features']):
             if feature['typ'] == dna_utils.SO_CDS:
+                # Gets sequences from protein ids, which may be either
+                # Uniprot ids, or a protein sequence itself:
+                uniprot_id_pattern = '[OPQ][0-9][A-Z0-9]{3}[0-9]|' + \
+                    '[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}'
+
                 for cds in feature['options']:
                     if re.match(uniprot_id_pattern,
                                 cds['temp_params']['aa_seq']):
@@ -134,17 +142,38 @@ class PartsSolution(object):
                     cds.set_seq(self.__cod_opt.get_codon_optim_seq(
                         cds['temp_params']['aa_seq'],
                         self.__filters.get('excl_codons', None),
-                        self.__inv_patt,
+                        self.__filters['max_repeats'],
+                        self.__filters['restr_enzs'],
                         tolerant=False))
 
-        # Randomly choose an RBS that is a decent starting point,
-        # using the first CDS as the upstream sequence:
-        for idx, feature in enumerate(self.__dna['features']):
-            if feature['typ'] == dna_utils.SO_RBS:
+            elif feature['typ'] == dna_utils.SO_RBS:
+                # Randomly choose an RBS that is a decent starting point,
+                # using the first CDS as the upstream sequence:
                 feature.set_seq(self.__calc.get_initial_rbs(
                     feature['end'],
                     self.__dna['features'][idx + 1]['options'][0]['seq'],
                     feature['parameters']['TIR target']))
+
+            elif feature['typ'] == dna_utils.SO_ASS_COMP:
+                # Generate bridging oligo site of desired melting temp:
+                if not feature['seq']:
+                    seq, melt_temp = seq_utils.get_rand_seq_by_melt_temp(
+                        feature['parameters']['Tm target'],
+                        self.__filters['max_repeats'],
+                        self.__filters['restr_enzs'])
+
+                    feature.set_seq(seq)
+                else:
+                    melt_temp = seq_utils.get_melting_temp(feature['seq'])
+
+                feature['parameters']['Tm'] = melt_temp
+
+            elif feature['typ'] == dna_utils.SO_RANDOM:
+                # Randomly choose a sequence:
+                seq = seq_utils.get_random_dna(feature.pop('end'),
+                                               self.__filters['max_repeats'],
+                                               self.__filters['restr_enzs'])
+                feature.set_seq(seq)
 
     def __update(self, dna):
         '''Calculates (simulated annealing) energies for given RBS.'''
@@ -165,14 +194,18 @@ class PartsSolution(object):
                     cds['parameters']['CAI'] = float('{0:.3g}'.format(cai))
                     cais.append(cai)
 
-        dna['temp_params']['mean_cai'] = mean(cais)
-        dna['temp_params']['mean_tir_errs'] = mean(tir_errs)
+        dna['temp_params']['mean_cai'] = _mean(cais)
+        dna['temp_params']['mean_tir_errs'] = _mean(tir_errs) \
+            if len(tir_errs) else 0
         dna['temp_params']['num_rogue_rbs'] = num_rogue_rbs
 
         # Get number of invalid seqs:
         dna['temp_params']['num_inv_seq'] = \
-            sum([seq_utils.count_pattern(seq, self.__inv_patt)
-                 for seq in _get_all_seqs(dna)])
+            sum([len(seq_utils.find_invalid(seq,
+                                            self.__filters['max_repeats'],
+                                            self.__filters['restr_enzs']))
+                 for seq in _get_all_seqs(dna)]) - \
+            dna['temp_params']['num_inv_seq_fixed']
 
         dna['temp_params']['energy'] = dna['temp_params']['mean_tir_errs'] + \
             dna['temp_params']['num_inv_seq'] + \
@@ -189,8 +222,13 @@ class PartsSolution(object):
         # Get TIR:
         tir = tir_vals[rbs['end']][1]
         cds['parameters']['TIR'] = float('{0:.3g}'.format(tir))
-        tir_err = abs(rbs['parameters']['TIR target'] - tir) / \
-            rbs['parameters']['TIR target']
+        target = rbs['parameters']['TIR target']
+
+        try:
+            tir_err = 1 - math.log(target - abs(target - tir), target)
+        except ValueError:
+            # If tir is -ve, set tir_err to be a large number:
+            tir_err = 2.0 ** 32
 
         # Get rogue RBS sites:
         cutoff = 0.1
@@ -224,12 +262,17 @@ class PartsSolution(object):
 class PartsThread(SimulatedAnnealer):
     '''Wraps a PartsGenie job into a thread.'''
 
-    def __init__(self, query):
+    def __init__(self, query, verbose=True):
         solution = PartsSolution(query['designs'][0]['dna'],
                                  query['organism'],
                                  query['filters'])
 
-        SimulatedAnnealer.__init__(self, solution, verbose=True)
+        SimulatedAnnealer.__init__(self, solution, verbose=verbose)
+
+
+def _mean(lst):
+    '''Gets mean of list.'''
+    return float(sum(lst)) / len(lst) if len(lst) > 0 else 0.0
 
 
 def _get_all_seqs(dna):
@@ -238,10 +281,8 @@ def _get_all_seqs(dna):
 
     for feature in dna['features']:
         if feature['typ'] == dna_utils.SO_CDS:
-            all_seqs = [''.join(term)
-                        for term in product([option['seq']
-                                             for option in feature['options']],
-                                            all_seqs)]
+            options = [option['seq'] for option in feature['options']]
+            all_seqs = [''.join(term) for term in product(all_seqs, options)]
         else:
             for idx, seq in enumerate(all_seqs):
                 all_seqs[idx] = seq + feature['seq']
