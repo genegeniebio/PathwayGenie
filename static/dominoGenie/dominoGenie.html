@@ -41,7 +41,7 @@
 					<div class="col-xs-8">
 						<select
 							data-ng-model="ctrl.query.restr_enzs"
-							data-ng-options="restr_enz as restr_enz.name for restr_enz in ctrl.restr_enzs() | orderBy:'name'"
+							data-ng-options="restr_enz for restr_enz in ctrl.restr_enzs() | orderBy:'toString()'"
 							data-ng-multiple="false"
 							multiple
 							class="form-control">
