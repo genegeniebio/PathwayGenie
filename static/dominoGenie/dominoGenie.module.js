@@ -1,0 +1,1 @@
+var dominoGenieApp = angular.module("dominoGenieApp", []);
