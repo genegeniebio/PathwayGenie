@@ -11,10 +11,6 @@ dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "ICEServ
 	self.response = {"update": {}};
 	
 	var jobId = null;
-	
-	self.restr_enzs = function() {
-		return PathwayGenieService.restr_enzs();
-	};
 
 	self.connected = function() {
 		return ICEService.connected;
@@ -74,11 +70,15 @@ dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "ICEServ
 		// Parse DoE file:
 		if(values) {
 			var lines = values.match(/[^\r\n]+/g);
+			
+			self.query.restr_enzs = lines[0].match(/[^\t]+/g);
+			
 			var designs = []
 			
-			for(var i=0; i < lines.length; i++ ){
+			for(var i=1; i < lines.length; i++ ) {
 				designs.push({"design": lines[i].match(/[^\t]+/g)})
 			}
+			
 			self.query.designs = designs;
 		}
 	}, true);

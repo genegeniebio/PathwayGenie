@@ -36,18 +36,6 @@
 							placeholder="Enter melting temperature / &deg;C" required>
 					</div>
 				</div>
-				<div class="form-group">
-					<label class="col-xs-4 col-form-label">Digest reagent:</label>
-					<div class="col-xs-8">
-						<select
-							data-ng-model="ctrl.query.restr_enzs"
-							data-ng-options="restr_enz for restr_enz in ctrl.restr_enzs() | orderBy:'toString()'"
-							data-ng-multiple="false"
-							multiple
-							class="form-control">
-						</select>
-					</div>
-				</div>
 			</form>
 		</div>
 	</div>

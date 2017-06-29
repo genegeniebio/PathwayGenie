@@ -44,11 +44,10 @@ class DominoThread(JobThread):
 
             # Apply restriction site digestion to PARTs not PLASMIDs.
             # (Assumes PLASMID at positions 1 and -1 - first and last).
-            if self.__query.get('restr_enzs', None) is not None:
-                dsgn['components'] = [dsgn['components'][0]] + \
-                    [self.__apply_restricts(dna)
-                     for dna in dsgn['components'][1:-1]] + \
-                    [dsgn['components'][-1]]
+            for idx, dna_restr_enz in enumerate(
+                    zip(dsgn['components'], self.__query['restr_enzs'])):
+                dsgn['components'][idx] = \
+                    self.__apply_restricts(dna_restr_enz[0], dna_restr_enz[1])
 
             # Generate plasmid DNA object:
             dna = dna_utils.concat(dsgn['components'][:-1])
@@ -58,10 +57,6 @@ class DominoThread(JobThread):
             # Generate domino sequences:
             dna['children'].extend([self.__get_domino(pair)
                                     for pair in pairwise(dsgn['components'])])
-
-            import json
-            print json.dumps(dna, indent=2)
-            print
 
             self.__results.append(dna)
 
@@ -112,17 +107,12 @@ class DominoThread(JobThread):
         dna['desc'] = ice_id
         return dna
 
-    def __apply_restricts(self, dna):
-        '''Cleave off prefix and suffix, according to restriction sites.'''
-        if 'pQLINK' in dna['name']:
-            restrict_dnas = [dna]
-        else:
-            if 'restr_enzs' in self.__query:
-                restricts = [res['name'] for res in self.__query['restr_enzs']]
-            else:
-                restricts = []
+    def __apply_restricts(self, dna, restr_enz):
+        '''Apply restruction enzyme.'''
+        if restr_enz == 'None':
+            return dna
 
-            restrict_dnas = dna_utils.apply_restricts(dna, restricts)
+        restrict_dnas = dna_utils.apply_restricts(dna, restr_enz.split(','))
 
         # This is a bit fudgy...
         # Essentially, return the longest fragment remaining after digestion.
