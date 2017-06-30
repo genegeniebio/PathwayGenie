@@ -29,7 +29,7 @@ _WORKLIST_COLS = ['DestinationPlateBarcode',
 class AssemblyGenie(object):
     '''Class implementing AssemblyGenie algorithms.'''
 
-    def __init__(self, ice_details, ice_ids, src_filenames):
+    def __init__(self, ice_details, ice_ids, src_filenames=None):
         self.__ice_client = ICEClient(ice_details['url'],
                                       ice_details['username'],
                                       ice_details['password'])
@@ -82,8 +82,7 @@ class AssemblyGenie(object):
                 data = self.__get_data(part['partId'])
                 entries[data[1]] = data[2:]
 
-        for entry_id, entry in entries.iteritems():
-            print '\t'.join([entry_id] + [str(item) for item in entry])
+        return entries
 
     def __output_lcr_recipe(self, pools, plate_ids, def_reagents, vols):
         '''Outputs recipes.'''
@@ -193,14 +192,15 @@ def _get_src_comp_well(src_filenames):
     '''Gets components to well / plate mappings.'''
     comp_well = {}
 
-    for src_filename in src_filenames:
-        with open(src_filename) as fle:
-            plate_id = src_filename[:src_filename.find('.')]
+    if src_filenames:
+        for src_filename in src_filenames:
+            with open(src_filename) as fle:
+                plate_id = src_filename[:src_filename.find('.')]
 
-            for line in fle.read().splitlines():
-                if line.strip():
-                    terms = line.split('\t')
-                    comp_well[terms[1]] = (terms[0], plate_id)
+                for line in fle.read().splitlines():
+                    if line.strip():
+                        terms = line.split('\t')
+                        comp_well[terms[1]] = (terms[0], plate_id)
 
     return comp_well
 
@@ -212,6 +212,7 @@ def main(args):
                            'password': args[2]},
                           args[4:],
                           args[3].split(','))
+
     plate_ids = {'domino_pools': 'SBC50042389', 'lcr': 'lcr'}
     genie.export_lcr_recipe(plate_ids)
 
