@@ -5,7 +5,8 @@ dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "ICEServ
 	
 	self.query = {
 			"app": "DominoGenie",
-			"melt_temp": 70
+			"melt_temp": 70,
+			"circular": true
 		};
 	
 	self.response = {"update": {}};

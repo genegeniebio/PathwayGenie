@@ -1,22 +1,23 @@
 .uppercase
 {
-	text-transform:uppercase;
+	text-transform: uppercase;
 }
 
-.horizontal-cell
+.file-button
 {
-	display: table-cell;
+	margin-top: 5px;
+	display: none;
+}
+
+.aligned-checkbox
+{
+	margin: 0px;
+	height: 20px;
 }
 
 input.ng-invalid
 { 
 	border: 1px red solid;
-}
-
-.disabled
-{
-	cursor: not-allowed;
-	color: grey;
 }
 
 .tt-menu

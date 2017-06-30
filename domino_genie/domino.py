@@ -39,24 +39,24 @@ class DominoThread(JobThread):
         self.__fire_event('running', iteration, 'Running...')
 
         for dsgn in self.__query['designs']:
-            orig_comps = [comp.copy()
-                          for comp in dsgn['components'][:-1]]
+            orig_comps = [comp.copy() for comp in dsgn['components']]
 
-            # Apply restriction site digestion to PARTs not PLASMIDs.
-            # (Assumes PLASMID at positions 1 and -1 - first and last).
-            for idx, dna_restr_enz in enumerate(
-                    zip(dsgn['components'], self.__query['restr_enzs'])):
-                dsgn['components'][idx] = \
-                    self.__apply_restricts(dna_restr_enz[0], dna_restr_enz[1])
+            # Apply restriction site digestion:
+            dsgn['components'] = [self.__apply_restricts(dna, restr_enz)
+                                  for dna, restr_enz in zip(
+                dsgn['components'], self.__query['restr_enzs'])]
 
             # Generate plasmid DNA object:
-            dna = dna_utils.concat(dsgn['components'][:-1])
+            dna = dna_utils.concat(dsgn['components'])
             dna['typ'] = dna_utils.SO_PLASMID
             dna['children'].extend(orig_comps)
 
             # Generate domino sequences:
+            cmps = dsgn['components'] + [dsgn['components'][0]] \
+                if self.__query['circular'] else dsgn['components']
+
             dna['children'].extend([self.__get_domino(pair)
-                                    for pair in pairwise(dsgn['components'])])
+                                    for pair in pairwise(cmps)])
 
             self.__results.append(dna)
 
