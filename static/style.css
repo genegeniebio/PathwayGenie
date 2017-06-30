@@ -3,9 +3,13 @@
 	text-transform: uppercase;
 }
 
-.file-button
+.file-button-label
 {
 	margin-top: 5px;
+}
+
+#file-button
+{
 	display: none;
 }
 
