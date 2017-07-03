@@ -48,6 +48,7 @@ class DominoThread(JobThread):
 
             # Generate plasmid DNA object:
             dna = dna_utils.concat(dsgn['components'])
+            dna['name'] = dsgn['name']
             dna['typ'] = dna_utils.SO_PLASMID
             dna['children'].extend(orig_comps)
 
@@ -109,7 +110,7 @@ class DominoThread(JobThread):
 
     def __apply_restricts(self, dna, restr_enz):
         '''Apply restruction enzyme.'''
-        if restr_enz == 'None':
+        if not restr_enz:
             return dna
 
         restrict_dnas = dna_utils.apply_restricts(dna, restr_enz.split(','))

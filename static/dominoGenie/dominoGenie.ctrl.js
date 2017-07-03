@@ -72,12 +72,14 @@ dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "ICEServ
 		if(values) {
 			var lines = values.match(/[^\r\n]+/g);
 			
-			self.query.restr_enzs = lines[0].match(/[^\t]+/g);
+			tokens = lines[0].split("\t")
+			self.query.restr_enzs = tokens.slice(1, tokens.length);
 			
 			var designs = []
 			
 			for(var i=1; i < lines.length; i++ ) {
-				designs.push({"design": lines[i].match(/[^\t]+/g)})
+				tokens = lines[i].split("\t")
+				designs.push({"name": tokens[0], "design": tokens.slice(1, tokens.length)})
 			}
 			
 			self.query.designs = designs;
