@@ -12,7 +12,7 @@ import re
 import sys
 
 from synbiochem.utils import plate_utils
-from synbiochem.utils.ice_utils import ICEClient
+from assembly_genie.build import BuildGenieBase
 
 
 _WORKLIST_COLS = ['DestinationPlateBarcode',
@@ -26,16 +26,12 @@ _WORKLIST_COLS = ['DestinationPlateBarcode',
                   'plasmid_id']
 
 
-class AssemblyGenie(object):
+class AssemblyGenie(BuildGenieBase):
     '''Class implementing AssemblyGenie algorithms.'''
 
     def __init__(self, ice_details, ice_ids, src_filenames=None):
-        self.__ice_client = ICEClient(ice_details['url'],
-                                      ice_details['username'],
-                                      ice_details['password'])
-        self.__ice_ids = ice_ids
+        super(AssemblyGenie, self).__init__(ice_details, ice_ids)
         self.__comp_well = _get_src_comp_well(src_filenames)
-        self.__data = {}
 
     def export_lcr_recipe(self,
                           plate_ids=None,
@@ -55,11 +51,11 @@ class AssemblyGenie(object):
 
         pools = defaultdict(lambda: defaultdict(list))
 
-        for ice_id in self.__ice_ids:
-            data = self.__get_data(ice_id)
+        for ice_id in self._ice_ids:
+            data = self._get_data(ice_id)
 
             for part in data[0].get_metadata()['linkedParts']:
-                data = self.__get_data(part['partId'])
+                data = self._get_data(part['partId'])
 
                 if data[4] == 'ORF':
                     pools[ice_id]['parts'].append(data)
@@ -70,19 +66,6 @@ class AssemblyGenie(object):
                     pools[ice_id]['backbone'].append(data)
 
         self.__output_lcr_recipe(pools, plate_ids, def_reagents, vols)
-
-    def export_order(self):
-        '''Exports a plasmids constituent parts for ordering.'''
-        entries = {}
-
-        for ice_id in self.__ice_ids:
-            data = self.__get_data(ice_id)
-
-            for part in data[0].get_metadata()['linkedParts']:
-                data = self.__get_data(part['partId'])
-                entries[data[1]] = data[2:]
-
-        return entries
 
     def __output_lcr_recipe(self, pools, plate_ids, def_reagents, vols):
         '''Outputs recipes.'''
@@ -104,6 +87,7 @@ class AssemblyGenie(object):
 
             for domino in pools[ice_id]['dominoes']:
                 src_well = self.__comp_well[domino[1]]
+
                 print '\t'.join([dest_plate_id, dest_well, src_well[1],
                                  src_well[0], str(vol),
                                  domino[2], domino[5], domino[1],
@@ -162,6 +146,7 @@ class AssemblyGenie(object):
             # Write default reagents:
             for reagent, vol in def_reagents.iteritems():
                 well = self.__comp_well[reagent]
+
                 print '\t'.join([dest_plate_id, dest_well, well[1],
                                  well[0], str(vol),
                                  reagent, reagent, '',
