@@ -19,23 +19,6 @@ class RunnerBase(object):
         self._temp = temp
         self._cache = {}
 
-    def mfe(self, sequences, dangles='some'):
-        '''Runs mfe.'''
-        return self._get('mfe', sequences, dangles)
-
-    def subopt(self, sequences, energy_gap, dangles='some'):
-        '''Runs subopt.'''
-        return self._get('subopt', sequences, dangles, energy_gap=energy_gap)
-
-    def energy(self, sequences, bp_x, bp_y, dangles='some'):
-        '''Runs energy.'''
-        return self._get('energy', sequences, dangles, bp_x=bp_x, bp_y=bp_y)
-
-    def _get(self, cmd, sequences, dangles, energy_gap=None, bp_x=None,
-             bp_y=None):
-        '''Abstract method.'''
-        raise NotImplementedError()
-
 
 class NuPackRunner(RunnerBase):
     '''Wrapper class for running NuPACK jobs.'''
@@ -43,8 +26,20 @@ class NuPackRunner(RunnerBase):
     def __init__(self, temp=37.0):
         super(NuPackRunner, self).__init__(temp)
 
-    def _get(self, cmd, sequences, dangles, energy_gap=None, bp_x=None,
-             bp_y=None):
+    def mfe(self, sequences, dangles='some'):
+        '''Runs mfe.'''
+        return self.__get('mfe', sequences, dangles)
+
+    def subopt(self, sequences, energy_gap, dangles='some'):
+        '''Runs subopt.'''
+        return self.__get('subopt', sequences, dangles, energy_gap=energy_gap)
+
+    def energy(self, sequences, bp_x, bp_y, dangles='some'):
+        '''Runs energy.'''
+        return self.__get('energy', sequences, dangles, bp_x=bp_x, bp_y=bp_y)
+
+    def __get(self, cmd, sequences, dangles, energy_gap=None, bp_x=None,
+              bp_y=None):
         '''Gets the NuPACK result (which may be cached).'''
         key = ';'.join([cmd, str(sequences), dangles, str(energy_gap),
                         str(bp_x), str(bp_y)])
