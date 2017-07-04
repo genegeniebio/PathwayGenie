@@ -35,8 +35,8 @@ class BuildGenieBase(object):
                 entries[data[1]] = list(data[2:])
 
         # Format into list of lists:
-        return [[plate_utils.get_well(idx), key] + entries[key]
-                for idx, key in enumerate(sorted(entries))]
+        return [[key] + entries[key]
+                for key in sorted(entries)]
 
     def _get_data(self, ice_id):
         '''Gets data from ICE entry.'''

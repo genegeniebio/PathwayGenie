@@ -8,10 +8,11 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 from _collections import defaultdict
-import re
+import os
 import sys
 
 from synbiochem.utils import plate_utils
+
 from assembly_genie.build import BuildGenieBase
 
 
@@ -29,9 +30,13 @@ _WORKLIST_COLS = ['DestinationPlateBarcode',
 class AssemblyGenie(BuildGenieBase):
     '''Class implementing AssemblyGenie algorithms.'''
 
-    def __init__(self, ice_details, ice_ids, src_filenames=None):
+    def __init__(self, ice_details, ice_ids, outdir='assembly'):
         super(AssemblyGenie, self).__init__(ice_details, ice_ids)
-        self.__comp_well = _get_src_comp_well(src_filenames)
+        self.__outdir = outdir
+        self.__comp_well = {}
+
+        if not os.path.exists(self.__outdir):
+            os.mkdir(self.__outdir)
 
     def export_lcr_recipe(self,
                           plate_ids=None,
@@ -39,8 +44,12 @@ class AssemblyGenie(BuildGenieBase):
                           vols=None,
                           domino_vol=3):
         '''Exports LCR recipes.'''
+        self.__comp_well.update(self.__write_mastermix_trough())
+        self.__comp_well.update(self.__write_components())
+
         if plate_ids is None:
-            plate_ids = {'domino_pools': 'domino_pools', 'lcr': 'lcr'}
+            plate_ids = {'domino_pools': 'domino_pools',
+                         'lcr': 'lcr'}
 
         if def_reagents is None:
             def_reagents = {'mastermix': 7.0, 'Ampligase': 1.5}
@@ -66,6 +75,22 @@ class AssemblyGenie(BuildGenieBase):
                     pools[ice_id]['backbone'].append(data)
 
         self.__output_lcr_recipe(pools, plate_ids, def_reagents, vols)
+
+    def __write_mastermix_trough(self):
+        '''Writes mastermix trough.'''
+        plate_id = 'MastermixTrough'
+        components = [['mastermix'], ['ampligase'], ['H20']]
+        comp_well = _get_comp_well(plate_id, components)
+        self.__write_comp_well(plate_id, comp_well)
+        return comp_well
+
+    def __write_components(self):
+        '''Writes components.'''
+        plate_id = 'components'
+        components = self.get_order()
+        comp_well = _get_comp_well(plate_id, components)
+        self.__write_comp_well(plate_id, comp_well)
+        return comp_well
 
     def __output_lcr_recipe(self, pools, plate_ids, def_reagents, vols):
         '''Outputs recipes.'''
@@ -152,42 +177,22 @@ class AssemblyGenie(BuildGenieBase):
                                  reagent, reagent, '',
                                  ice_id])
 
-    def __get_data(self, ice_id):
-        '''Gets data from ICE entry.'''
-        if ice_id in self.__data:
-            return self.__data[ice_id]
+    def __write_comp_well(self, plate_id, comp_well):
+        '''Write component-well map.'''
+        outfile = os.path.join(self.__outdir, plate_id + '.txt')
 
-        ice_entry = self.__ice_client.get_ice_entry(ice_id)
-        metadata = ice_entry.get_metadata()
-        data = ice_entry, \
-            metadata['partId'], \
-            metadata['name'], \
-            metadata['type'], \
-            ice_entry.get_parameter('Type'), \
-            re.sub('\\s*\\[[^\\]]*\\]\\s*', ' ',
-                   metadata['shortDescription']).replace(' - ', '_'), \
-            ice_entry.get_seq()
-
-        self.__data[ice_id] = data
-
-        return data
+        with open(outfile, 'w') as out:
+            for comp, well in sorted(comp_well.iteritems(),
+                                     key=lambda (_, v): v[0]):
+                out.write('\t'.join(str(val)
+                                    for val in [well[0], comp] + well[2])
+                          + '\n')
 
 
-def _get_src_comp_well(src_filenames):
-    '''Gets components to well / plate mappings.'''
-    comp_well = {}
-
-    if src_filenames:
-        for src_filename in src_filenames:
-            with open(src_filename) as fle:
-                plate_id = src_filename[:src_filename.find('.')]
-
-                for line in fle.read().splitlines():
-                    if line.strip():
-                        terms = line.split('\t')
-                        comp_well[terms[1]] = (terms[0], plate_id)
-
-    return comp_well
+def _get_comp_well(plate_id, components):
+    '''Gets component-well map.'''
+    return {comps[0]: (plate_utils.get_well(idx), plate_id, comps[1:])
+            for idx, comps in enumerate(components)}
 
 
 def main(args):
@@ -195,11 +200,9 @@ def main(args):
     genie = AssemblyGenie({'url': args[0],
                            'username': args[1],
                            'password': args[2]},
-                          args[4:],
-                          args[3].split(','))
+                          args[3:])
 
-    plate_ids = {'domino_pools': 'SBC50042389', 'lcr': 'lcr'}
-    genie.export_lcr_recipe(plate_ids)
+    genie.export_lcr_recipe()
 
 
 if __name__ == '__main__':
