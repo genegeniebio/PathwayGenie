@@ -15,6 +15,9 @@ from synbiochem.utils import plate_utils
 
 from assembly_genie.build import BuildGenieBase
 
+_AMPLIGASE = 'ampligase'
+_MASTERMIX = 'mastermix'
+_WATER = 'water'
 
 _WORKLIST_COLS = ['DestinationPlateBarcode',
                   'DestinationPlateWell',
@@ -44,15 +47,12 @@ class AssemblyGenie(BuildGenieBase):
                           vols=None,
                           domino_vol=3):
         '''Exports LCR recipes.'''
-        self.__comp_well.update(self.__write_mastermix_trough())
-        self.__comp_well.update(self.__write_components())
-
         if plate_ids is None:
             plate_ids = {'domino_pools': 'domino_pools',
                          'lcr': 'lcr'}
 
         if def_reagents is None:
-            def_reagents = {'mastermix': 7.0, 'Ampligase': 1.5}
+            def_reagents = {_MASTERMIX: 7.0, _AMPLIGASE: 1.5}
 
         if vols is None:
             vols = {'backbone': 1, 'parts': 1, 'dom_pool': 1, 'total': 25,
@@ -74,39 +74,28 @@ class AssemblyGenie(BuildGenieBase):
                     # Assume backbone:
                     pools[ice_id]['backbone'].append(data)
 
-        self.__output_lcr_recipe(pools, plate_ids, def_reagents, vols)
+        # Write plates:
+        self.__comp_well.update(self.__write_plate('MastermixTrough',
+                                                   [[_MASTERMIX], [_AMPLIGASE],
+                                                    [_WATER]]))
+        self.__comp_well.update(self.__write_plate('components',
+                                                   self.get_order()))
 
-    def __write_mastermix_trough(self):
-        '''Writes mastermix trough.'''
-        plate_id = 'MastermixTrough'
-        components = [['mastermix'], ['ampligase'], ['H20']]
-        comp_well = _get_comp_well(plate_id, components)
-        self.__write_comp_well(plate_id, comp_well)
-        return comp_well
-
-    def __write_components(self):
-        '''Writes components.'''
-        plate_id = 'components'
-        components = self.get_order()
-        comp_well = _get_comp_well(plate_id, components)
-        self.__write_comp_well(plate_id, comp_well)
-        return comp_well
-
-    def __output_lcr_recipe(self, pools, plate_ids, def_reagents, vols):
-        '''Outputs recipes.'''
         # Write domino pools worklist:
         self.__write_dom_pool_worklist(pools, plate_ids['domino_pools'],
                                        vols['domino'])
 
-        print ''
-
         # Write LCR worklist:
         self.__write_lcr_worklist(plate_ids['lcr'], pools, def_reagents, vols)
 
+    def __write_plate(self, plate_id, components):
+        '''Write plate.'''
+        comp_well = _get_comp_well(plate_id, components)
+        self.__write_comp_well(plate_id, comp_well)
+        return comp_well
+
     def __write_dom_pool_worklist(self, pools, dest_plate_id, vol):
         '''Write domino pool worklist.'''
-        print '\t'.join(_WORKLIST_COLS)
-
         for idx, ice_id in enumerate(pools):
             dest_well = plate_utils.get_well(idx)
 
@@ -121,15 +110,17 @@ class AssemblyGenie(BuildGenieBase):
             self.__comp_well[ice_id + '_domino_pool'] = \
                 (dest_well, dest_plate_id)
 
+        self.__write_worklist(dest_plate_id + '_worklist')
+
     def __write_lcr_worklist(self, dest_plate_id, pools, def_reagents, vols):
         '''Writes LCR worklist.'''
         print '\t'.join(_WORKLIST_COLS)
 
-        for idx, ice_id in enumerate(self.__ice_ids):
+        for idx, ice_id in enumerate(self._ice_ids):
             dest_well = plate_utils.get_well(idx)
 
             # Write water:
-            well = self.__comp_well['H2O']
+            well = self.__comp_well[_WATER]
 
             h2o_vol = vols['total'] - \
                 sum(def_reagents.values()) - \
@@ -139,7 +130,7 @@ class AssemblyGenie(BuildGenieBase):
 
             print '\t'.join([dest_plate_id, dest_well, well[1],
                              well[0], str(h2o_vol),
-                             'H2O', 'H2O', '',
+                             _WATER, _WATER, '',
                              ice_id])
 
             # Write backbone:
@@ -187,6 +178,13 @@ class AssemblyGenie(BuildGenieBase):
                 out.write('\t'.join(str(val)
                                     for val in [well[0], comp] + well[2])
                           + '\n')
+
+    def __write_worklist(self, worklist_id):
+        '''Write worklist.'''
+        outfile = os.path.join(self.__outdir, worklist_id + '.txt')
+
+        with open(outfile, 'w') as out:
+            out.write('\t'.join(_WORKLIST_COLS) + '\n')
 
 
 def _get_comp_well(plate_id, components):
