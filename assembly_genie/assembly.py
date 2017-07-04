@@ -82,35 +82,35 @@ class AssemblyGenie(BuildGenieBase):
                                                    self.get_order()))
 
         # Write domino pools worklist:
-        self.__write_dom_pool_worklist(pools, plate_ids['domino_pools'],
-                                       vols['domino'])
+        self.__comp_well.update(
+            self.__write_dom_pool_worklist(pools, plate_ids['domino_pools'],
+                                           vols['domino']))
 
         # Write LCR worklist:
         self.__write_lcr_worklist(plate_ids['lcr'], pools, def_reagents, vols)
 
-    def __write_plate(self, plate_id, components):
-        '''Write plate.'''
-        comp_well = _get_comp_well(plate_id, components)
-        self.__write_comp_well(plate_id, comp_well)
-        return comp_well
-
     def __write_dom_pool_worklist(self, pools, dest_plate_id, vol):
         '''Write domino pool worklist.'''
+        comp_well = {}
+        worklist = []
+
         for idx, ice_id in enumerate(pools):
             dest_well = plate_utils.get_well(idx)
 
             for domino in pools[ice_id]['dominoes']:
                 src_well = self.__comp_well[domino[1]]
 
-                print '\t'.join([dest_plate_id, dest_well, src_well[1],
+                worklist.append([dest_plate_id, dest_well, src_well[1],
                                  src_well[0], str(vol),
                                  domino[2], domino[5], domino[1],
                                  ice_id])
 
-            self.__comp_well[ice_id + '_domino_pool'] = \
-                (dest_well, dest_plate_id)
+            comp_well[ice_id + '_domino_pool'] = \
+                (dest_well, dest_plate_id, [])
 
-        self.__write_worklist(dest_plate_id + '_worklist')
+        self.__write_comp_well(dest_plate_id, comp_well)
+        self.__write_worklist(dest_plate_id + '_worklist', worklist)
+        return comp_well
 
     def __write_lcr_worklist(self, dest_plate_id, pools, def_reagents, vols):
         '''Writes LCR worklist.'''
@@ -168,6 +168,12 @@ class AssemblyGenie(BuildGenieBase):
                                  reagent, reagent, '',
                                  ice_id])
 
+    def __write_plate(self, plate_id, components):
+        '''Write plate.'''
+        comp_well = _get_comp_well(plate_id, components)
+        self.__write_comp_well(plate_id, comp_well)
+        return comp_well
+
     def __write_comp_well(self, plate_id, comp_well):
         '''Write component-well map.'''
         outfile = os.path.join(self.__outdir, plate_id + '.txt')
@@ -179,12 +185,15 @@ class AssemblyGenie(BuildGenieBase):
                                     for val in [well[0], comp] + well[2])
                           + '\n')
 
-    def __write_worklist(self, worklist_id):
+    def __write_worklist(self, worklist_id, worklist):
         '''Write worklist.'''
         outfile = os.path.join(self.__outdir, worklist_id + '.txt')
 
         with open(outfile, 'w') as out:
             out.write('\t'.join(_WORKLIST_COLS) + '\n')
+
+            for entry in worklist:
+                out.write('\t'.join(entry) + '\n')
 
 
 def _get_comp_well(plate_id, components):
