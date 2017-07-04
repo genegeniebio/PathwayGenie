@@ -9,11 +9,12 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import re
 
+from synbiochem.utils import plate_utils
 from synbiochem.utils.ice_utils import ICEClient
 
 
 class BuildGenieBase(object):
-    '''Abstract base class for build applications.'''
+    '''Base class for build applications.'''
 
     def __init__(self, ice_details, ice_ids):
         self._ice_client = ICEClient(ice_details['url'],
@@ -21,6 +22,21 @@ class BuildGenieBase(object):
                                      ice_details['password'])
         self._ice_ids = ice_ids
         self._data = {}
+
+    def get_order(self):
+        '''Gets a plasmids constituent parts list for ordering.'''
+        entries = {}
+
+        for ice_id in self._ice_ids:
+            data = self._get_data(ice_id)
+
+            for part in data[0].get_metadata()['linkedParts']:
+                data = self._get_data(part['partId'])
+                entries[data[1]] = list(data[2:])
+
+        # Format into list of lists:
+        return [[plate_utils.get_well(idx), key] + entries[key]
+                for idx, key in enumerate(sorted(entries))]
 
     def _get_data(self, ice_id):
         '''Gets data from ICE entry.'''
