@@ -114,7 +114,7 @@ class AssemblyGenie(BuildGenieBase):
 
     def __write_lcr_worklist(self, dest_plate_id, pools, def_reagents, vols):
         '''Writes LCR worklist.'''
-        print '\t'.join(_WORKLIST_COLS)
+        worklist = []
 
         for idx, ice_id in enumerate(self._ice_ids):
             dest_well = plate_utils.get_well(idx)
@@ -128,7 +128,7 @@ class AssemblyGenie(BuildGenieBase):
                 len(pools[ice_id]['parts']) * vols['parts'] - \
                 vols['dom_pool']
 
-            print '\t'.join([dest_plate_id, dest_well, well[1],
+            worklist.append([dest_plate_id, dest_well, well[1],
                              well[0], str(h2o_vol),
                              _WATER, _WATER, '',
                              ice_id])
@@ -137,7 +137,7 @@ class AssemblyGenie(BuildGenieBase):
             for comp in pools[ice_id]['backbone']:
                 well = self.__comp_well[comp[1]]
 
-                print '\t'.join([dest_plate_id, dest_well, well[1],
+                worklist.append([dest_plate_id, dest_well, well[1],
                                  well[0], str(vols['backbone']),
                                  comp[2], comp[5], comp[1],
                                  ice_id])
@@ -146,7 +146,7 @@ class AssemblyGenie(BuildGenieBase):
             for comp in pools[ice_id]['parts']:
                 well = self.__comp_well[comp[1]]
 
-                print '\t'.join([dest_plate_id, dest_well, well[1],
+                worklist.append([dest_plate_id, dest_well, well[1],
                                  well[0], str(vols['parts']),
                                  comp[2], comp[5], comp[1],
                                  ice_id])
@@ -154,7 +154,7 @@ class AssemblyGenie(BuildGenieBase):
             # Write domino pools:
             well = self.__comp_well[ice_id + '_domino_pool']
 
-            print '\t'.join([dest_plate_id, dest_well, well[1],
+            worklist.append([dest_plate_id, dest_well, well[1],
                              well[0], str(vols['dom_pool']),
                              'domino pool', 'domino pool', '',
                              ice_id])
@@ -163,10 +163,12 @@ class AssemblyGenie(BuildGenieBase):
             for reagent, vol in def_reagents.iteritems():
                 well = self.__comp_well[reagent]
 
-                print '\t'.join([dest_plate_id, dest_well, well[1],
+                worklist.append([dest_plate_id, dest_well, well[1],
                                  well[0], str(vol),
                                  reagent, reagent, '',
                                  ice_id])
+
+        self.__write_worklist(dest_plate_id + '_worklist', worklist)
 
     def __write_plate(self, plate_id, components):
         '''Write plate.'''
