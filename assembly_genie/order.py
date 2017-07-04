@@ -9,6 +9,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import sys
 
+from synbiochem.utils import plate_utils
+
 from assembly_genie.build import BuildGenieBase
 
 
@@ -27,20 +29,25 @@ class OrderGenie(BuildGenieBase):
 
             for part in data[0].get_metadata()['linkedParts']:
                 data = self._get_data(part['partId'])
-                entries[data[1]] = data[2:]
+                entries[data[1]] = list(data[2:])
 
         return entries
 
 
 def main(args):
     '''main method.'''
+    from __builtin__ import str
     genie = OrderGenie({'url': args[0],
                         'username': args[1],
                         'password': args[2]},
                        args[3:])
 
-    for entry_id, entry in genie.export_order().iteritems():
-        print '\t'.join([entry_id] + [str(item) for item in entry])
+    entries = genie.export_order()
+
+    for idx, key in enumerate(sorted(entries)):
+        print '\t'.join([str(val)
+                         for val in [plate_utils.get_well(idx), key] +
+                         entries[key]])
 
 
 if __name__ == '__main__':
