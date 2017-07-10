@@ -44,8 +44,7 @@ class AssemblyGenie(BuildGenieBase):
     def export_lcr_recipe(self,
                           plate_ids=None,
                           def_reagents=None,
-                          vols=None,
-                          domino_vol=3):
+                          vols=None):
         '''Exports LCR recipes.'''
         if plate_ids is None:
             plate_ids = {'domino_pools': 'domino_pools',
@@ -56,7 +55,7 @@ class AssemblyGenie(BuildGenieBase):
 
         if vols is None:
             vols = {'backbone': 1, 'parts': 1, 'dom_pool': 1, 'total': 25,
-                    'domino': domino_vol}
+                    'domino': 3}
 
         pools = defaultdict(lambda: defaultdict(list))
 
@@ -119,8 +118,9 @@ class AssemblyGenie(BuildGenieBase):
         for idx, ice_id in enumerate(self._ice_ids):
             dest_well = plate_utils.get_well(idx)
 
-            # Write water:
-            well = self.__comp_well[_WATER]
+            # Write water (special case: appears in many wells to optimise
+            # dispensing efficiency):
+            well = self.__comp_well[_WATER][idx]
 
             h2o_vol = vols['total'] - \
                 sum(def_reagents.values()) - \
@@ -133,6 +133,9 @@ class AssemblyGenie(BuildGenieBase):
                              well[0], str(h2o_vol),
                              _WATER, _WATER, '',
                              ice_id])
+
+        for idx, ice_id in enumerate(self._ice_ids):
+            dest_well = plate_utils.get_well(idx)
 
             # Write backbone:
             for comp in pools[ice_id]['backbone']:
@@ -173,8 +176,32 @@ class AssemblyGenie(BuildGenieBase):
 
     def __write_plate(self, plate_id, components):
         '''Write plate.'''
-        comp_well = _get_comp_well(plate_id, components)
+        comp_well = self.__get_comp_well(plate_id, components)
         self.__write_comp_well(plate_id, comp_well)
+        return comp_well
+
+    def __get_comp_well(self, plate_id, components):
+        '''Gets component-well map.'''
+        comp_well = {}
+        well_idx = 0
+
+        for comps in components:
+            if comps[0] == _WATER:
+                # Special case: appears in many wells to optimise dispensing
+                # efficiency:
+                # Assumes water is first in components list.
+                comp_well[comps[0]] = [[plate_utils.get_well(idx),
+                                        plate_id, comps[1:]]
+                                       for idx in range(len(self._ice_ids))]
+
+                well_idx = well_idx + len(self._ice_ids)
+
+            else:
+                comp_well[comps[0]] = [plate_utils.get_well(well_idx),
+                                       plate_id, comps[1:]]
+
+                well_idx = well_idx + 1
+
         return comp_well
 
     def __write_comp_well(self, plate_id, comp_well):
@@ -182,11 +209,19 @@ class AssemblyGenie(BuildGenieBase):
         outfile = os.path.join(self.__outdir, plate_id + '.txt')
 
         with open(outfile, 'w') as out:
-            for comp, well in sorted(comp_well.iteritems(),
-                                     key=lambda (_, v): v[0]):
-                out.write('\t'.join(str(val)
-                                    for val in [well[0], comp] + well[2])
-                          + '\n')
+            for comp, wells in sorted(comp_well.iteritems(),
+                                      key=lambda (_, v): v[0]):
+
+                if isinstance(wells[0], basestring):
+                    out.write('\t'.join(str(val)
+                                        for val in [wells[0], comp] + wells[2])
+                              + '\n')
+                else:
+                    for well in wells:
+                        out.write('\t'.join(str(val)
+                                            for val in [well[0], comp] +
+                                            well[2])
+                                  + '\n')
 
     def __write_worklist(self, worklist_id, worklist):
         '''Write worklist.'''
@@ -197,12 +232,6 @@ class AssemblyGenie(BuildGenieBase):
 
             for entry in worklist:
                 out.write('\t'.join(entry) + '\n')
-
-
-def _get_comp_well(plate_id, components):
-    '''Gets component-well map.'''
-    return {comps[0]: (plate_utils.get_well(idx), plate_id, comps[1:])
-            for idx, comps in enumerate(components)}
 
 
 def main(args):
