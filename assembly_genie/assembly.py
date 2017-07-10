@@ -93,7 +93,7 @@ class AssemblyGenie(BuildGenieBase):
         comp_well = {}
         worklist = []
 
-        for idx, ice_id in enumerate(pools):
+        for idx, ice_id in enumerate(sorted(pools)):
             dest_well = plate_utils.get_well(idx)
 
             for domino in pools[ice_id]['dominoes']:
