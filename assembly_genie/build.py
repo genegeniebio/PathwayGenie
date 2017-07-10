@@ -9,7 +9,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import re
 
-from synbiochem.utils import plate_utils
 from synbiochem.utils.ice_utils import ICEClient
 
 

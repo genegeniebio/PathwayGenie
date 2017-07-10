@@ -76,10 +76,10 @@ class AssemblyGenie(BuildGenieBase):
 
         # Write plates:
         self.__comp_well.update(self.__write_plate('MastermixTrough',
-                                                   [[_MASTERMIX], [_AMPLIGASE],
-                                                    [_WATER]]))
+                                                   [[_WATER], [_MASTERMIX]]))
         self.__comp_well.update(self.__write_plate('components',
-                                                   self.get_order()))
+                                                   self.get_order()
+                                                   + [[_AMPLIGASE]]))
 
         # Write domino pools worklist:
         self.__comp_well.update(
@@ -128,6 +128,7 @@ class AssemblyGenie(BuildGenieBase):
                 len(pools[ice_id]['parts']) * vols['parts'] - \
                 vols['dom_pool']
 
+            # Write water:
             worklist.append([dest_plate_id, dest_well, well[1],
                              well[0], str(h2o_vol),
                              _WATER, _WATER, '',
