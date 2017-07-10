@@ -155,6 +155,9 @@ class AssemblyGenie(BuildGenieBase):
                                  comp[2], comp[5], comp[1],
                                  ice_id])
 
+        for idx, ice_id in enumerate(self._ice_ids):
+            dest_well = plate_utils.get_well(idx)
+
             # Write domino pools:
             well = self.__comp_well[ice_id + '_domino_pool']
 
@@ -162,6 +165,9 @@ class AssemblyGenie(BuildGenieBase):
                              well[0], str(vols['dom_pool']),
                              'domino pool', 'domino pool', '',
                              ice_id])
+
+        for idx, ice_id in enumerate(self._ice_ids):
+            dest_well = plate_utils.get_well(idx)
 
             # Write default reagents:
             for reagent, vol in def_reagents.iteritems():
