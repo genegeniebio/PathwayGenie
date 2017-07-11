@@ -115,11 +115,11 @@ class AssemblyGenie(BuildGenieBase):
         '''Writes LCR worklist.'''
         worklist = []
 
+        # Write water (special case: appears in many wells to optimise
+        # dispensing efficiency):
         for idx, ice_id in enumerate(self._ice_ids):
             dest_well = plate_utils.get_well(idx)
 
-            # Write water (special case: appears in many wells to optimise
-            # dispensing efficiency):
             well = self.__comp_well[_WATER][idx]
 
             h2o_vol = vols['total'] - \
@@ -155,10 +155,9 @@ class AssemblyGenie(BuildGenieBase):
                                  comp[2], comp[5], comp[1],
                                  ice_id])
 
+        # Write domino pools:
         for idx, ice_id in enumerate(self._ice_ids):
             dest_well = plate_utils.get_well(idx)
-
-            # Write domino pools:
             well = self.__comp_well[ice_id + '_domino_pool']
 
             worklist.append([dest_plate_id, dest_well, well[1],
@@ -166,10 +165,10 @@ class AssemblyGenie(BuildGenieBase):
                              'domino pool', 'domino pool', '',
                              ice_id])
 
+        # Write default reagents:
         for idx, ice_id in enumerate(self._ice_ids):
             dest_well = plate_utils.get_well(idx)
 
-            # Write default reagents:
             for reagent, vol in def_reagents.iteritems():
                 well = self.__comp_well[reagent]
 
