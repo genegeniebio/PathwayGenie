@@ -78,6 +78,18 @@ class AssemblyGeneticAlgorithm(gen_alg.GeneticAlgorithm):
 
             return new_well
 
+    def _procreate(self, male, female):
+        '''Procreate.'''
+        pos = randint(0, len(male))
+
+        child = male.copy()
+
+        for idx, key in enumerate(female.keys()):
+            if idx >= pos and female[key] not in child.values():
+                child[key] = female[key]
+
+        return child
+
     def _fitness(self, individual):
         '''Determine the fitness of an individual.'''
         dists = []
@@ -105,7 +117,7 @@ def main():
         for comp in dest_comp[1]:
             comps_dest[comp].append(dest_comp[0])
 
-    result = optimise(comps_dest)
+    result, _ = optimise(comps_dest)
 
     print
 
