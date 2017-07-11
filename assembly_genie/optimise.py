@@ -12,7 +12,7 @@ from synbiochem.utils import plate_utils
 from sbclearn.optimisation import gen_alg
 
 
-def get_dest_comps(designs=12, rows=8, columns=12, all_comps=22, max_comps=5):
+def get_dest_comps(designs=12, rows=8, columns=12, all_comps=12, max_comps=6):
     '''Gets dest_comps.'''
     dest_comps = []
 
@@ -34,16 +34,14 @@ class AssemblyGeneticAlgorithm(gen_alg.GeneticAlgorithm):
     '''Class to run a genetic algorithm to optimise LCR assembly.'''
 
     def __init__(self, pop_size, comps_dest, rows=8, cols=12,
-                 retain=0.2, random_select=0.5, mutate=0.3,
-                 verbose=True):
+                 retain=0.1, random_select=0.5, mutate=0.8, verbose=True):
         self.__comps_dest = comps_dest
         self.__rows = rows
         self.__cols = cols
         args = {key: None for key in comps_dest}
         super(AssemblyGeneticAlgorithm, self).__init__(
-            pop_size, args,
-            retain=retain, random_select=random_select, mutate=mutate,
-            verbose=verbose)
+            pop_size, args, retain=retain, random_select=random_select,
+            mutate=mutate, verbose=verbose)
 
     def _get_individual(self):
         '''Create a member of the population.'''
@@ -60,7 +58,7 @@ class AssemblyGeneticAlgorithm(gen_alg.GeneticAlgorithm):
 
         while True:
             new_ords = [(curr_ords[0] + randint(1, self.__rows)) %
-                        self.__rows + 1,
+                        self.__rows,
                         (curr_ords[1] + randint(1, self.__cols)) %
                         self.__cols + 1]
 
