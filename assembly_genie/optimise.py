@@ -102,7 +102,7 @@ class AssemblyGeneticAlgorithm(gen_alg.GeneticAlgorithm):
 
 
 def _get_ords(well):
-    vals = re.split('(\d+)', well)
+    vals = re.split(r'(\d+)', well)
     return [ord(vals[0]) - ord('A'), int(vals[1])]
 
 

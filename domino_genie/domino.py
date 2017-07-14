@@ -42,7 +42,7 @@ class DominoThread(JobThread):
             orig_comps = [comp.copy() for comp in dsgn['components']]
 
             # Apply restriction site digestion:
-            dsgn['components'] = [self.__apply_restricts(dna, restr_enz)
+            dsgn['components'] = [_apply_restricts(dna, restr_enz)
                                   for dna, restr_enz in zip(
                 dsgn['components'], self.__query['restr_enzs'])]
 
@@ -77,14 +77,11 @@ class DominoThread(JobThread):
             ids_seqs = dict(zip(design['design'], design['seqs']))
             analysis = seq_utils.do_blast(ids_seqs, ids_seqs)
 
-            try:
-                for result in analysis:
-                    for alignment in result.alignments:
-                        for hsp in alignment.hsps:
-                            if result.query != alignment.hit_def:
-                                print hsp
-            except ValueError as err:
-                print err
+            for result in analysis:
+                for alignment in result.alignments:
+                    for hsp in alignment.hsps:
+                        if result.query != alignment.hit_def:
+                            return hsp
 
     def __get_components(self):
         '''Gets DNA components from ICE.'''
@@ -107,19 +104,6 @@ class DominoThread(JobThread):
         dna = ice_entry.get_dna()
         dna['desc'] = ice_id
         return dna
-
-    def __apply_restricts(self, dna, restr_enz):
-        '''Apply restruction enzyme.'''
-        if not restr_enz:
-            return dna
-
-        restrict_dnas = dna_utils.apply_restricts(dna, restr_enz.split(','))
-
-        # This is a bit fudgy...
-        # Essentially, return the longest fragment remaining after digestion.
-        # Assumes prefix and suffix are short sequences that are cleaved off.
-        restrict_dnas.sort(key=lambda x: len(x['seq']), reverse=True)
-        return restrict_dnas[0]
 
     def __get_domino(self, pair):
         '''Gets a domino from a pair of DNA objects.'''
@@ -164,3 +148,17 @@ class DominoThread(JobThread):
             event['result'] = self.__results
 
         self._fire_event(event)
+
+
+def _apply_restricts(dna, restr_enz):
+    '''Apply restruction enzyme.'''
+    if not restr_enz:
+        return dna
+
+    restrict_dnas = dna_utils.apply_restricts(dna, restr_enz.split(','))
+
+    # This is a bit fudgy...
+    # Essentially, return the longest fragment remaining after digestion.
+    # Assumes prefix and suffix are short sequences that are cleaved off.
+    restrict_dnas.sort(key=lambda x: len(x['seq']), reverse=True)
+    return restrict_dnas[0]

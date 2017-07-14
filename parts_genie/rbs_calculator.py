@@ -206,7 +206,7 @@ class RbsCalculator(object):
         # start codon
         m_rna_subseq = m_rna[begin:start_pos]
 
-        if len(m_rna_subseq) == 0:
+        if not m_rna_subseq:
             raise ValueError('Warning: There is a leaderless start codon, ' +
                              'which is being ignored.')
 
@@ -215,7 +215,7 @@ class RbsCalculator(object):
                                                       energy_cutoff,
                                                       dangles=dangles)
 
-        if len(bp_xs) == 0:
+        if not bp_xs:
             raise ValueError(
                 'Warning: The 16S r_rna has no predicted binding site. ' +
                 'Start codon is considered as leaderless and ignored.')
@@ -301,7 +301,7 @@ class RbsCalculator(object):
         total_bp_y = []
 
         # Calculate pre-sequence folding
-        if len(m_rna_pre) > 0:
+        if m_rna_pre:
             _, bp_xs, bp_ys = self.__runner.mfe([m_rna_pre], dangles=dangles)
             bp_x_pre = bp_xs[0]
             bp_y_pre = bp_ys[0]
@@ -328,7 +328,7 @@ class RbsCalculator(object):
             total_bp_y.append(nt_y + r_rna_offset)
 
         # Calculate post-sequence folding
-        if len(m_rna_post) > 0:
+        if m_rna_post:
             _, bp_xs, bp_ys = self.__runner.mfe([m_rna_post], dangles=dangles)
             bp_x_post = bp_xs[0]
             bp_y_post = bp_ys[0]
@@ -398,7 +398,7 @@ class RbsCalculator(object):
             0:max(0, most_5p_m_rna - standby_site_length - 1)]
 
         # Fold it and extract the base pairings
-        if len(m_rna_subsequence) > 0:
+        if m_rna_subsequence:
             _, bp_xs, bp_ys = self.__runner.mfe(
                 [m_rna_subsequence], dangles=dangles)
             bp_x_5p = bp_xs[0]  # [0] added 12/13/07

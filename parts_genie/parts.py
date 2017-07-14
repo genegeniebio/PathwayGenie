@@ -196,7 +196,7 @@ class PartsSolution(object):
 
         dna['temp_params']['mean_cai'] = _mean(cais)
         dna['temp_params']['mean_tir_errs'] = _mean(tir_errs) \
-            if len(tir_errs) else 0
+            if tir_errs else 0
         dna['temp_params']['num_rogue_rbs'] = num_rogue_rbs
 
         # Get number of invalid seqs:
@@ -272,7 +272,7 @@ class PartsThread(SimulatedAnnealer):
 
 def _mean(lst):
     '''Gets mean of list.'''
-    return float(sum(lst)) / len(lst) if len(lst) > 0 else 0.0
+    return float(sum(lst)) / len(lst) if lst else 0.0
 
 
 def _get_all_seqs(dna):
