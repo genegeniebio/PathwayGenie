@@ -1,8 +1,15 @@
 '''
-Created on 10 Jul 2017
+PathwayGenie (c) University of Manchester 2017
 
-@author: neilswainston
+PathwayGenie is licensed under the MIT License.
+
+To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
+
+@author:  neilswainston
 '''
+# pylint: disable=signature-differs
+# pylint: disable=too-few-public-methods
+# pylint: disable=too-many-arguments
 from collections import defaultdict
 from random import randint, sample
 import re
