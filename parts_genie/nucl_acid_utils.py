@@ -7,6 +7,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=too-few-public-methods
 # pylint: disable=too-many-arguments
 import subprocess
 import tempfile
@@ -22,9 +23,6 @@ class RunnerBase(object):
 
 class NuPackRunner(RunnerBase):
     '''Wrapper class for running NuPACK jobs.'''
-
-    def __init__(self, temp=37.0):
-        super(NuPackRunner, self).__init__(temp)
 
     def mfe(self, sequences, dangles='some'):
         '''Runs mfe.'''
