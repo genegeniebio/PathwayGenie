@@ -31,6 +31,18 @@ def get_dest_comps(designs=12, rows=8, columns=12, all_comps=12, max_comps=6):
     return dest_comps
 
 
+def get_perfect_comps(rows=8, columns=12):
+    '''Gets dest_comps.'''
+    dest_comps = []
+
+    for idx in range(rows):
+        dest_well = plate_utils.get_well(idx, rows, columns)
+        comps = [idx]
+        dest_comps.append([dest_well, comps])
+
+    return dest_comps
+
+
 def optimise(comps_dest, rows=8, columns=12):
     '''Optimise component layout.'''
     alg = AssemblyGeneticAlgorithm(100, comps_dest, rows, columns)
@@ -89,9 +101,15 @@ class AssemblyGeneticAlgorithm(gen_alg.GeneticAlgorithm):
 
         child = male.copy()
 
-        for idx, key in enumerate(female.keys()):
-            if idx >= pos and female[key] not in child.values():
-                child[key] = female[key]
+        for idx, fem_comp in enumerate(female.keys()):
+            if idx >= pos:
+                if female[fem_comp] not in child.values():
+                    child[fem_comp] = female[fem_comp]
+                else:
+                    for child_comp, child_well in child.iteritems():
+                        if child_well == female[fem_comp]:
+                            child[child_comp] = child[idx]
+                            child[fem_comp] = female[fem_comp]
 
         return child
 
@@ -116,7 +134,7 @@ def _get_ords(well):
 def main():
     '''main method.'''
     comps_dest = defaultdict(list)
-    dest_comps = get_dest_comps()
+    dest_comps = get_perfect_comps()
 
     for dest_comp in dest_comps:
         for comp in dest_comp[1]:
