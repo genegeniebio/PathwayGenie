@@ -10,6 +10,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-arguments
 from _collections import defaultdict
 from itertools import cycle
+from shutil import rmtree
 import os
 import sys
 
@@ -44,8 +45,10 @@ class AssemblyGenie(BuildGenieBase):
         self.__outdir = outdir
         self.__comp_well = {}
 
-        if not os.path.exists(self.__outdir):
-            os.mkdir(self.__outdir)
+        if os.path.exists(self.__outdir):
+            rmtree(self.__outdir)
+
+        os.mkdir(self.__outdir)
 
     def export_lcr_recipe(self,
                           plate_ids=None,
@@ -96,6 +99,9 @@ class AssemblyGenie(BuildGenieBase):
 
     def __write_dom_pool_worklist(self, pools, dest_plate_id, vol):
         '''Write domino pool worklist.'''
+        worklist_id = dest_plate_id + '_worklist'
+        self.__write_worklist_header(worklist_id)
+
         comp_well = {}
         worklist = []
 
@@ -116,10 +122,13 @@ class AssemblyGenie(BuildGenieBase):
 
     def __write_lcr_worklist(self, dest_plate_id, pools, def_reagents, vols):
         '''Writes LCR worklist.'''
-        worklist = []
+        worklist_id = dest_plate_id + '_worklist'
+        self.__write_worklist_header(worklist_id)
 
         # Write water (special case: appears in many wells to optimise
         # dispensing efficiency):
+        worklist = []
+
         for dest_idx, ice_id in enumerate(self._ice_ids):
             well = self.__comp_well[_WATER][dest_idx]
 
@@ -134,6 +143,10 @@ class AssemblyGenie(BuildGenieBase):
                              well[0], str(h2o_vol),
                              _WATER, _WATER, '',
                              ice_id])
+
+        self.__write_worklist(worklist_id, worklist)
+
+        worklist = []
 
         for dest_idx, ice_id in enumerate(self._ice_ids):
             # Write backbone:
@@ -154,7 +167,11 @@ class AssemblyGenie(BuildGenieBase):
                                  comp[2], comp[5], comp[1],
                                  ice_id])
 
+        self.__write_worklist(worklist_id, worklist)
+
         # Write domino pools:
+        worklist = []
+
         for dest_idx, ice_id in enumerate(self._ice_ids):
             well = self.__comp_well[ice_id + '_domino_pool']
 
@@ -163,7 +180,11 @@ class AssemblyGenie(BuildGenieBase):
                              'domino pool', 'domino pool', '',
                              ice_id])
 
+        self.__write_worklist(worklist_id, worklist)
+
         # Write default reagents:
+        worklist = []
+
         for dest_idx, ice_id in enumerate(self._ice_ids):
             for reagent, vol in def_reagents.iteritems():
                 well = self.__comp_well[reagent]
@@ -173,7 +194,7 @@ class AssemblyGenie(BuildGenieBase):
                                  reagent, reagent, '',
                                  ice_id])
 
-        self.__write_worklist(dest_plate_id + '_worklist', worklist)
+        self.__write_worklist(worklist_id, worklist)
 
     def __write_plate(self, plate_id, components):
         '''Write plate.'''
@@ -207,7 +228,7 @@ class AssemblyGenie(BuildGenieBase):
         '''Write component-well map.'''
         outfile = os.path.join(self.__outdir, plate_id + '.txt')
 
-        with open(outfile, 'w') as out:
+        with open(outfile, 'a+') as out:
             for comp, wells in sorted(comp_wells.iteritems(),
                                       key=lambda (_, v): v[0]):
 
@@ -217,16 +238,21 @@ class AssemblyGenie(BuildGenieBase):
                     for well in wells:
                         self.__write_comp_well(out, well, comp)
 
+    def __write_worklist_header(self, worklist_id):
+        '''Write worklist.'''
+        outfile = os.path.join(self.__outdir, worklist_id + '.txt')
+
+        with open(outfile, 'a+') as out:
+            out.write('\t'.join(_WORKLIST_COLS) + '\n')
+
     def __write_worklist(self, worklist_id, worklist):
         '''Write worklist.'''
         outfile = os.path.join(self.__outdir, worklist_id + '.txt')
 
-        with open(outfile, 'w') as out:
-            out.write('\t'.join(_WORKLIST_COLS) + '\n')
-
+        with open(outfile, 'a+') as out:
             worklist_map = defaultdict(list)
 
-            for entry in worklist:
+            for entry in sorted(worklist, key=lambda x: x[3]):
                 worklist_map[entry[1]].append(entry)
 
             for idx in cycle(range(0, self.__rows * self.__cols)):
