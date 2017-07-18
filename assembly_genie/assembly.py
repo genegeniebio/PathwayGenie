@@ -15,6 +15,7 @@ from synbiochem.utils import plate_utils
 
 from assembly_genie.build import BuildGenieBase
 
+
 _AMPLIGASE = 'ampligase'
 _MASTERMIX = 'mastermix'
 _WATER = 'water'
@@ -93,21 +94,18 @@ class AssemblyGenie(BuildGenieBase):
         comp_well = {}
         worklist = []
 
-        for idx, ice_id in enumerate(sorted(pools)):
-            dest_well = plate_utils.get_well(idx)
-
+        for dest_idx, ice_id in enumerate(sorted(pools)):
             for domino in pools[ice_id]['dominoes']:
                 src_well = self.__comp_well[domino[1]]
 
-                worklist.append([dest_plate_id, dest_well, src_well[1],
+                worklist.append([dest_plate_id, dest_idx, src_well[1],
                                  src_well[0], str(vol),
                                  domino[2], domino[5], domino[1],
                                  ice_id])
 
-            comp_well[ice_id + '_domino_pool'] = \
-                (dest_well, dest_plate_id, [])
+            comp_well[ice_id + '_domino_pool'] = (dest_idx, dest_plate_id, [])
 
-        self.__write_comp_well(dest_plate_id, comp_well)
+        self.__write_comp_wells(dest_plate_id, comp_well)
         self.__write_worklist(dest_plate_id + '_worklist', worklist)
         return comp_well
 
@@ -117,10 +115,8 @@ class AssemblyGenie(BuildGenieBase):
 
         # Write water (special case: appears in many wells to optimise
         # dispensing efficiency):
-        for idx, ice_id in enumerate(self._ice_ids):
-            dest_well = plate_utils.get_well(idx)
-
-            well = self.__comp_well[_WATER][idx]
+        for dest_idx, ice_id in enumerate(self._ice_ids):
+            well = self.__comp_well[_WATER][dest_idx]
 
             h2o_vol = vols['total'] - \
                 sum(def_reagents.values()) - \
@@ -129,19 +125,17 @@ class AssemblyGenie(BuildGenieBase):
                 vols['dom_pool']
 
             # Write water:
-            worklist.append([dest_plate_id, dest_well, well[1],
+            worklist.append([dest_plate_id, dest_idx, well[1],
                              well[0], str(h2o_vol),
                              _WATER, _WATER, '',
                              ice_id])
 
-        for idx, ice_id in enumerate(self._ice_ids):
-            dest_well = plate_utils.get_well(idx)
-
+        for dest_idx, ice_id in enumerate(self._ice_ids):
             # Write backbone:
             for comp in pools[ice_id]['backbone']:
                 well = self.__comp_well[comp[1]]
 
-                worklist.append([dest_plate_id, dest_well, well[1],
+                worklist.append([dest_plate_id, dest_idx, well[1],
                                  well[0], str(vols['backbone']),
                                  comp[2], comp[5], comp[1],
                                  ice_id])
@@ -150,29 +144,26 @@ class AssemblyGenie(BuildGenieBase):
             for comp in pools[ice_id]['parts']:
                 well = self.__comp_well[comp[1]]
 
-                worklist.append([dest_plate_id, dest_well, well[1],
+                worklist.append([dest_plate_id, dest_idx, well[1],
                                  well[0], str(vols['parts']),
                                  comp[2], comp[5], comp[1],
                                  ice_id])
 
         # Write domino pools:
-        for idx, ice_id in enumerate(self._ice_ids):
-            dest_well = plate_utils.get_well(idx)
+        for dest_idx, ice_id in enumerate(self._ice_ids):
             well = self.__comp_well[ice_id + '_domino_pool']
 
-            worklist.append([dest_plate_id, dest_well, well[1],
+            worklist.append([dest_plate_id, dest_idx, well[1],
                              well[0], str(vols['dom_pool']),
                              'domino pool', 'domino pool', '',
                              ice_id])
 
         # Write default reagents:
-        for idx, ice_id in enumerate(self._ice_ids):
-            dest_well = plate_utils.get_well(idx)
-
+        for dest_idx, ice_id in enumerate(self._ice_ids):
             for reagent, vol in def_reagents.iteritems():
                 well = self.__comp_well[reagent]
 
-                worklist.append([dest_plate_id, dest_well, well[1],
+                worklist.append([dest_plate_id, dest_idx, well[1],
                                  well[0], str(vol),
                                  reagent, reagent, '',
                                  ice_id])
@@ -182,7 +173,7 @@ class AssemblyGenie(BuildGenieBase):
     def __write_plate(self, plate_id, components):
         '''Write plate.'''
         comp_well = self.__get_comp_well(plate_id, components)
-        self.__write_comp_well(plate_id, comp_well)
+        self.__write_comp_wells(plate_id, comp_well)
         return comp_well
 
     def __get_comp_well(self, plate_id, components):
@@ -195,38 +186,31 @@ class AssemblyGenie(BuildGenieBase):
                 # Special case: appears in many wells to optimise dispensing
                 # efficiency:
                 # Assumes water is first in components list.
-                comp_well[comps[0]] = [[plate_utils.get_well(idx),
-                                        plate_id, comps[1:]]
+                comp_well[comps[0]] = [[idx, plate_id, comps[1:]]
                                        for idx in range(len(self._ice_ids))]
 
                 well_idx = well_idx + len(self._ice_ids)
 
             else:
-                comp_well[comps[0]] = [plate_utils.get_well(well_idx),
-                                       plate_id, comps[1:]]
+                comp_well[comps[0]] = [well_idx, plate_id, comps[1:]]
 
                 well_idx = well_idx + 1
 
         return comp_well
 
-    def __write_comp_well(self, plate_id, comp_well):
+    def __write_comp_wells(self, plate_id, comp_wells):
         '''Write component-well map.'''
         outfile = os.path.join(self.__outdir, plate_id + '.txt')
 
         with open(outfile, 'w') as out:
-            for comp, wells in sorted(comp_well.iteritems(),
+            for comp, wells in sorted(comp_wells.iteritems(),
                                       key=lambda (_, v): v[0]):
 
-                if isinstance(wells[0], basestring):
-                    out.write('\t'.join(str(val)
-                                        for val in [wells[0], comp] + wells[2])
-                              + '\n')
+                if isinstance(wells[0], int):
+                    _write_comp_well(out, wells, comp)
                 else:
                     for well in wells:
-                        out.write('\t'.join(str(val)
-                                            for val in [well[0], comp] +
-                                            well[2])
-                                  + '\n')
+                        _write_comp_well(out, well, comp)
 
     def __write_worklist(self, worklist_id, worklist):
         '''Write worklist.'''
@@ -236,7 +220,18 @@ class AssemblyGenie(BuildGenieBase):
             out.write('\t'.join(_WORKLIST_COLS) + '\n')
 
             for entry in worklist:
-                out.write('\t'.join(entry) + '\n')
+                out.write('\t'.join([plate_utils.get_well(val)
+                                     if idx == 1 or idx == 3
+                                     else str(val)
+                                     for idx, val in enumerate(entry)]) + '\n')
+
+
+def _write_comp_well(out, well, comp):
+    '''Write line on component-well map.'''
+    outstr = '%s\t%s' % (plate_utils.get_well(well[0]), comp)
+    out.write(outstr)
+    out.write('\t'.join(str(val) for val in well[2]))
+    out.write('\n')
 
 
 def main(args):
