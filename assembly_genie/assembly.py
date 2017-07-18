@@ -87,10 +87,8 @@ class AssemblyGenie(BuildGenieBase):
                                                    [[_WATER], [_MASTERMIX]]))
 
         self.__comp_well.update(self.__write_plate('components',
-                                                   self.get_order()))
-
-        self.__comp_well.update(self.__write_plate('components',
-                                                   [[_AMPLIGASE]]))
+                                                   self.get_order()
+                                                   + [[_AMPLIGASE]]))
 
         # Write domino pools worklist:
         self.__comp_well.update(

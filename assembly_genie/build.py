@@ -11,12 +11,15 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import re
 
 from synbiochem.utils.ice_utils import ICEClient
+from synbiochem.utils.job import JobThread
 
 
-class BuildGenieBase(object):
+class BuildGenieBase(JobThread):
     '''Base class for build applications.'''
 
     def __init__(self, ice_details, ice_ids):
+        JobThread.__init__(self)
+
         self._ice_client = ICEClient(ice_details['url'],
                                      ice_details['username'],
                                      ice_details['password'])
