@@ -7,7 +7,9 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=too-many-arguments
 from _collections import defaultdict
+from itertools import cycle
 import os
 import sys
 
@@ -34,8 +36,11 @@ _WORKLIST_COLS = ['DestinationPlateBarcode',
 class AssemblyGenie(BuildGenieBase):
     '''Class implementing AssemblyGenie algorithms.'''
 
-    def __init__(self, ice_details, ice_ids, outdir='assembly'):
+    def __init__(self, ice_details, ice_ids, rows=8, cols=12,
+                 outdir='assembly'):
         super(AssemblyGenie, self).__init__(ice_details, ice_ids)
+        self.__rows = rows
+        self.__cols = cols
         self.__outdir = outdir
         self.__comp_well = {}
 
@@ -207,10 +212,10 @@ class AssemblyGenie(BuildGenieBase):
                                       key=lambda (_, v): v[0]):
 
                 if isinstance(wells[0], int):
-                    _write_comp_well(out, wells, comp)
+                    self.__write_comp_well(out, wells, comp)
                 else:
                     for well in wells:
-                        _write_comp_well(out, well, comp)
+                        self.__write_comp_well(out, well, comp)
 
     def __write_worklist(self, worklist_id, worklist):
         '''Write worklist.'''
@@ -219,19 +224,32 @@ class AssemblyGenie(BuildGenieBase):
         with open(outfile, 'w') as out:
             out.write('\t'.join(_WORKLIST_COLS) + '\n')
 
+            worklist_map = defaultdict(list)
+
             for entry in worklist:
-                out.write('\t'.join([plate_utils.get_well(val)
-                                     if idx == 1 or idx == 3
-                                     else str(val)
-                                     for idx, val in enumerate(entry)]) + '\n')
+                worklist_map[entry[1]].append(entry)
 
+            for idx in cycle(range(0, self.__rows * self.__cols)):
+                if worklist_map[idx]:
+                    entry = worklist_map[idx].pop(0)
+                    out.write('\t'.join([plate_utils.get_well(val)
+                                         if idx == 1 or idx == 3
+                                         else str(val)
+                                         for idx, val in enumerate(entry)]) +
+                              '\n')
 
-def _write_comp_well(out, well, comp):
-    '''Write line on component-well map.'''
-    outstr = '%s\t%s' % (plate_utils.get_well(well[0]), comp)
-    out.write(outstr)
-    out.write('\t'.join(str(val) for val in well[2]))
-    out.write('\n')
+                if not sum([len(lst) for lst in worklist_map.values()]):
+                    break
+
+    def __write_comp_well(self, out, well, comp):
+        '''Write line on component-well map.'''
+        outstr = '%s\t%s' % (plate_utils.get_well(well[0],
+                                                  self.__rows,
+                                                  self.__cols),
+                             comp)
+        out.write(outstr)
+        out.write('\t'.join(str(val) for val in well[2]))
+        out.write('\n')
 
 
 def main(args):
