@@ -34,14 +34,13 @@ _WORKLIST_COLS = ['DestinationPlateBarcode',
                   'plasmid_id']
 
 
-class AssemblyGenie(BuildGenieBase):
+class AssemblyThread(BuildGenieBase):
     '''Class implementing AssemblyGenie algorithms.'''
 
-    def __init__(self, ice_details, ice_ids, rows=8, cols=12,
-                 outdir='assembly'):
-        super(AssemblyGenie, self).__init__(ice_details, ice_ids)
-        self.__rows = rows
-        self.__cols = cols
+    def __init__(self, query, outdir='assembly'):
+        super(AssemblyThread, self).__init__(query)
+        self.__rows = self._query.get('rows', 8)
+        self.__cols = self._query.get('cols', 12)
         self.__outdir = outdir
         self.__comp_well = {}
 
@@ -50,21 +49,22 @@ class AssemblyGenie(BuildGenieBase):
 
         os.mkdir(self.__outdir)
 
-    def export_lcr_recipe(self,
-                          plate_ids=None,
-                          def_reagents=None,
-                          vols=None):
+    def run(self):
         '''Exports LCR recipes.'''
-        if plate_ids is None:
-            plate_ids = {'domino_pools': 'domino_pools',
-                         'lcr': 'lcr'}
+        if 'plate_ids' not in self._query:
+            self._query['plate_ids'] = {'domino_pools': 'domino_pools',
+                                        'lcr': 'lcr'}
 
-        if def_reagents is None:
-            def_reagents = {_MASTERMIX: 7.0, _AMPLIGASE: 1.5}
+        if 'def_reagents' not in self._query:
+            self._query['def_reagents'] = {_MASTERMIX: 7.0,
+                                           _AMPLIGASE: 1.5}
 
-        if vols is None:
-            vols = {'backbone': 1, 'parts': 1, 'dom_pool': 1, 'total': 25,
-                    'domino': 3}
+        if 'vols' not in self._query:
+            self._query['vols'] = {'backbone': 1,
+                                   'parts': 1,
+                                   'dom_pool': 1,
+                                   'domino': 3,
+                                   'total': 25}
 
         pools = defaultdict(lambda: defaultdict(list))
 
@@ -92,11 +92,13 @@ class AssemblyGenie(BuildGenieBase):
 
         # Write domino pools worklist:
         self.__comp_well.update(
-            self.__write_dom_pool_worklist(pools, plate_ids['domino_pools'],
-                                           vols['domino']))
+            self.__write_dom_pool_worklist(
+                pools,
+                self._query['plate_ids']['domino_pools'],
+                self._query['vols']['domino']))
 
         # Write LCR worklist:
-        self.__write_lcr_worklist(plate_ids['lcr'], pools, def_reagents, vols)
+        self.__write_lcr_worklist(self._query['plate_ids']['lcr'], pools)
 
     def __write_dom_pool_worklist(self, pools, dest_plate_id, vol):
         '''Write domino pool worklist.'''
@@ -121,7 +123,7 @@ class AssemblyGenie(BuildGenieBase):
         self.__write_worklist(dest_plate_id + '_worklist', worklist)
         return comp_well
 
-    def __write_lcr_worklist(self, dest_plate_id, pools, def_reagents, vols):
+    def __write_lcr_worklist(self, dest_plate_id, pools):
         '''Writes LCR worklist.'''
         worklist_id = dest_plate_id + '_worklist'
         self.__write_worklist_header(worklist_id)
@@ -133,11 +135,12 @@ class AssemblyGenie(BuildGenieBase):
         for dest_idx, ice_id in enumerate(self._ice_ids):
             well = self.__comp_well[_WATER][dest_idx]
 
-            h2o_vol = vols['total'] - \
-                sum(def_reagents.values()) - \
-                len(pools[ice_id]['backbone']) * vols['backbone'] - \
-                len(pools[ice_id]['parts']) * vols['parts'] - \
-                vols['dom_pool']
+            h2o_vol = self._query['vols']['total'] - \
+                sum(self._query['def_reagents'].values()) - \
+                len(pools[ice_id]['backbone']) * \
+                self._query['vols']['backbone'] - \
+                len(pools[ice_id]['parts']) * self._query['vols']['parts'] - \
+                self._query['vols']['dom_pool']
 
             # Write water:
             worklist.append([dest_plate_id, dest_idx, well[1],
@@ -155,7 +158,7 @@ class AssemblyGenie(BuildGenieBase):
                 well = self.__comp_well[comp[1]]
 
                 worklist.append([dest_plate_id, dest_idx, well[1],
-                                 well[0], str(vols['backbone']),
+                                 well[0], str(self._query['vols']['backbone']),
                                  comp[2], comp[5], comp[1],
                                  ice_id])
 
@@ -164,7 +167,7 @@ class AssemblyGenie(BuildGenieBase):
                 well = self.__comp_well[comp[1]]
 
                 worklist.append([dest_plate_id, dest_idx, well[1],
-                                 well[0], str(vols['parts']),
+                                 well[0], str(self._query['vols']['parts']),
                                  comp[2], comp[5], comp[1],
                                  ice_id])
 
@@ -177,7 +180,7 @@ class AssemblyGenie(BuildGenieBase):
             well = self.__comp_well[ice_id + '_domino_pool']
 
             worklist.append([dest_plate_id, dest_idx, well[1],
-                             well[0], str(vols['dom_pool']),
+                             well[0], str(self._query['vols']['dom_pool']),
                              'domino pool', 'domino pool', '',
                              ice_id])
 
@@ -187,7 +190,7 @@ class AssemblyGenie(BuildGenieBase):
         worklist = []
 
         for dest_idx, ice_id in enumerate(self._ice_ids):
-            for reagent, vol in def_reagents.iteritems():
+            for reagent, vol in self._query['def_reagents'].iteritems():
                 well = self.__comp_well[reagent]
 
                 worklist.append([dest_plate_id, dest_idx, well[1],
@@ -281,12 +284,12 @@ class AssemblyGenie(BuildGenieBase):
 
 def main(args):
     '''main method.'''
-    genie = AssemblyGenie({'url': args[0],
-                           'username': args[1],
-                           'password': args[2]},
-                          args[3:])
+    thread = AssemblyThread({'ice': {'url': args[0],
+                                     'username': args[1],
+                                     'password': args[2]},
+                             'ice_ids': args[3:]})
 
-    genie.export_lcr_recipe()
+    thread.run()
 
 
 if __name__ == '__main__':

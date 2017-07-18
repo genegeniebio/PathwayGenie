@@ -17,13 +17,17 @@ from synbiochem.utils.job import JobThread
 class BuildGenieBase(JobThread):
     '''Base class for build applications.'''
 
-    def __init__(self, ice_details, ice_ids):
+    def __init__(self, query):
         JobThread.__init__(self)
 
-        self._ice_client = ICEClient(ice_details['url'],
-                                     ice_details['username'],
-                                     ice_details['password'])
-        self._ice_ids = ice_ids
+        self._query = query
+        self._ice_client = ICEClient(
+            query['ice']['url'],
+            query['ice']['username'],
+            query['ice']['password'],
+            group_names=query['ice'].get('groups', None))
+
+        self._ice_ids = query['ice_ids']
         self._data = {}
 
     def get_order(self):

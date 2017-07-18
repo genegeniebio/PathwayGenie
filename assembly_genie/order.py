@@ -15,10 +15,10 @@ from assembly_genie.build import BuildGenieBase
 
 def main(args):
     '''main method.'''
-    genie = BuildGenieBase({'url': args[0],
-                            'username': args[1],
-                            'password': args[2]},
-                           args[3:])
+    genie = BuildGenieBase({'ice': {'url': args[0],
+                                    'username': args[1],
+                                    'password': args[2]},
+                            'ice_ids': args[3:]})
 
     entries = genie.get_order()
 
