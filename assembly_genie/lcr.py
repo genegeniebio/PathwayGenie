@@ -45,23 +45,22 @@ class LcrThread(AssemblyThread):
 
         # Write water (special case: appears in many wells to optimise
         # dispensing efficiency):
-        self.__write_water_worklist(dest_plate_id, pools, def_reagents)
-        self.__write_parts_worklist(dest_plate_id, pools)
-        self.__write_dom_pools_worklist(dest_plate_id)
+        part_vol = 1
+        self.__write_water_worklist(dest_plate_id, pools, 15.5, part_vol)
+        self.__write_parts_worklist(dest_plate_id, pools, part_vol)
+        self.__write_dom_pools_worklist(dest_plate_id, 1)
         self.__write_default_reag_worklist(dest_plate_id, def_reagents)
 
-    def __write_water_worklist(self, dest_plate_id, pools, def_reagents):
+    def __write_water_worklist(self, dest_plate_id, pools, total, part_vol):
         '''Write water worklist.'''
         worklist = []
 
         for dest_idx, ice_id in enumerate(self._ice_ids):
             well = self._comp_well[_WATER][dest_idx]
 
-            h2o_vol = 25 - \
-                sum(def_reagents.values()) - \
-                len(pools[ice_id]['backbone']) * 1 - \
-                len(pools[ice_id]['parts']) * 1 - \
-                1
+            h2o_vol = total - \
+                (len(pools[ice_id]['backbone']) +
+                 len(pools[ice_id]['parts'])) * part_vol
 
             # Write water:
             worklist.append([dest_plate_id, dest_idx, well[1],
@@ -71,7 +70,7 @@ class LcrThread(AssemblyThread):
 
         self._write_worklist(dest_plate_id, worklist)
 
-    def __write_parts_worklist(self, dest_plate_id, pools):
+    def __write_parts_worklist(self, dest_plate_id, pools, part_vol):
         '''Write parts worklist.'''
         worklist = []
 
@@ -81,7 +80,7 @@ class LcrThread(AssemblyThread):
                 well = self._comp_well[comp[1]]
 
                 worklist.append([dest_plate_id, dest_idx, well[1],
-                                 well[0], str(1),
+                                 well[0], str(part_vol),
                                  comp[2], comp[5], comp[1],
                                  ice_id])
 
@@ -96,7 +95,7 @@ class LcrThread(AssemblyThread):
 
         self._write_worklist(dest_plate_id, worklist)
 
-    def __write_dom_pools_worklist(self, dest_plate_id):
+    def __write_dom_pools_worklist(self, dest_plate_id, vol):
         '''Write domino pools worklist.'''
         worklist = []
 
@@ -104,7 +103,7 @@ class LcrThread(AssemblyThread):
             well = self._comp_well[ice_id + '_domino_pool']
 
             worklist.append([dest_plate_id, dest_idx, well[1],
-                             well[0], str(1),
+                             well[0], str(vol),
                              'domino pool', 'domino pool', '',
                              ice_id])
 
