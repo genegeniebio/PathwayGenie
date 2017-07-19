@@ -40,7 +40,22 @@ class PhosphoLcrThread(AssemblyThread):
             self._write_dom_pool_worklist(pools, 'domino_pools', 3))
 
         # Write LCR worklist:
+        self.__write_phospho_worklist('phospho', pools)
+
+        # Write LCR worklist:
         self.__write_lcr_worklist('lcr', pools)
+
+    def __write_phospho_worklist(self, dest_plate_id, pools):
+        '''Writes phospho worklist.'''
+        self._write_worklist_header(dest_plate_id)
+
+        def_reagents = {_PNK_MASTERMIX: 3.0, _PNK: 1.0}
+
+        # Write water (special case: appears in many wells to optimise
+        # dispensing efficiency):
+        self.__write_water_worklist(dest_plate_id, pools, def_reagents, 20)
+        self.__write_parts_worklist(dest_plate_id, pools)
+        self.__write_default_reag_worklist(dest_plate_id, def_reagents)
 
     def __write_lcr_worklist(self, dest_plate_id, pools):
         '''Writes LCR worklist.'''
@@ -50,23 +65,22 @@ class PhosphoLcrThread(AssemblyThread):
 
         # Write water (special case: appears in many wells to optimise
         # dispensing efficiency):
-        self.__write_water_worklist(dest_plate_id, pools, def_reagents)
-        self.__write_parts_worklist(dest_plate_id, pools)
+        self.__write_water_worklist(dest_plate_id, pools, def_reagents, 24)
         self.__write_dom_pools_worklist(dest_plate_id)
         self.__write_default_reag_worklist(dest_plate_id, def_reagents)
 
-    def __write_water_worklist(self, dest_plate_id, pools, def_reagents):
+    def __write_water_worklist(self, dest_plate_id, pools, def_reagents,
+                               total):
         '''Write water worklist.'''
         worklist = []
 
         for dest_idx, ice_id in enumerate(self._ice_ids):
             well = self._comp_well[_WATER][dest_idx]
 
-            h2o_vol = 25 - \
+            h2o_vol = total - \
                 sum(def_reagents.values()) - \
                 len(pools[ice_id]['backbone']) * 1 - \
-                len(pools[ice_id]['parts']) * 1 - \
-                1
+                len(pools[ice_id]['parts']) * 1
 
             # Write water:
             worklist.append([dest_plate_id, dest_idx, well[1],
