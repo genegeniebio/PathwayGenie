@@ -19,7 +19,7 @@ from assembly_genie.build import BuildGenieBase
 
 
 _AMPLIGASE = 'ampligase'
-_MASTERMIX = 'mastermix'
+_LCR_MASTERMIX = 'lgr-mastermix'
 _WATER = 'water'
 
 _WORKLIST_COLS = ['DestinationPlateBarcode',
@@ -48,6 +48,28 @@ class AssemblyThread(BuildGenieBase):
 
         os.mkdir(self.__outdir)
 
+    def _write_dom_pool_worklist(self, pools, dest_plate_id, vol):
+        '''Write domino pool worklist.'''
+        self._write_worklist_header(dest_plate_id)
+
+        comp_well = {}
+        worklist = []
+
+        for dest_idx, ice_id in enumerate(sorted(pools)):
+            for domino in pools[ice_id]['dominoes']:
+                src_well = self._comp_well[domino[1]]
+
+                worklist.append([dest_plate_id, dest_idx, src_well[1],
+                                 src_well[0], str(vol),
+                                 domino[2], domino[5], domino[1],
+                                 ice_id])
+
+            comp_well[ice_id + '_domino_pool'] = (dest_idx, dest_plate_id, [])
+
+        self._write_comp_wells(dest_plate_id, comp_well)
+        self._write_worklist(dest_plate_id, worklist)
+        return comp_well
+
     def _get_pools(self):
         '''Get pools.'''
         pools = defaultdict(lambda: defaultdict(list))
@@ -71,7 +93,7 @@ class AssemblyThread(BuildGenieBase):
     def _write_plate(self, plate_id, components):
         '''Write plate.'''
         comp_well = self.__get_comp_well(plate_id, components)
-        self.__write_comp_wells(plate_id, comp_well)
+        self._write_comp_wells(plate_id, comp_well)
         return comp_well
 
     def _write_worklist_header(self, dest_plate_id):
@@ -105,28 +127,6 @@ class AssemblyThread(BuildGenieBase):
                 if not sum([len(lst) for lst in worklist_map.values()]):
                     break
 
-    def _write_dom_pool_worklist(self, pools, dest_plate_id, vol):
-        '''Write domino pool worklist.'''
-        self._write_worklist_header(dest_plate_id)
-
-        comp_well = {}
-        worklist = []
-
-        for dest_idx, ice_id in enumerate(sorted(pools)):
-            for domino in pools[ice_id]['dominoes']:
-                src_well = self._comp_well[domino[1]]
-
-                worklist.append([dest_plate_id, dest_idx, src_well[1],
-                                 src_well[0], str(vol),
-                                 domino[2], domino[5], domino[1],
-                                 ice_id])
-
-            comp_well[ice_id + '_domino_pool'] = (dest_idx, dest_plate_id, [])
-
-        self.__write_comp_wells(dest_plate_id, comp_well)
-        self._write_worklist(dest_plate_id, worklist)
-        return comp_well
-
     def __get_comp_well(self, plate_id, components):
         '''Gets component-well map.'''
         comp_well = {}
@@ -149,7 +149,7 @@ class AssemblyThread(BuildGenieBase):
 
         return comp_well
 
-    def __write_comp_wells(self, plate_id, comp_wells):
+    def _write_comp_wells(self, plate_id, comp_wells):
         '''Write component-well map.'''
         outfile = os.path.join(self.__outdir, plate_id + '.txt')
 

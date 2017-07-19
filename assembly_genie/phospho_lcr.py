@@ -13,8 +13,11 @@ import sys
 from assembly_genie.assembly import AssemblyThread, _AMPLIGASE, \
     _LCR_MASTERMIX, _WATER
 
+_PNK = 'pnk'
+_PNK_MASTERMIX = 'pnk-mastermix'
 
-class LcrThread(AssemblyThread):
+
+class PhosphoLcrThread(AssemblyThread):
     '''Class implementing AssemblyGenie algorithms.'''
 
     def run(self):
@@ -25,11 +28,13 @@ class LcrThread(AssemblyThread):
         # Write plates:
         self._comp_well.update(self._write_plate('MastermixTrough',
                                                  [[_WATER],
-                                                  [_LCR_MASTERMIX]]))
+                                                  [_LCR_MASTERMIX],
+                                                  [_PNK_MASTERMIX]]))
 
         self._comp_well.update(self._write_plate('components',
                                                  self.get_order()
-                                                 + [[_AMPLIGASE]]))
+                                                 + [[_AMPLIGASE],
+                                                    [_PNK]]))
 
         # Write domino pools worklist:
         self._comp_well.update(
@@ -45,6 +50,7 @@ class LcrThread(AssemblyThread):
         '''Initialises query.'''
         if 'plate_ids' not in self._query:
             self._query['plate_ids'] = {'domino_pools': 'domino_pools',
+                                        'phospho': 'phospho',
                                         'lcr': 'lcr'}
 
         if 'def_reagents' not in self._query:
@@ -148,10 +154,10 @@ class LcrThread(AssemblyThread):
 
 def main(args):
     '''main method.'''
-    thread = LcrThread({'ice': {'url': args[0],
-                                'username': args[1],
-                                'password': args[2]},
-                        'ice_ids': args[3:]})
+    thread = PhosphoLcrThread({'ice': {'url': args[0],
+                                       'username': args[1],
+                                       'password': args[2]},
+                               'ice_ids': args[3:]})
 
     thread.run()
 
