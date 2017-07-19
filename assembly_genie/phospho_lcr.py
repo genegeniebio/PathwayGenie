@@ -22,7 +22,6 @@ class PhosphoLcrThread(AssemblyThread):
 
     def run(self):
         '''Exports recipes.'''
-        self.__init_query()
         pools = self._get_pools()
 
         # Write plates:
@@ -38,56 +37,36 @@ class PhosphoLcrThread(AssemblyThread):
 
         # Write domino pools worklist:
         self._comp_well.update(
-            self._write_dom_pool_worklist(
-                pools,
-                self._query['plate_ids']['domino_pools'],
-                self._query['vols']['domino']))
+            self._write_dom_pool_worklist(pools, 'domino_pools', 3))
 
         # Write LCR worklist:
-        self.__write_lcr_worklist(self._query['plate_ids']['lcr'], pools)
-
-    def __init_query(self):
-        '''Initialises query.'''
-        if 'plate_ids' not in self._query:
-            self._query['plate_ids'] = {'domino_pools': 'domino_pools',
-                                        'phospho': 'phospho',
-                                        'lcr': 'lcr'}
-
-        if 'def_reagents' not in self._query:
-            self._query['def_reagents'] = {_LCR_MASTERMIX: 7.0,
-                                           _AMPLIGASE: 1.5}
-
-        if 'vols' not in self._query:
-            self._query['vols'] = {'backbone': 1,
-                                   'parts': 1,
-                                   'dom_pool': 1,
-                                   'domino': 3,
-                                   'total': 25}
+        self.__write_lcr_worklist('lcr', pools)
 
     def __write_lcr_worklist(self, dest_plate_id, pools):
         '''Writes LCR worklist.'''
         self._write_worklist_header(dest_plate_id)
 
+        def_reagents = {_LCR_MASTERMIX: 7.0, _AMPLIGASE: 1.5}
+
         # Write water (special case: appears in many wells to optimise
         # dispensing efficiency):
-        self.__write_water_worklist(dest_plate_id, pools)
+        self.__write_water_worklist(dest_plate_id, pools, def_reagents)
         self.__write_parts_worklist(dest_plate_id, pools)
         self.__write_dom_pools_worklist(dest_plate_id)
-        self.__write_default_reag_worklist(dest_plate_id)
+        self.__write_default_reag_worklist(dest_plate_id, def_reagents)
 
-    def __write_water_worklist(self, dest_plate_id, pools):
+    def __write_water_worklist(self, dest_plate_id, pools, def_reagents):
         '''Write water worklist.'''
         worklist = []
 
         for dest_idx, ice_id in enumerate(self._ice_ids):
             well = self._comp_well[_WATER][dest_idx]
 
-            h2o_vol = self._query['vols']['total'] - \
-                sum(self._query['def_reagents'].values()) - \
-                len(pools[ice_id]['backbone']) * \
-                self._query['vols']['backbone'] - \
-                len(pools[ice_id]['parts']) * self._query['vols']['parts'] - \
-                self._query['vols']['dom_pool']
+            h2o_vol = 25 - \
+                sum(def_reagents.values()) - \
+                len(pools[ice_id]['backbone']) * 1 - \
+                len(pools[ice_id]['parts']) * 1 - \
+                1
 
             # Write water:
             worklist.append([dest_plate_id, dest_idx, well[1],
@@ -107,7 +86,7 @@ class PhosphoLcrThread(AssemblyThread):
                 well = self._comp_well[comp[1]]
 
                 worklist.append([dest_plate_id, dest_idx, well[1],
-                                 well[0], str(self._query['vols']['backbone']),
+                                 well[0], str(1),
                                  comp[2], comp[5], comp[1],
                                  ice_id])
 
@@ -116,7 +95,7 @@ class PhosphoLcrThread(AssemblyThread):
                 well = self._comp_well[comp[1]]
 
                 worklist.append([dest_plate_id, dest_idx, well[1],
-                                 well[0], str(self._query['vols']['parts']),
+                                 well[0], str(1),
                                  comp[2], comp[5], comp[1],
                                  ice_id])
 
@@ -130,18 +109,18 @@ class PhosphoLcrThread(AssemblyThread):
             well = self._comp_well[ice_id + '_domino_pool']
 
             worklist.append([dest_plate_id, dest_idx, well[1],
-                             well[0], str(self._query['vols']['dom_pool']),
+                             well[0], str(1),
                              'domino pool', 'domino pool', '',
                              ice_id])
 
         self._write_worklist(dest_plate_id, worklist)
 
-    def __write_default_reag_worklist(self, dest_plate_id):
+    def __write_default_reag_worklist(self, dest_plate_id, def_reagents):
         '''Write default reagents worklist.'''
         worklist = []
 
         for dest_idx, ice_id in enumerate(self._ice_ids):
-            for reagent, vol in self._query['def_reagents'].iteritems():
+            for reagent, vol in def_reagents.iteritems():
                 well = self._comp_well[reagent]
 
                 worklist.append([dest_plate_id, dest_idx, well[1],

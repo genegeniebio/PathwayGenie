@@ -165,10 +165,10 @@ class AssemblyThread(BuildGenieBase):
 
     def __write_comp_well(self, out, well, comp):
         '''Write line on component-well map.'''
-        outstr = '%s\t%s' % (plate_utils.get_well(well[0],
-                                                  self.__rows,
-                                                  self.__cols),
-                             comp)
+        outstr = '%s\t%s\t' % (plate_utils.get_well(well[0],
+                                                    self.__rows,
+                                                    self.__cols),
+                               comp)
         out.write(outstr)
         out.write('\t'.join(str(val) for val in well[2]))
         out.write('\n')
