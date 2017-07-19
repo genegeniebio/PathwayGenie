@@ -8,7 +8,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=too-many-arguments
-from _collections import defaultdict
 import sys
 
 from assembly_genie.assembly import AssemblyThread, _AMPLIGASE, _MASTERMIX, \
@@ -21,7 +20,7 @@ class LcrThread(AssemblyThread):
     def run(self):
         '''Exports recipes.'''
         self.__init_query()
-        pools = self.__get_pools()
+        pools = self._get_pools()
 
         # Write plates:
         self._comp_well.update(self._write_plate('MastermixTrough',
@@ -57,26 +56,6 @@ class LcrThread(AssemblyThread):
                                    'dom_pool': 1,
                                    'domino': 3,
                                    'total': 25}
-
-    def __get_pools(self):
-        '''Get pools.'''
-        pools = defaultdict(lambda: defaultdict(list))
-
-        for ice_id in self._ice_ids:
-            data = self._get_data(ice_id)
-
-            for part in data[0].get_metadata()['linkedParts']:
-                data = self._get_data(part['partId'])
-
-                if data[4] == 'ORF':
-                    pools[ice_id]['parts'].append(data)
-                elif data[4] == 'DOMINO':
-                    pools[ice_id]['dominoes'].append(data)
-                else:
-                    # Assume backbone:
-                    pools[ice_id]['backbone'].append(data)
-
-        return pools
 
     def __write_lcr_worklist(self, dest_plate_id, pools):
         '''Writes LCR worklist.'''

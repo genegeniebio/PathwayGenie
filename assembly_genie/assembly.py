@@ -48,6 +48,63 @@ class AssemblyThread(BuildGenieBase):
 
         os.mkdir(self.__outdir)
 
+    def _get_pools(self):
+        '''Get pools.'''
+        pools = defaultdict(lambda: defaultdict(list))
+
+        for ice_id in self._ice_ids:
+            data = self._get_data(ice_id)
+
+            for part in data[0].get_metadata()['linkedParts']:
+                data = self._get_data(part['partId'])
+
+                if data[4] == 'ORF':
+                    pools[ice_id]['parts'].append(data)
+                elif data[4] == 'DOMINO':
+                    pools[ice_id]['dominoes'].append(data)
+                else:
+                    # Assume backbone:
+                    pools[ice_id]['backbone'].append(data)
+
+        return pools
+
+    def _write_plate(self, plate_id, components):
+        '''Write plate.'''
+        comp_well = self.__get_comp_well(plate_id, components)
+        self.__write_comp_wells(plate_id, comp_well)
+        return comp_well
+
+    def _write_worklist_header(self, dest_plate_id):
+        '''Write worklist.'''
+        worklist_id = dest_plate_id + '_worklist'
+        outfile = os.path.join(self.__outdir, worklist_id + '.txt')
+
+        with open(outfile, 'a+') as out:
+            out.write('\t'.join(_WORKLIST_COLS) + '\n')
+
+    def _write_worklist(self, dest_plate_id, worklist):
+        '''Write worklist.'''
+        worklist_id = dest_plate_id + '_worklist'
+        outfile = os.path.join(self.__outdir, worklist_id + '.txt')
+
+        with open(outfile, 'a+') as out:
+            worklist_map = defaultdict(list)
+
+            for entry in sorted(worklist, key=lambda x: x[3]):
+                worklist_map[entry[1]].append(entry)
+
+            for idx in cycle(range(0, self.__rows * self.__cols)):
+                if worklist_map[idx]:
+                    entry = worklist_map[idx].pop(0)
+                    out.write('\t'.join([plate_utils.get_well(val)
+                                         if idx == 1 or idx == 3
+                                         else str(val)
+                                         for idx, val in enumerate(entry)]) +
+                              '\n')
+
+                if not sum([len(lst) for lst in worklist_map.values()]):
+                    break
+
     def _write_dom_pool_worklist(self, pools, dest_plate_id, vol):
         '''Write domino pool worklist.'''
         self._write_worklist_header(dest_plate_id)
@@ -68,12 +125,6 @@ class AssemblyThread(BuildGenieBase):
 
         self.__write_comp_wells(dest_plate_id, comp_well)
         self._write_worklist(dest_plate_id, worklist)
-        return comp_well
-
-    def _write_plate(self, plate_id, components):
-        '''Write plate.'''
-        comp_well = self.__get_comp_well(plate_id, components)
-        self.__write_comp_wells(plate_id, comp_well)
         return comp_well
 
     def __get_comp_well(self, plate_id, components):
@@ -111,37 +162,6 @@ class AssemblyThread(BuildGenieBase):
                 else:
                     for well in wells:
                         self.__write_comp_well(out, well, comp)
-
-    def _write_worklist_header(self, dest_plate_id):
-        '''Write worklist.'''
-        worklist_id = dest_plate_id + '_worklist'
-        outfile = os.path.join(self.__outdir, worklist_id + '.txt')
-
-        with open(outfile, 'a+') as out:
-            out.write('\t'.join(_WORKLIST_COLS) + '\n')
-
-    def _write_worklist(self, dest_plate_id, worklist):
-        '''Write worklist.'''
-        worklist_id = dest_plate_id + '_worklist'
-        outfile = os.path.join(self.__outdir, worklist_id + '.txt')
-
-        with open(outfile, 'a+') as out:
-            worklist_map = defaultdict(list)
-
-            for entry in sorted(worklist, key=lambda x: x[3]):
-                worklist_map[entry[1]].append(entry)
-
-            for idx in cycle(range(0, self.__rows * self.__cols)):
-                if worklist_map[idx]:
-                    entry = worklist_map[idx].pop(0)
-                    out.write('\t'.join([plate_utils.get_well(val)
-                                         if idx == 1 or idx == 3
-                                         else str(val)
-                                         for idx, val in enumerate(entry)]) +
-                              '\n')
-
-                if not sum([len(lst) for lst in worklist_map.values()]):
-                    break
 
     def __write_comp_well(self, out, well, comp):
         '''Write line on component-well map.'''
