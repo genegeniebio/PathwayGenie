@@ -102,8 +102,7 @@ class AssemblyThread(BuildGenieBase):
 
     def __write_dom_pool_worklist(self, pools, dest_plate_id, vol):
         '''Write domino pool worklist.'''
-        worklist_id = dest_plate_id + '_worklist'
-        self.__write_worklist_header(worklist_id)
+        self.__write_worklist_header(dest_plate_id)
 
         comp_well = {}
         worklist = []
@@ -120,16 +119,22 @@ class AssemblyThread(BuildGenieBase):
             comp_well[ice_id + '_domino_pool'] = (dest_idx, dest_plate_id, [])
 
         self.__write_comp_wells(dest_plate_id, comp_well)
-        self.__write_worklist(dest_plate_id + '_worklist', worklist)
+        self.__write_worklist(dest_plate_id, worklist)
         return comp_well
 
     def __write_lcr_worklist(self, dest_plate_id, pools):
         '''Writes LCR worklist.'''
-        worklist_id = dest_plate_id + '_worklist'
-        self.__write_worklist_header(worklist_id)
+        self.__write_worklist_header(dest_plate_id)
 
         # Write water (special case: appears in many wells to optimise
         # dispensing efficiency):
+        self.__write_water_worklist(dest_plate_id, pools)
+        self.__write_parts_worklist(dest_plate_id, pools)
+        self.__write_dom_pools_worklist(dest_plate_id)
+        self.__write_default_reag_worklist(dest_plate_id)
+
+    def __write_water_worklist(self, dest_plate_id, pools):
+        '''Write water worklist.'''
         worklist = []
 
         for dest_idx, ice_id in enumerate(self._ice_ids):
@@ -148,8 +153,10 @@ class AssemblyThread(BuildGenieBase):
                              _WATER, _WATER, '',
                              ice_id])
 
-        self.__write_worklist(worklist_id, worklist)
+        self.__write_worklist(dest_plate_id, worklist)
 
+    def __write_parts_worklist(self, dest_plate_id, pools):
+        '''Write parts worklist.'''
         worklist = []
 
         for dest_idx, ice_id in enumerate(self._ice_ids):
@@ -171,9 +178,10 @@ class AssemblyThread(BuildGenieBase):
                                  comp[2], comp[5], comp[1],
                                  ice_id])
 
-        self.__write_worklist(worklist_id, worklist)
+        self.__write_worklist(dest_plate_id, worklist)
 
-        # Write domino pools:
+    def __write_dom_pools_worklist(self, dest_plate_id):
+        '''Write domino pools worklist.'''
         worklist = []
 
         for dest_idx, ice_id in enumerate(self._ice_ids):
@@ -184,9 +192,10 @@ class AssemblyThread(BuildGenieBase):
                              'domino pool', 'domino pool', '',
                              ice_id])
 
-        self.__write_worklist(worklist_id, worklist)
+        self.__write_worklist(dest_plate_id, worklist)
 
-        # Write default reagents:
+    def __write_default_reag_worklist(self, dest_plate_id):
+        '''Write default reagents worklist.'''
         worklist = []
 
         for dest_idx, ice_id in enumerate(self._ice_ids):
@@ -198,7 +207,7 @@ class AssemblyThread(BuildGenieBase):
                                  reagent, reagent, '',
                                  ice_id])
 
-        self.__write_worklist(worklist_id, worklist)
+        self.__write_worklist(dest_plate_id, worklist)
 
     def __write_plate(self, plate_id, components):
         '''Write plate.'''
@@ -242,15 +251,17 @@ class AssemblyThread(BuildGenieBase):
                     for well in wells:
                         self.__write_comp_well(out, well, comp)
 
-    def __write_worklist_header(self, worklist_id):
+    def __write_worklist_header(self, dest_plate_id):
         '''Write worklist.'''
+        worklist_id = dest_plate_id + '_worklist'
         outfile = os.path.join(self.__outdir, worklist_id + '.txt')
 
         with open(outfile, 'a+') as out:
             out.write('\t'.join(_WORKLIST_COLS) + '\n')
 
-    def __write_worklist(self, worklist_id, worklist):
+    def __write_worklist(self, dest_plate_id, worklist):
         '''Write worklist.'''
+        worklist_id = dest_plate_id + '_worklist'
         outfile = os.path.join(self.__outdir, worklist_id + '.txt')
 
         with open(outfile, 'a+') as out:
