@@ -5,7 +5,7 @@
 <div class="panel panel-default">
 	<div class="panel-heading">Feature</div>
 	<div class="panel-body">
-		<form class="form-horizontal" role="form">
+		<form class="form-horizontal" name="form" role="form">
 			<div class="form-group">
 				<label class="col-xs-4 col-form-label">Name:</label>
 				<div class="col-xs-8">
@@ -14,12 +14,13 @@
 						placeholder="Name"/>
 				</div>
 			</div>
-			<div class="form-group" data-ng-show="selected().seq != null">
+			<div class="form-group" data-ng-show="selected().temp_params.seq_required">
 				<label class="col-xs-4 col-form-label">Sequence:</label>
 				<div class="col-xs-8">
-					<textarea class="form-control sequence"
+					<textarea class="form-control sequence uppercase"
 						data-ng-model="selected().seq"
-						data-ng-pattern="[ACGTacgt]+"
+						data-ng-pattern="/^[ACGTacgt]+$/"
+						required
 						placeholder="Sequence">
 					</textarea>
 				</div>

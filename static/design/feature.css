@@ -1,3 +1,7 @@
 .sequence {
     resize: none;
 }
+
+textarea.ng-invalid {
+    border: 1px red solid;
+}
