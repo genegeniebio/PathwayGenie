@@ -19,7 +19,7 @@
 	height: 20px;
 }
 
-input.ng-invalid
+.ng-invalid
 { 
 	border: 1px red solid;
 }
