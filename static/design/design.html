@@ -32,13 +32,16 @@
 					<div class="panel-body">
 						<div class="features" dnd-list="design.features" dnd-allowed-types="['feature']">
 							<div data-ng-repeat="feature in design.features"
+								name="feature-{{$index}}"
 								data-ng-class="{selected: selected() === feature}"
 								data-ng-click="toggleSelected({args: feature})"
+								data-ng-form
 								class="feature SO{{feature.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}"
 								dnd-type="'feature'"
 								dnd-draggable="feature"
 								dnd-effect-allowed="move"
-								dnd-moved="design.features.splice($index, 1)">
+								dnd-moved="design.features.splice($index, 1)"
+								novalidate>
 							</div>
 						</div>
 					</div>
