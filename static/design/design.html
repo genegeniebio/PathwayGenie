@@ -18,10 +18,12 @@
 				</div>
 			</button>
 		</div>
-		<form role="form">
+		<form name="feature-form" role="form">
 			<div class="panel-group designs" dnd-list="query().designs" dnd-allowed-types="['design']">
 				<div data-ng-repeat="design in query().designs"
 					class="panel panel-default"
+					name="design-{{$index}}"
+					data-ng-form
 					dnd-type="'design'"
 					dnd-draggable="design"
 					dnd-effect-allowed="move"
@@ -33,7 +35,7 @@
 					<div class="panel-body">
 						<div class="features" dnd-list="design.features" dnd-allowed-types="['feature']">
 							<div data-ng-repeat="feature in design.features"
-								name="feature-{{$index}}"
+								name="{{feature.temp_params.id}}"
 								data-ng-class="{selected: selected() === feature}"
 								data-ng-click="toggleSelected({args: feature})"
 								data-ng-form

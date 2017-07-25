@@ -111,7 +111,6 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 	
 	self.copy = function(feature) {
 		feature.temp_params.id = "_" + (new Date()).getTime();
-		console.log(feature.temp_params.id)
 	}
 	
 	self.query = function() {
@@ -160,6 +159,23 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 	},               
 	function(values) {
 		self.queryJson = angular.toJson({selected: self.selected(), query: self.query()}, true)
+	}, true);
+	
+	$scope.$watch(function() {
+		return self.query().designs;
+	},               
+	function(designs) {
+		for(var i = 0; i < designs.length; i++) {
+			design = designs[i];
+			
+			for(var j = 0; j < design.features.length; j++) {
+				feature = design.features[j];
+				
+				if(!feature.temp_params.valid) {
+					console.log(feature.temp_params.id)
+				}
+			}
+		}
 	}, true);
 	
 	// Initialise UI:
