@@ -7,6 +7,7 @@ designApp.directive("designPanel", function() {
     		toggleSelected: "&",
     		addDesign: "&",
     		removeDesign: "&",
+    		copy: "&"
     	},
         templateUrl: "design.html"
     };

@@ -9,7 +9,8 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 			temp_params: {
 				fixed: true,
 				seq_required: true,
-				valid: false
+				valid: false,
+				id: "_1"
 			}
 		},
 		{
@@ -21,7 +22,8 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 			},
 			temp_params: {
 				fixed: true,
-				valid: true
+				valid: true,
+				id: "_2"
 			}
 		},
 		{
@@ -32,7 +34,8 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 			temp_params: {
 				fixed: true,
 				seq_required: true,
-				valid: false
+				valid: false,
+				id: "_3"
 			}
 		},
 		{
@@ -47,7 +50,8 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 				fixed: false,
 				min_end: 35,
 				max_end: 10000,
-				valid: true
+				valid: true,
+				id: "_4"
 			}
 		},
 		{
@@ -64,7 +68,8 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 				}
 			],
 			temp_params: {
-				valid: false
+				valid: false,
+				id: "_5"
 			}
 		},
 		{
@@ -75,7 +80,8 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 			temp_params: {
 				fixed: true,
 				seq_required: true,
-				valid: false
+				valid: false,
+				id: "_6"
 			}
 		},
 		{
@@ -86,7 +92,8 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 				fixed: false,
 				min_end: 1,
 				max_end: 10000,
-				valid: true
+				valid: true,
+				id: "_7"
 			}
 		},
 		{
@@ -96,10 +103,16 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 			temp_params: {
 				fixed: true,
 				seq_required: true,
-				valid: false
+				valid: false,
+				id: "_8"
 			}
 		}
 	];
+	
+	self.copy = function(feature) {
+		feature.temp_params.id = "_" + (new Date()).getTime();
+		console.log(feature.temp_params.id)
+	}
 	
 	self.query = function() {
 		return DesignService.query;
