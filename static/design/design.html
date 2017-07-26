@@ -3,23 +3,23 @@
 <link rel="stylesheet" href="../style.css" />
 <link rel="stylesheet" href="design.css" />
 
+<form name="feature-form" role="form">
 <div class="panel panel-default">
 	<div class="panel-heading">Designs</div>
-	<div class="panel-body">
-		<div class="btn-toolbar palette">
-			<button data-ng-repeat="feature in templates"
-				type="button"
-				class="btn btn-default"
-				dnd-type="'feature'"
-				dnd-draggable="feature"
-				dnd-effect-allowed="copy"
-				uib-tooltip="{{feature.name}}"
-				dnd-dragstart="copy({args: feature})">
-				<div class="feature SO{{feature.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}">
-				</div>
-			</button>
-		</div>
-		<form name="feature-form" role="form">
+		<div class="panel-body">
+			<div class="btn-toolbar palette">
+				<button data-ng-repeat="feature in templates"
+					type="button"
+					class="btn btn-default"
+					dnd-type="'feature'"
+					dnd-draggable="feature"
+					dnd-effect-allowed="copy"
+					uib-tooltip="{{feature.name}}"
+					dnd-dragstart="copy({args: feature})">
+					<div class="feature SO{{feature.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}">
+					</div>
+				</button>
+			</div>
 			<div class="panel-group designs" dnd-list="query().designs" dnd-allowed-types="['design']">
 				<div data-ng-repeat="design in query().designs"
 					class="panel panel-default"
@@ -51,8 +51,8 @@
 					</div>
 				</div>
 			</div>
-		</form>
-		<div class="glyphicon glyphicon-plus pull-right glyphicon-grey" data-ng-click="addDesign()">
+			<div class="glyphicon glyphicon-plus pull-right glyphicon-grey" data-ng-click="addDesign()">
+			</div>
 		</div>
 	</div>
-</div>
+</form>
