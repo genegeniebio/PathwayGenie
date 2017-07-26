@@ -22,9 +22,9 @@ designApp.directive("designPanel", function() {
         				feature = design.features[j];
         				
         				if(!feature.temp_params.valid) {
-        					var id = '#' + feature.temp_params.id;
-        					// var ft = angular.element(element);
-        					// ft.$setValidity("valid", false);
+        					var form = element.find("form").eq(0);
+        					ctrl = form.controller("form");
+        					ctrl.$setValidity("valid", false);
         				}
         			}
         		}
