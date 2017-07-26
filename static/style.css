@@ -19,7 +19,7 @@
 	height: 20px;
 }
 
-.ng-invalid
+input.ng-invalid, textarea.ng-invalid
 { 
 	border: 1px red solid;
 }

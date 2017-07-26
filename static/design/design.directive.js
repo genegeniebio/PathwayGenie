@@ -1,4 +1,4 @@
-designApp.directive("designPanel", function() {
+designApp.directive("designPanel", function($timeout) {
     return {
     	scope: {
     		templates: "=",
@@ -10,11 +10,15 @@ designApp.directive("designPanel", function() {
     		copy: "&"
     	},
         templateUrl: "design.html",
-        link: function(scope, element, attrs, formCtrl) {
+        link: function(scope, element) {
         	scope.$watch(function() {
         		return scope.query().designs;
         	},               
         	function(designs) {
+        		$timeout(checkValidity(designs));
+        	}, true);
+        	
+        	checkValidity = function(designs) {
         		for(var i = 0; i < designs.length; i++) {
         			design = designs[i];
         			
@@ -22,13 +26,14 @@ designApp.directive("designPanel", function() {
         				feature = design.features[j];
         				
         				if(!feature.temp_params.valid) {
+        					var id = feature.temp_params.id;
         					var form = element.find("form").eq(0);
         					ctrl = form.controller("form");
         					ctrl.$setValidity("valid", false);
         				}
         			}
         		}
-        	}, true);
+        	}
         }
     };
 });
