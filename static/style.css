@@ -13,6 +13,11 @@
 	display: none;
 }
 
+.btn-field
+{
+	margin-top: 3px;
+}
+
 .aligned-checkbox
 {
 	margin: 0px;

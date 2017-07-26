@@ -6,8 +6,8 @@
 <div class="panel panel-default">
 	<div class="panel-heading">Feature</div>
 	<div class="panel-body">
-		<form class="form-horizontal" name="form" role="form">
-			<div class="form-group">
+		<form class="form-horizontal" name="form" role="form" novalidate>
+			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('name') !== -1">
 				<label class="col-xs-4 col-form-label">Name:</label>
 				<div class="col-xs-8">
 					<input type="text" class="form-control"
@@ -20,7 +20,7 @@
 				<div class="col-xs-8">
 					<textarea class="form-control sequence uppercase"
 						data-ng-model="selected().seq"
-						data-ng-pattern="/^[ACGTacgt]+$/"
+						data-ng-pattern="/^[ACGTacgt\s]+$/"
 						required
 						placeholder="Sequence">
 					</textarea>
@@ -46,6 +46,47 @@
 						max="200000"
 						step="100"
 						placeholder="Translation initiation rate"/>
+				</div>
+			</div>
+			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('prot') !== -1">
+				<label class="col-xs-4 col-form-label">Search UniProt:</label>
+				<div class="col-xs-8">
+					<div>
+						<input type="text" class="form-control"
+							data-ng-model="uniprot"
+							placeholder="UniProt search term"/>
+						<button type="submit" data-ng-click="ctrl.submit()"
+							data-ng-disabled="uniprot.length < 3"
+							class="pull-right btn btn-default btn-xs btn-field">Search</button>
+					</div>
+				</div>
+			</div>
+			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('prot') !== -1">
+				<label class="col-xs-4 col-form-label">UniProt id:</label>
+				<div class="col-xs-8">
+					<input type="text" class="form-control"
+						data-ng-model="uniprot.id"
+						placeholder="UniProt id"
+						disabled/>
+				</div>
+			</div>
+			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('prot') !== -1">
+				<label class="col-xs-4 col-form-label">Name:</label>
+				<div class="col-xs-8">
+					<input type="text" class="form-control"
+						data-ng-model="selected().options[0].name"
+						placeholder="Name"/>
+				</div>
+			</div>
+			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('prot') !== -1">
+				<label class="col-xs-4 col-form-label">Sequence:</label>
+				<div class="col-xs-8">
+					<textarea class="form-control sequence uppercase"
+						data-ng-model="selected().options[0].seq"
+						data-ng-pattern="/^[ACDEFGHIKLMNPQRSTVWYacdefghiklmnpqrstvwy\s]+$/"
+						required
+						placeholder="Sequence">
+					</textarea>
 				</div>
 			</div>
 			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('len') !== -1">
