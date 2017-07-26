@@ -8,7 +8,7 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 			seq: "",
 			temp_params: {
 				fixed: true,
-				seq_required: true,
+				required: ["seq"],
 				valid: false,
 				id: "_1"
 			}
@@ -22,6 +22,7 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 			},
 			temp_params: {
 				fixed: true,
+				required: ["tm"],
 				valid: true,
 				id: "_2"
 			}
@@ -33,7 +34,7 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 			seq: "",
 			temp_params: {
 				fixed: true,
-				seq_required: true,
+				required: ["seq"],
 				valid: false,
 				id: "_3"
 			}
@@ -48,6 +49,7 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 			},
 			temp_params: {
 				fixed: false,
+				required: ["tir"],
 				min_end: 35,
 				max_end: 10000,
 				valid: true,
@@ -68,6 +70,7 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 				}
 			],
 			temp_params: {
+				required: ["prot"],
 				valid: false,
 				id: "_5"
 			}
@@ -79,7 +82,7 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 			seq: "",
 			temp_params: {
 				fixed: true,
-				seq_required: true,
+				required: ["seq"],
 				valid: false,
 				id: "_6"
 			}
@@ -90,6 +93,7 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 			name: "random region",
 			temp_params: {
 				fixed: false,
+				required: ["len"],
 				min_end: 1,
 				max_end: 10000,
 				valid: true,
@@ -102,7 +106,7 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 			seq: "",
 			temp_params: {
 				fixed: true,
-				seq_required: true,
+				required: ["seq"],
 				valid: false,
 				id: "_8"
 			}

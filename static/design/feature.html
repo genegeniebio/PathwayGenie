@@ -15,7 +15,7 @@
 						placeholder="Name"/>
 				</div>
 			</div>
-			<div class="form-group" data-ng-show="selected().temp_params.seq_required">
+			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('seq') !== -1">
 				<label class="col-xs-4 col-form-label">Sequence:</label>
 				<div class="col-xs-8">
 					<textarea class="form-control sequence uppercase"
@@ -26,7 +26,7 @@
 					</textarea>
 				</div>
 			</div>
-			<div class="form-group" data-ng-show="selected().parameters['Tm target'] != null">
+			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('tm') !== -1">
 				<label class="col-xs-4 col-form-label">Tm / &deg;C:</label>
 				<div class="col-xs-8">
 					<input type="number" class="form-control"
@@ -37,7 +37,7 @@
 						placeholder="Melting temperature"/>
 				</div>
 			</div>
-			<div class="form-group" data-ng-show="selected().parameters['TIR target'] != null">
+			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('tir') !== -1">
 				<label class="col-xs-4 col-form-label">TIR:</label>
 				<div class="col-xs-8">
 					<input type="number" class="form-control"
@@ -48,7 +48,7 @@
 						placeholder="Translation initiation rate"/>
 				</div>
 			</div>
-			<div class="form-group" data-ng-show="selected().end != null">
+			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('len') !== -1">
 				<label class="col-xs-4 col-form-label">Length:</label>
 				<div class="col-xs-8">
 					<input type="number" class="form-control"
