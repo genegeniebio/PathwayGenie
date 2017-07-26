@@ -26,6 +26,17 @@
 					</textarea>
 				</div>
 			</div>
+			<div class="form-group" data-ng-show="selected().parameters['Tm target'] != null">
+				<label class="col-xs-4 col-form-label">Tm / &deg;C:</label>
+				<div class="col-xs-8">
+					<input type="number" class="form-control"
+						data-ng-model="selected().parameters['Tm target']"
+						min="20"
+						max="100"
+						step="1"
+						placeholder="Melting temperature"/>
+				</div>
+			</div>
 			<div class="form-group" data-ng-show="selected().parameters['TIR target'] != null">
 				<label class="col-xs-4 col-form-label">TIR:</label>
 				<div class="col-xs-8">
