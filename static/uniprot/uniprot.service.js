@@ -11,6 +11,7 @@ uniprotApp.factory("UniprotService", ["$uibModal", function($uibModal) {
 			controllerAs: "uniprotCtrl",
 			backdrop: "static",
 			keyboard: false,
+			size: "lg",
 			resolve: {
 				options: function() {
 					return options;

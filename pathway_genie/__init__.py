@@ -130,7 +130,7 @@ def search_uniprot(query):
     fields = ['entry name', 'protein names', 'sequence', 'ec', 'organism',
               'organism-id']
     result = seq_utils.search_uniprot(query, fields)
-    return json.dumps(result)
+    return json.dumps(result.values())
 
 
 def _connect_ice(req):

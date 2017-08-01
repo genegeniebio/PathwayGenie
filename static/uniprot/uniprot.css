@@ -1,0 +1,11 @@
+.table-fixed
+{
+	table-layout: fixed;
+}
+
+.single-row
+{
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
