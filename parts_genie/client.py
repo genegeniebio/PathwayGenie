@@ -12,7 +12,7 @@ import sys
 import time
 
 from parts_genie.parts import PartsThread
-from pathway_genie.pathway_genie import PathwayGenie
+from pathway_genie.pathway import PathwayGenie
 
 
 class PartsGenieClient(object):

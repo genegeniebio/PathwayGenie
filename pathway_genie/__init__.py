@@ -23,7 +23,7 @@ from synbiochem.utils.net_utils import NetworkError
 
 from parts_genie import parts
 
-from . import pathway_genie
+from pathway_genie import pathway
 
 
 # Configuration:
@@ -36,7 +36,7 @@ _STATIC_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)),
 APP = Flask(__name__, static_folder=_STATIC_FOLDER)
 APP.config.from_object(__name__)
 
-_MANAGER = pathway_genie.PathwayGenie()
+_MANAGER = pathway.PathwayGenie()
 _ORGANISMS = seq_utils.get_codon_usage_organisms(expand=True, verbose=True)
 
 
@@ -122,6 +122,15 @@ def connect_ice():
     response = jsonify({'message': message})
     response.status_code = status_code
     return response
+
+
+@APP.route('/uniprot/<query>')
+def search_uniprot(query):
+    '''Gets supported restriction enzymes.'''
+    fields = ['entry name', 'protein names', 'sequence', 'ec', 'organism',
+              'organism-id']
+    result = seq_utils.search_uniprot(query, fields)
+    return json.dumps(result)
 
 
 def _connect_ice(req):
