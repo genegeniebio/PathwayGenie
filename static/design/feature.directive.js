@@ -2,7 +2,9 @@ designApp.directive("featurePanel", function() {
     return {
     	scope: {
     		selected: "&",
-    		setValid: "&"
+    		setValid: "&",
+    		searchUniprot: "&",
+    		searching: "&"
     	},
         templateUrl: "feature.html",
         link: function (scope, element, attr, ctrl) {

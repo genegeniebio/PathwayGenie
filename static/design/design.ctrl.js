@@ -1,6 +1,8 @@
 designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, DesignService) {
 	var self = this;
 	
+	var search = false;
+	
 	self.templates = [
 		{
 			typ: "http://purl.obolibrary.org/obo/SO_0001416",
@@ -148,6 +150,24 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 		self.query().designs.splice(index, 1);
 		self.toggleSelected(null);
 	};
+	
+	self.searchUniprot = function(query) {
+		search = true;
+		
+		DesignService.searchUniprot(query).then(
+			function(resp) {
+				var response = resp.data;
+				alert(response)
+				search = false;
+			},
+			function(errResp) {
+				search = false;
+			});
+	};
+	
+	self.searching = function() {
+		return search;
+	}
 
 	self.queryJson = angular.toJson({selected: self.selected(), query: self.query()}, true);
 	

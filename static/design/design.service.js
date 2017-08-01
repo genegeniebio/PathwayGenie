@@ -1,4 +1,4 @@
-designApp.factory("DesignService", [function() {
+designApp.factory("DesignService", ["$http", function($http) {
 	var obj = {};
 	
 	obj.query = {
@@ -20,6 +20,10 @@ designApp.factory("DesignService", [function() {
 		else {
 			obj.selected = selected;
 		}
+	}
+	
+	obj.searchUniprot = function(query) {
+		return $http.get("/uniprot/" + encodeURIComponent(query));
 	}
 
 	return obj;

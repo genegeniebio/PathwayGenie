@@ -55,8 +55,9 @@
 						<input type="text" class="form-control"
 							data-ng-model="uniprot"
 							placeholder="UniProt search term"/>
-						<button type="submit" data-ng-click="ctrl.submit()"
-							data-ng-disabled="uniprot.length < 3"
+						<button type="submit"
+							data-ng-click="searchUniprot({query: uniprot})"
+							data-ng-disabled="searching() || !uniprot || uniprot.length < 3"
 							class="pull-right btn btn-default btn-xs btn-field">Search</button>
 					</div>
 				</div>
