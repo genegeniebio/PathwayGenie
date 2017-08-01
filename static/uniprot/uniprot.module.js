@@ -1,1 +1,1 @@
-var uniprotApp = angular.module("uniprotApp", []);
+var uniprotApp = angular.module("uniprotApp", ["angularUtils.directives.dirPagination"]);

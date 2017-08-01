@@ -3,10 +3,26 @@
 		<h4 class="modal-title">UniProt</h4>
 	</div>
 	<div class="modal-body">
-		{{uniprotCtrl.options}}
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Value</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr dir-paginate="option in uniprotCtrl.options|itemsPerPage:5">
+					<td>{{option}}</td>
+				</tr>
+			</tbody>
+		</table>
+		<dir-pagination-controls
+			max-size="5"
+			direction-links="true"
+			boundary-links="true">
+		</dir-pagination-controls>
 	</div>
 	<div class="modal-footer">
-	 	<button type="button" class="btn btn-default" data-ng-click="uniprotCtrl.cancel()">Cancel</button>
+		<button type="button" class="btn btn-default" data-ng-click="uniprotCtrl.cancel()">Cancel</button>
 		<button type="button" class="btn btn-primary" data-ng-click="uniprotCtrl.ok()">OK</button>
 	</div>
 </div>
