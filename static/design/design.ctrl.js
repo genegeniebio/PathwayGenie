@@ -1,4 +1,4 @@
-designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, DesignService) {
+designApp.controller("designCtrl", ["$scope", "DesignService", "UniprotService", function($scope, DesignService, UniprotService) {
 	var self = this;
 	
 	var search = false;
@@ -156,8 +156,7 @@ designApp.controller("designCtrl", ["$scope", "DesignService", function($scope, 
 		
 		DesignService.searchUniprot(query).then(
 			function(resp) {
-				var response = resp.data;
-				alert(response)
+				UniprotService.open(resp.data)
 				search = false;
 			},
 			function(errResp) {

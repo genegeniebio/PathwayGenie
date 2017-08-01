@@ -6,7 +6,7 @@ designApp.directive("featurePanel", function() {
     		searchUniprot: "&",
     		searching: "&"
     	},
-        templateUrl: "feature.html",
+        templateUrl: "design/feature.html",
         link: function (scope, element, attr, ctrl) {
             scope.$watch("form.$valid", function() {
             	scope.setValid({valid: scope.form.$valid});

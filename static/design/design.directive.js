@@ -9,7 +9,7 @@ designApp.directive("designPanel", function($timeout) {
     		removeDesign: "&",
     		copy: "&"
     	},
-        templateUrl: "design.html",
+        templateUrl: "design/design.html",
         link: function(scope, element) {
         	scope.$watch(function() {
         		return scope.query().designs;

@@ -1,0 +1,12 @@
+<div data-ng-init="uniprotCtrl.init()">
+	<div class="modal-header">
+		<h4 class="modal-title">UniProt</h4>
+	</div>
+	<div class="modal-body">
+		{{uniprotCtrl.options}}
+	</div>
+	<div class="modal-footer">
+	 	<button type="button" class="btn btn-default" data-ng-click="uniprotCtrl.cancel()">Cancel</button>
+		<button type="button" class="btn btn-primary" data-ng-click="uniprotCtrl.ok()">OK</button>
+	</div>
+</div>

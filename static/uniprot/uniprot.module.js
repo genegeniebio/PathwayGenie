@@ -1,0 +1,1 @@
+var uniprotApp = angular.module("uniprotApp", []);
