@@ -15,7 +15,9 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr dir-paginate="option in uniprotCtrl.options|itemsPerPage:5">
+				<tr dir-paginate="option in uniprotCtrl.options|itemsPerPage:5"
+					data-ng-class="{'info': uniprotCtrl.selected.Entry === option.Entry}"
+					data-ng-click="uniprotCtrl.toggleSelected(option)">
 					<td class="single-row" tooltip-append-to-body="true" uib-tooltip="{{option.Entry}}">{{option.Entry}}</td>
 					<td class="single-row" tooltip-append-to-body="true" uib-tooltip="{{option['Entry name']}}">{{option['Entry name']}}</td>
 					<td class="single-row" tooltip-append-to-body="true" uib-tooltip="{{option['Protein names'][0]}}">{{option['Protein names'][0]}}</td>
@@ -34,6 +36,6 @@
 	</div>
 	<div class="modal-footer">
 		<button type="button" class="btn btn-default" data-ng-click="uniprotCtrl.cancel()">Cancel</button>
-		<button type="button" class="btn btn-primary" data-ng-click="uniprotCtrl.ok()">OK</button>
+		<button type="button" class="btn btn-primary" data-ng-disabled="!uniprotCtrl.selected" data-ng-click="uniprotCtrl.ok()">OK</button>
 	</div>
 </div>
