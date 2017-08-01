@@ -156,7 +156,7 @@ designApp.controller("designCtrl", ["$scope", "DesignService", "UniprotService",
 		
 		DesignService.searchUniprot(query).then(
 			function(resp) {
-				UniprotService.open(resp.data)
+				UniprotService.open(resp.data, DesignService.selected)
 				search = false;
 			},
 			function(errResp) {

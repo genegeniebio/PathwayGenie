@@ -1,6 +1,7 @@
-uniprotApp.controller("uniprotCtrl", ["$uibModalInstance", "options", function($uibModalInstance, options) {
+uniprotApp.controller("uniprotCtrl", ["$uibModalInstance", "options", "feature", function($uibModalInstance, options, feature) {
 	var self = this;
 	self.options = options;
+	self.feature = feature;
 	self.selected = null;
 	
 	self.toggleSelected = function(selected) {
@@ -13,10 +14,10 @@ uniprotApp.controller("uniprotCtrl", ["$uibModalInstance", "options", function($
 	};
 	
 	self.cancel = function() {
-		$uibModalInstance.close();
+		$uibModalInstance.dismiss();
 	};
 
 	self.ok = function() {
-		$uibModalInstance.close();
+		$uibModalInstance.close(self.selected);
 	};
 }]);
