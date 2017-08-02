@@ -5,6 +5,11 @@
 	resize: none;
 }
 
+.mutated
+{
+	border: 1px blue solid;
+}
+
 .file-button-label
 {
 	margin-top: 5px;

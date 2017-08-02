@@ -25,6 +25,7 @@ uniprotApp.factory("UniprotService", ["$uibModal", function($uibModal) {
 		modalInstance.result.then(function(selected) {
 			feature.options[0].name = selected['Protein names'][0];
 			feature.options[0].seq = selected.Sequence;
+			feature.options[0].temp_params.orig_seq = selected.Sequence;
 		});
 	};
 	
