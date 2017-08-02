@@ -1,7 +1,6 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
 <link rel="stylesheet" href="style.css" />
-<link rel="stylesheet" href="design/feature.css">
 
 <div class="panel panel-default">
 	<div class="panel-heading">Feature</div>
@@ -18,7 +17,7 @@
 			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('seq') !== -1">
 				<label class="col-xs-4 col-form-label">Sequence:</label>
 				<div class="col-xs-8">
-					<textarea class="form-control sequence uppercase"
+					<textarea class="form-control sequence"
 						data-ng-model="selected().seq"
 						data-ng-pattern="/^[ACGTacgt\s]+$/"
 						required
@@ -73,7 +72,7 @@
 			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('prot') !== -1">
 				<label class="col-xs-4 col-form-label">Sequence:</label>
 				<div class="col-xs-8">
-					<textarea class="form-control sequence uppercase"
+					<textarea class="form-control sequence sequence"
 						data-ng-model="selected().options[0].seq"
 						data-ng-pattern="/^[ACDEFGHIKLMNPQRSTVWYacdefghiklmnpqrstvwy\s]+$/"
 						required

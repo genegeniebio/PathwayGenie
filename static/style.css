@@ -1,6 +1,8 @@
-.uppercase
+.sequence
 {
 	text-transform: uppercase;
+	font-family: monospace;
+	resize: none;
 }
 
 .file-button-label

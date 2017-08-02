@@ -15,7 +15,7 @@
 						<div class="form-group">
 							<label class="col-xs-4 col-form-label">5' flanking region:</label>
 							<div class="col-xs-8">
-								<input type="text" class="form-control uppercase"
+								<input type="text" class="form-control sequence"
 									data-ng-model="ctrl.query.designs[0].dna.features[0].seq"
 									placeholder="Enter 5' flanking region">
 							</div>
@@ -57,7 +57,7 @@
 						<div class="form-group">
 							<label class="col-xs-4 col-form-label">3' flanking region:</label>
 							<div class="col-xs-8">
-								<input type="text" class="form-control uppercase"
+								<input type="text" class="form-control sequence"
 									data-ng-model="ctrl.query.designs[0].dna.features[3].seq"
 									placeholder="Enter 3' flanking region">
 							</div>
@@ -95,7 +95,7 @@
 						<div class="form-group">
 							<label class="col-xs-4 col-form-label">Excluded codons:</label>
 							<div class="col-xs-8">
-								<input type="text" class="form-control uppercase"
+								<input type="text" class="form-control sequence"
 									data-ng-model="ctrl.query.filters.excl_codons"
 									data-ng-pattern="ctrl.excl_codons_regex"
 									placeholder="Enter excluded codons">
