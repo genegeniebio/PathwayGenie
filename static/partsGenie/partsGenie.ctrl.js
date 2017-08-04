@@ -142,12 +142,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	};
 	
 	self.addDesign = function() {
-		self.query.designs.push({
-			type: "design",
-			name: "Design",
-			desc: "Design",
-			features: []
-		});
+		PartsGenieService.addDesign();
 	};
 	
 	self.removeDesign = function(index) {
@@ -240,7 +235,4 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	function(values) {
 		self.queryJson = angular.toJson({selected: self.selected(), query: self.query}, true)
 	}, true);
-
-	// Initialise UI:
-	self.addDesign();
 }]);

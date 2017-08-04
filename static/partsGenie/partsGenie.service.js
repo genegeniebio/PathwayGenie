@@ -10,6 +10,15 @@ partsGenieApp.factory("PartsGenieService", ["$http", function($http) {
 			"max_repeats": 5
 		},
 	};
+	
+	obj.addDesign = function() {
+		obj.query.designs.push({
+			type: "design",
+			name: "Design",
+			desc: "Design",
+			features: []
+		});
+	};
 		
 	obj.selected = null;
 	
@@ -25,6 +34,9 @@ partsGenieApp.factory("PartsGenieService", ["$http", function($http) {
 	obj.searchUniprot = function(query) {
 		return $http.get("/uniprot/" + encodeURIComponent(query));
 	}
+	
+	// Initialise UI:
+	obj.addDesign();
 
 	return obj;
 }]);
