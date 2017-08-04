@@ -21,15 +21,20 @@
 <body data-ng-app="designApp" data-ng-controller="designCtrl as ctrl" style="margin-top: 15px">
 	<div class="container">
 		<div class="col-md-6">
-			<design-panel
-				templates="ctrl.templates"
-				query="ctrl.query()"
-				selected="ctrl.selected()"
-				toggle-selected="ctrl.toggleSelected(args)"
-				add-design="ctrl.addDesign()"
-				remove-design="ctrl.removeDesign(args)"
-				copy="ctrl.copy(args)">
-			</design-panel>
+			<form role="form">
+				<div class="panel panel-default">
+					<div class="panel-heading">Designs</div>
+					<design-panel
+						templates="ctrl.templates"
+						query="ctrl.query()"
+						selected="ctrl.selected()"
+						toggle-selected="ctrl.toggleSelected(args)"
+						add-design="ctrl.addDesign()"
+						remove-design="ctrl.removeDesign(args)"
+						copy="ctrl.copy(args)">
+					</design-panel>
+				</div>
+			</form>
     	</div>
    		<div class="col-md-6" data-ng-show="ctrl.selected()">
 			<feature-panel

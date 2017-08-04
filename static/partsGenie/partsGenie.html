@@ -5,63 +5,30 @@
 			<div class="panel panel-default">
 				<div class="panel-heading">
 						<a data-toggle="collapse" data-parent="#accordion"
-							href="#collapse1">Query</a>
+							href="#collapse1">Designs</a>
 					<button type="submit" data-ng-click="ctrl.submit()"
 						data-ng-disabled="ctrl.response.update.status == 'running' || form.$invalid"
 						class="pull-right btn btn-default btn-xs">Submit</button>
 				</div>
 				<div id="collapse1" class="panel-collapse collapse in">
+					<design-panel
+						templates="ctrl.templates"
+						query="ctrl.query"
+						selected="ctrl.selected()"
+						toggle-selected="ctrl.toggleSelected(args)"
+						add-design="ctrl.addDesign()"
+						remove-design="ctrl.removeDesign(args)"
+						copy="ctrl.copy(args)">
+					</design-panel>
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<div class="panel-heading">
+						<a data-toggle="collapse in" data-parent="#accordion"
+							href="#collapse2">Organism</a>
+				</div>
+				<div id="collapse2" class="panel-collapse collapse">
 					<div class="panel-body">
-						<div class="form-group">
-							<label class="col-xs-4 col-form-label">5' flanking region:</label>
-							<div class="col-xs-8">
-								<input type="text" class="form-control sequence"
-									data-ng-model="ctrl.query.designs[0].dna.features[0].seq"
-									placeholder="Enter 5' flanking region">
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-xs-4 col-form-label">RBS length:</label>
-							<div class="col-xs-8">
-								<input type="number" class="form-control"
-									data-ng-model="ctrl.query.designs[0].dna.features[1].end" min="35" max="10000"
-									placeholder="Enter RBS length" required>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-xs-4 col-form-label">RBS TIR:</label>
-							<div class="col-xs-8">
-								<input type="number" class="form-control"
-									data-ng-model="ctrl.query.designs[0].dna.features[1].parameters['TIR target']" min="0" max="200000"
-									step="100"
-									placeholder="Enter target RBS translation initiation rate"
-									required>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-xs-4 col-form-label">Protein name:</label>
-							<div class="col-xs-8">
-								<input type="text" class="form-control"
-									data-ng-model="ctrl.query.designs[0].dna.features[2].options[0].name"
-									placeholder="Enter protein name" required>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-xs-4 col-form-label">Protein:</label>
-							<div class="col-xs-8">
-								<input type="text" class="form-control"
-									data-ng-model="ctrl.query.designs[0].dna.features[2].options[0].temp_params.aa_seq"
-									placeholder="Enter protein (Uniprot id or sequence)" required>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-xs-4 col-form-label">3' flanking region:</label>
-							<div class="col-xs-8">
-								<input type="text" class="form-control sequence"
-									data-ng-model="ctrl.query.designs[0].dna.features[3].seq"
-									placeholder="Enter 3' flanking region">
-							</div>
-						</div>
 						<div class="form-group">
 							<label class="col-xs-4 col-form-label">Organism:</label>
 							<div class="col-xs-8" data-ng-controller="typeaheadCtrl as typeahead_ctrl">
@@ -79,9 +46,9 @@
 			<div class="panel panel-default">
 				<div class="panel-heading">
 						<a data-toggle="collapse" data-parent="#accordion"
-							href="#collapse2">Filters</a>
+							href="#collapse3">Filters</a>
 				</div>
-				<div id="collapse2" class="panel-collapse collapse">
+				<div id="collapse3" class="panel-collapse collapse">
 					<div class="panel-body">
 						<div class="form-group">
 							<label class="col-xs-4 col-form-label">Max repeating nucleotides:</label>
@@ -115,6 +82,20 @@
 			</div>
 		</div>
 	</form>
+</div>
+
+<!-- Feature panel -->
+<div class="col-md-6" data-ng-show="ctrl.selected()">
+	<feature-panel
+		selected="ctrl.selected()"
+		set-valid="ctrl.setValid(valid)"
+		search-uniprot="ctrl.searchUniprot(query)"
+		searching="ctrl.searching()">
+	</feature-panel>
+</div>
+
+<div class="col-md-12">
+	<pre>{{ctrl.queryJson}}</pre>
 </div>
 
 <!-- Results panel -->
