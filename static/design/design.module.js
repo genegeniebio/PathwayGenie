@@ -1,1 +1,1 @@
-var designApp = angular.module("design", ["ui.bootstrap", "dndLists", "uniprotApp"]);
+var designApp = angular.module("designApp", ["ui.bootstrap", "dndLists", "uniprotApp"]);

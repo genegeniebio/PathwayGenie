@@ -1,1 +1,1 @@
-var partsGenieApp = angular.module("partsGenieApp", ["errorApp", "progressApp", "resultApp", "typeaheadApp"]);
+var partsGenieApp = angular.module("partsGenieApp", ["designApp", "errorApp", "progressApp", "resultApp", "typeaheadApp"]);

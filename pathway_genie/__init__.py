@@ -85,7 +85,7 @@ def get_organisms():
     '''Gets organisms from search term.'''
     query = json.loads(request.data)
 
-    url = "https://salislab.net/software/return_species_list?term=" + \
+    url = "https://www.denovodna.com/software/return_species_list?term=" + \
         query['term']
 
     response = urllib2.urlopen(url)
