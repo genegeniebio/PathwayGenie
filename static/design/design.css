@@ -83,6 +83,10 @@
     opacity: 0.66;
 }
 
+.glyphicon-small {
+    font-size: 8px;
+}
+
 .dndDragging {
     opacity: 0.5;
 }
