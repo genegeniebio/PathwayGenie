@@ -13,14 +13,27 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 
 	self.templates = [
 		{
-			typ: "http://purl.obolibrary.org/obo/SO_0001416",
-			name: "5' flanking region",
+			typ: "http://purl.obolibrary.org/obo/SO_0000001",
+			name: "region",
 			seq: "",
 			temp_params: {
 				fixed: true,
 				required: ["name", "seq"],
 				valid: false,
 				id: "_1"
+			}
+		},
+		{
+			typ: "http://purl.obolibrary.org/obo/SO_0000449",
+			end: 100,
+			name: "random region",
+			temp_params: {
+				fixed: false,
+				required: ["name", "len"],
+				min_end: 1,
+				max_end: 10000,
+				valid: true,
+				id: "_7"
 			}
 		},
 		{
@@ -93,30 +106,6 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 				id: "_6"
 			}
 		},
-		{
-			typ: "http://purl.obolibrary.org/obo/SO_0000449",
-			end: 100,
-			name: "random region",
-			temp_params: {
-				fixed: false,
-				required: ["name", "len"],
-				min_end: 1,
-				max_end: 10000,
-				valid: true,
-				id: "_7"
-			}
-		},
-		{
-			typ: "http://purl.obolibrary.org/obo/SO_0001417",
-			name: "3' flanking region",
-			seq: "",
-			temp_params: {
-				fixed: true,
-				required: ["name", "seq"],
-				valid: false,
-				id: "_8"
-			}
-		}
 	];
 	
 	self.copy = function(feature) {
@@ -167,7 +156,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		jobId = null
 		self.response = {"update": {"values": [], "status": "running", "message": "Submitting..."}};
 		error = null;
-		self.toggleSelected(self.selected);
+		self.toggleSelected(self.selected());
 		ResultService.setResults(null);
 		
 		ProgressService.open(self.query["app"] + " dashboard", self.cancel, self.update);
