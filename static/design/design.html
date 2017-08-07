@@ -22,7 +22,8 @@
 			dnd-draggable="design"
 			dnd-effect-allowed="move"
 			dnd-moved="models.designs.splice($index, 1)">
-			<div class="panel-heading">{{design.name}}
+			<div class="panel-heading">
+				<input type="text" class="form-control" data-ng-model="design.name"/>
 				<div class="glyphicon glyphicon-remove pull-right glyphicon-grey" data-ng-click="removeDesign({args: $index})">
 				</div>
 			</div>
