@@ -69,8 +69,8 @@
 				<label class="col-xs-4 col-form-label">Sequence:</label>
 				<div class="col-xs-8">
 					<textarea class="form-control sequence"
-						data-ng-model="selected().options[0].seq"
-						data-ng-class="{mutated: selected().options[0].temp_params.orig_seq && selected().options[0].seq !== selected().options[0].temp_params.orig_seq}"
+						data-ng-model="selected().options[0].temp_params.aa_seq"
+						data-ng-class="{mutated: selected().options[0].temp_params.orig_seq && selected().options[0].temp_params.aa_seq !== selected().options[0].temp_params.orig_seq}"
 						data-ng-pattern="/^[ACDEFGHIKLMNPQRSTVWYacdefghiklmnpqrstvwy\s]+$/"
 						required
 						placeholder="Sequence">

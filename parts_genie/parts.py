@@ -11,7 +11,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 from itertools import product
 import copy
 import math
-import re
 
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import dna_utils, seq_utils
@@ -122,15 +121,9 @@ class PartsSolution(object):
         or a protein sequence itself.'''
         for idx, feature in enumerate(self.__dna['features']):
             if feature['typ'] == dna_utils.SO_CDS:
-                # Gets sequences from protein ids, which may be either
-                # Uniprot ids, or a protein sequence itself:
-                uniprot_id_pattern = '[OPQ][0-9][A-Z0-9]{3}[0-9]|' + \
-                    '[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}'
-
                 for cds in feature['options']:
-                    if re.match(uniprot_id_pattern,
-                                cds['temp_params']['aa_seq']):
-                        _get_uniprot_data(cds, cds['temp_params']['aa_seq'])
+                    cds['temp_params']['aa_seq'] = \
+                        cds['temp_params']['aa_seq'].upper()
 
                     if cds['temp_params']['aa_seq'][-1] != '*':
                         cds['temp_params']['aa_seq'] += '*'
@@ -247,7 +240,7 @@ class PartsSolution(object):
         for feature in self.__dna['features']:
             if feature['typ'] == dna_utils.SO_CDS:
                 for cds in feature['options']:
-                    tirs.append(cds['parameters']['TIR'])
+                    tirs.append(cds['parameters'].get('TIR', None))
                     cais.append(cds['parameters']['CAI'])
 
         return '\t'.join([str(tirs),
@@ -263,7 +256,7 @@ class PartsThread(SimulatedAnnealer):
     '''Wraps a PartsGenie job into a thread.'''
 
     def __init__(self, query, verbose=True):
-        solution = PartsSolution(query['designs'][0]['dna'],
+        solution = PartsSolution(query['designs'][0],
                                  query['organism'],
                                  query['filters'])
 
@@ -300,7 +293,6 @@ def _get_uniprot_data(cds, uniprot_id):
                        'organism-id',
                        'ec'])
 
-    cds['temp_params']['aa_seq'] = uniprot_vals[uniprot_id]['Sequence']
     cds['name'] = uniprot_vals[uniprot_id]['Entry name']
     prot_names = uniprot_vals[uniprot_id]['Protein names']
     org = uniprot_vals[uniprot_id]['Organism']

@@ -38,7 +38,6 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 			}
 		},
 		{
-			type: "feature",
 			typ: "http://purl.obolibrary.org/obo/SO_0000167",
 			name: "promoter",
 			seq: "",
@@ -50,7 +49,6 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 			}
 		},
 		{
-			type: "feature",
 			typ: "http://purl.obolibrary.org/obo/SO_0000139",
 			name:"ribosome entry site",
 			end: 60,
@@ -67,7 +65,6 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 			}
 		},
 		{
-			type: "feature",
 			typ: "http://purl.obolibrary.org/obo/SO_0000316",
 			name: "coding sequence",
 			options: [
@@ -86,7 +83,6 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 			}
 		},
 		{
-			type: "feature",
 			typ: "http://purl.obolibrary.org/obo/SO_0000141",
 			name: "terminator",
 			seq: "",

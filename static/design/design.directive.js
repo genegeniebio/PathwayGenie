@@ -35,7 +35,6 @@ designApp.directive("designPanel", function($timeout) {
         		}
         		
         		scope.$parent.form.$setValidity("valid", valid);
-				
         	}
         }
     };
