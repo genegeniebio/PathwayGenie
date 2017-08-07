@@ -281,29 +281,3 @@ def _get_all_seqs(dna):
                 all_seqs[idx] = seq + feature['seq']
 
     return all_seqs
-
-
-def _get_uniprot_data(cds, uniprot_id):
-    '''Updates CDS with Uniprot data.'''
-    uniprot_vals = seq_utils.get_uniprot_values(
-        [uniprot_id], ['sequence',
-                       'entry name',
-                       'protein names',
-                       'organism',
-                       'organism-id',
-                       'ec'])
-
-    cds['name'] = uniprot_vals[uniprot_id]['Entry name']
-    prot_names = uniprot_vals[uniprot_id]['Protein names']
-    org = uniprot_vals[uniprot_id]['Organism']
-    cds['desc'] = ', '.join(prot_names) + ' (' + org + ')'
-    ec_number = \
-        uniprot_vals[uniprot_id].get('EC number', None)
-
-    cds['links'] = [
-        'http://identifiers.org/uniprot/' + uniprot_id,
-    ]
-
-    if ec_number:
-        cds['links'].append(
-            'http://identifiers.org/ec-code/' + ec_number)

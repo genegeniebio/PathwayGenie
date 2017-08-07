@@ -23,9 +23,18 @@ uniprotApp.factory("UniprotService", ["$uibModal", function($uibModal) {
 		});
 
 		modalInstance.result.then(function(selected) {
-			feature.options[0].name = selected['Protein names'][0];
-			feature.options[0].seq = selected.Sequence;
+			feature.options[0].name = selected["Entry name"];
+			feature.options[0].temp_params.aa_seq = selected.Sequence;
 			feature.options[0].temp_params.orig_seq = selected.Sequence;
+			feature.options[0].desc = selected["Protein names"].join(", ") + " (" + selected["Organism"] + ")";
+			
+			feature.options[0].links = [
+		        "http://identifiers.org/uniprot/" + selected["Entry"]
+		    ]
+	
+		    if(selected["EC number"]) {
+		    	feature.options[0].links.push("http://identifiers.org/ec-code/" + selected["EC number"]);
+		    }
 		});
 	};
 	
