@@ -167,6 +167,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		jobId = null
 		self.response = {"update": {"values": [], "status": "running", "message": "Submitting..."}};
 		error = null;
+		self.toggleSelected(self.selected);
 		ResultService.setResults(null);
 		
 		ProgressService.open(self.query["app"] + " dashboard", self.cancel, self.update);

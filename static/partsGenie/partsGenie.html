@@ -94,10 +94,6 @@
 	</feature-panel>
 </div>
 
-<div class="col-md-12">
-	<pre>{{ctrl.queryJson}}</pre>
-</div>
-
 <!-- Results panel -->
 <div class="col-md-6" data-ng-controller="resultCtrl as result_ctrl"
 	data-ng-show="result_ctrl.results()">
@@ -110,4 +106,8 @@
 		set-feature="result_ctrl.setFeature(ft)"
 		pagination="result_ctrl.pagination">
 	</result-panel>
+</div>
+
+<div class="col-md-12">
+	<pre>{{ctrl.queryJson}}</pre>
 </div>
