@@ -1,7 +1,7 @@
 <div class="panel panel-default">
 	<div class="panel-heading">Feature</div>
 	<div class="panel-body">
-		<form class="form-horizontal" name="form" role="form" novalidate>
+		<form class="form-horizontal" name="form" role="form">
 			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('name') !== -1">
 				<label class="col-xs-4 col-form-label">Name:</label>
 				<div class="col-xs-8">
@@ -16,7 +16,7 @@
 					<textarea class="form-control sequence"
 						data-ng-model="selected().seq"
 						data-ng-pattern="/^[ACGTacgt\s]+$/"
-						required
+						data-ng-required="selected().temp_params.required.indexOf('seq') !== -1"
 						placeholder="Sequence">
 					</textarea>
 				</div>
@@ -72,7 +72,7 @@
 						data-ng-model="selected().options[0].temp_params.aa_seq"
 						data-ng-class="{mutated: selected().options[0].temp_params.orig_seq && selected().options[0].temp_params.aa_seq !== selected().options[0].temp_params.orig_seq}"
 						data-ng-pattern="/^[ACDEFGHIKLMNPQRSTVWYacdefghiklmnpqrstvwy\s]+$/"
-						required
+						data-ng-required="selected().temp_params.required.indexOf('prot') !== -1"
 						placeholder="Sequence">
 					</textarea>
 				</div>
