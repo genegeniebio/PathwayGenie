@@ -13,15 +13,11 @@
 			</div>
 		</button>
 	</div>
-	<div class="panel-group designs" dnd-list="query().designs" dnd-allowed-types="['design']">
+	<div class="panel-group designs">
 		<div data-ng-repeat="design in query().designs"
 			class="panel panel-default"
 			name="design-{{$index}}"
-			data-ng-form
-			dnd-type="'design'"
-			dnd-draggable="design"
-			dnd-effect-allowed="move"
-			dnd-moved="models.designs.splice($index, 1)">
+			data-ng-form>
 			<div class="panel-heading">
 				<input type="text" class="form-control" data-ng-model="design.name"/>
 				<div class="glyphicon glyphicon-remove pull-right glyphicon-grey" data-ng-click="removeDesign({args: $index})">
