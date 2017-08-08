@@ -1,0 +1,1 @@
+var dualListboxApp = angular.module("dualListboxApp", []);

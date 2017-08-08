@@ -7,7 +7,8 @@ partsGenieApp.factory("PartsGenieService", ["$http", function($http) {
 			
 		], 
 		"filters": {
-			"max_repeats": 5
+			"max_repeats": 5,
+			"restr_enzs": []
 		},
 	};
 	

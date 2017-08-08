@@ -27,8 +27,7 @@ class PartsSolution(object):
         self.__dna['parameters']['Type'] = 'PART'
         self.__organism = organism
         self.__filters = filters
-        self.__filters['restr_enzs'] = self.__filters['restr_enzs'] \
-            if 'restr_enzs' in self.__filters else []
+        self.__filters['restr_enzs'] = self.__filters.get('restr_enzs', [])
         self.__calc = rbs_calc.RbsCalculator(organism['r_rna'])
         self.__cod_opt = seq_utils.CodonOptimiser(organism['taxonomy_id'])
 

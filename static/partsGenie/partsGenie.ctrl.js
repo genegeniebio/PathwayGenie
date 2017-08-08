@@ -7,9 +7,17 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	self.query = PartsGenieService.query;
 	self.response = {"update": {"values": [], "status": "waiting", "message": "Waiting..."}};
 
-	self.restr_enzs = function() {
-		return PathwayGenieService.restr_enzs();
-	};
+	self.restrEnzs = PathwayGenieService.restrEnzs;
+	
+	self.selectRestEnzs = function(selected) {
+		self.restrEnzs = remove(self.restrEnzs, selected);
+		self.query.filters.restr_enzs.push.apply(self.query.filters.restr_enzs, selected);
+	}
+	
+	self.deselectRestEnzs = function(selected) {
+		self.restrEnzs.push.apply(self.restrEnzs, selected);
+		self.query.filters.restr_enzs = remove(self.query.filters.restr_enzs, selected);
+	}
 
 	self.templates = [
 		{
@@ -204,6 +212,14 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		self.response.update.message = "Error";
 		$scope.$apply();
 		ErrorService.open(message);
+	};
+	
+	remove = function(array, toRemove) {
+		array = array.filter(function(elem) {
+			return !toRemove.includes(elem);
+		});
+		
+		return array;
 	};
 	
 	self.queryJson = angular.toJson({selected: self.selected(), query: self.query}, true);

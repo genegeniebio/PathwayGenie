@@ -1,19 +1,16 @@
 pathwayGenieApp.factory("PathwayGenieService", ["$http", "ErrorService", function($http, ErrorService) {
-	var restr_enzs = null;
+	var restrEnzs = [];
 	
-	var restr_enzymes_promise = $http.get("/restr_enzymes").then(
+	var restrEnzymesPromise = $http.get("/restr_enzymes").then(
 		function(resp) {
-			restr_enzs = resp.data;
+			restrEnzs.push.apply(restrEnzs, resp.data);
 		},
 		function(errResp) {
 			ErrorService.open(errResp.data.message);
 		});
 	return {
-		restr_enzymes_promise: restr_enzymes_promise,
-		
-		restr_enzs: function() {
-			return restr_enzs;
-		},
+		restrEnzymesPromise: restrEnzymesPromise,
+		restrEnzs: restrEnzs,
 
 		submit: function(query) {
 			return $http.post("/submit", query);

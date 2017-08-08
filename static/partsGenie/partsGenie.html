@@ -69,13 +69,13 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="col-xs-4 col-form-label">Excluded restriction sites:</label>
-							<div class="col-xs-8">
-								<select data-ng-model="ctrl.query.filters.restr_enzs"
-									data-ng-options="restr_enz for restr_enz in ctrl.restr_enzs() | orderBy:'toString()'"
-									data-ng-multiple="true" multiple class="form-control">
-								</select>
-							</div>
+							<label class="col-xs-12 col-form-label">Excluded restriction sites:</label>
+							<dual-listbox
+								options="ctrl.restrEnzs"
+					    		chosen="ctrl.query.filters.restr_enzs"
+					    		select="ctrl.selectRestEnzs(args)"
+					    		deselect="ctrl.deselectRestEnzs(args)">
+							</dual-listbox>
 						</div>
 					</div>
 				</div>
