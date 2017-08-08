@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="/static/dualListbox/dualListbox.css" />
 <div class="col-md-5">
 	<select class="form-control"
 		data-ng-model="selectedOptions"
@@ -6,19 +7,27 @@
 		multiple>
 	</select>
 </div>
-<div class="col-md-2">
-	<button type="button"
-		class="btn btn-default"
-		data-ng-click="select({args: selectedOptions})"
-		aria-label="Select">
-		<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-	</button>
-	<button type="button"
-		class="btn btn-default"
-		data-ng-click="deselect({args: selectedChosen})"
-		aria-label="De-select">
-		<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
-	</button>
+<div class="col-md-2 center">
+	<div class="middle">
+		<div class="inner">
+			<button type="button"
+				class="btn btn-default"
+				data-ng-click="select({args: selectedOptions}); selectedOptions = null;"
+				data-ng-disabled="!selectedOptions"
+				aria-label="Select">
+				<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+			</button>
+    	</div>
+		<div class="inner">
+			<button type="button"
+				class="btn btn-default"
+				data-ng-click="deselect({args: selectedChosen}); selectedChosen = null;"
+				data-ng-disabled="!selectedChosen"
+				aria-label="De-select">
+				<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+			</button>
+    	</div>
+  	</div>
 </div>
 <div class="col-md-5">
 	<select class="form-control"
