@@ -4,10 +4,15 @@
 		<span class="label label-danger tag" data-ng-repeat="tag in tags">{{tag}}
 			<span class="glyphicon glyphicon-remove" data-ng-click="tags.splice($index, 1)"></span>
 		</span>
-		<form name="tag-form" role="form" novalidate>
-			<input type="text" class="form-control sequence" data-ng-model="tagText" placeholder="{{placeholder}}" required/>
+		<form name="tagForm" role="form" novalidate>
+			<input type="text"
+				class="form-control sequence"
+				data-ng-model="tagText"
+				data-ng-pattern="pattern"
+				required
+				placeholder="{{placeholder}}"/>
 			<button type="submit" data-ng-click="addTag({args: tags})"
-				data-ng-disabled="tag-form.$invalid"
+				data-ng-disabled="tagForm.$invalid"
 				class="pull-right btn btn-default btn-xs btn-field">Add</button>
 		</form>
 	</div>

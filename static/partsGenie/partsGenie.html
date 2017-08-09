@@ -63,8 +63,9 @@
 							<label class="col-xs-4 col-form-label">Excluded codons:</label>
 							<div class="col-xs-8" data-ng-controller="tagInputCtrl as tag_ctrl">
 							    <tag-input
-							    	placeholder="'Add a codon'"
+							    	placeholder="'Codon'"
 							    	tags="ctrl.query.filters.excl_codons"
+							    	pattern="ctrl.codons_regex"
 							    	tag-text="tag_ctrl.tagText"
 							    	add-tag="tag_ctrl.addTag(args)">
 							    </tag-input>

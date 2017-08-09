@@ -3,7 +3,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	var jobId = null;
 	var search = false;
 	
-	self.excl_codons_regex = "([ACGTacgt]{3}(\s[ACGTacgt]{3})+)*";
+	self.codons_regex = new RegExp("^[ACGTacgt\s]{3}$");
 	self.query = PartsGenieService.query;
 	self.response = {"update": {"values": [], "status": "waiting", "message": "Waiting..."}};
 

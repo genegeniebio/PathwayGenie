@@ -1,4 +1,5 @@
 .tag {
-	border-right: 5px;
-	border-bottom: 5px;
+	margin-right: 3px;
+	margin-bottom: 3px;
+	display: inline-block;
 }

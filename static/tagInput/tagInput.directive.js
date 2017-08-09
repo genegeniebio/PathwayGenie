@@ -3,6 +3,7 @@ tagInputApp.directive("tagInput", function() {
 		scope: {
 			placeholder: "=",
 			tags: "=",
+			pattern: "=",
 			tagText: "=",
 			addTag: "&"
 		},
