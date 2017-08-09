@@ -6,6 +6,7 @@ designApp.directive("designPanel", function($timeout) {
     		selected: "&",
     		toggleSelected: "&",
     		addDesign: "&",
+    		copyDesign: "&",
     		removeDesign: "&",
     		copy: "&"
     	},

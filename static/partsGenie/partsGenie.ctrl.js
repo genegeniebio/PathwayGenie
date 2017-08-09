@@ -138,6 +138,17 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		PartsGenieService.addDesign();
 	};
 	
+	self.copyDesign = function(index) {
+		var origDesign = self.query.designs[index];
+		var copiedDesign = angular.copy(origDesign);
+		
+		for(var i = 0; i < copiedDesign.features.length; i++) {
+			copiedDesign.features[i].temp_params.id = "_" + i + "_" + (new Date()).getTime();
+		}
+		
+		self.query.designs.push(copiedDesign);
+	};
+	
 	self.removeDesign = function(index) {
 		self.query.designs.splice(index, 1);
 		self.toggleSelected(null);

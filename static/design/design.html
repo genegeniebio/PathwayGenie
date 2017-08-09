@@ -20,7 +20,11 @@
 			data-ng-form>
 			<div class="panel-heading">
 				<input type="text" class="form-control" data-ng-model="design.name"/>
-				<div class="glyphicon glyphicon-remove pull-right glyphicon-grey" data-ng-click="removeDesign({args: $index})">
+				<div class="pull-right">
+					<div class="glyphicon glyphicon-copy glyphicon-grey" data-ng-click="copyDesign({args: $index})">
+					</div>
+					<div class="glyphicon glyphicon-remove glyphicon-grey" data-ng-click="removeDesign({args: $index})">
+					</div>
 				</div>
 			</div>
 			<div class="panel-body">
