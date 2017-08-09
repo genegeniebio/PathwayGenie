@@ -28,6 +28,7 @@
 								<input type="text" class="form-control"
 									data-ng-init="typeahead_ctrl.url='/organisms/'"
 									data-ng-model="ctrl.query.organism"
+									data-ng-required="ctrl.organismRequired()"
 									placeholder="Select host organism" required autocomplete="off"
 									uib-typeahead="organism as organism.name for organism in typeahead_ctrl.getItem({'term': $viewValue})"
 									typeahead-min-length="3" typeahead-editable="false">

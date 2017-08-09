@@ -154,6 +154,21 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		self.toggleSelected(null);
 	};
 	
+	self.organismRequired = function() {
+		for(var i = 0; i < self.query.designs.length; i++) {
+			design = self.query.designs[i];
+		
+			for(var j = 0; j < design.features.length; j++) {
+				if(design.features[j].typ == "http://purl.obolibrary.org/obo/SO_0000139"
+					|| design.features[j].typ == "http://purl.obolibrary.org/obo/SO_0000316") {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
 	self.searchUniprot = function(query) {
 		search = true;
 		
