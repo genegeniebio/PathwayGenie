@@ -8,4 +8,8 @@ tagInputApp.controller("tagInputCtrl", [function() {
 		}
 		self.tagText = null
 	};
+	
+	self.validTag = function(pattern) {
+		return pattern && self.tagText && pattern.test(self.tagText.toUpperCase())
+	}
 }]);

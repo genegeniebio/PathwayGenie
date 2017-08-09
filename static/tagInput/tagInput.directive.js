@@ -5,7 +5,8 @@ tagInputApp.directive("tagInput", function() {
 			tags: "=",
 			pattern: "=",
 			tagText: "=",
-			addTag: "&"
+			addTag: "&",
+			validTag: "&"
 		},
 		templateUrl : "/static/tagInput/tagInput.html"
 	};
