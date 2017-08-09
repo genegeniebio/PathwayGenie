@@ -53,6 +53,11 @@
 
 /***************************** Features *****************************/
 
+.design-name {
+	display: table-cell;
+	width: 92%;
+}
+
 .features {
     height: 100px;
     overflow-x: scroll;
