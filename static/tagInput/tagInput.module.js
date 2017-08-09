@@ -1,0 +1,1 @@
+var tagInputApp = angular.module("tagInputApp", []);
