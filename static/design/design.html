@@ -36,6 +36,7 @@
 						data-ng-click="toggleSelected({args: feature})"
 						data-ng-form
 						class="dropped feature SO{{feature.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}"
+						uib-tooltip="{{feature.name}}"
 						dnd-type="'feature'"
 						dnd-draggable="feature"
 						dnd-effect-allowed="move"

@@ -22,7 +22,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	self.templates = [
 		{
 			typ: "http://purl.obolibrary.org/obo/SO_0000001",
-			name: "region",
+			name: "Defined sequence",
 			seq: "",
 			temp_params: {
 				fixed: true,
@@ -34,19 +34,19 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		{
 			typ: "http://purl.obolibrary.org/obo/SO_0000449",
 			end: 100,
-			name: "random region",
+			name: "Randomised sequence",
 			temp_params: {
 				fixed: false,
 				required: ["name", "len"],
 				min_end: 1,
 				max_end: 10000,
 				valid: true,
-				id: "_7"
+				id: "_2"
 			}
 		},
 		{
 			typ: "http://purl.obolibrary.org/obo/SO_0000143",
-			name: "assembly component",
+			name: "Sequence of defined melting temperature",
 			seq: "",
 			parameters: {
 				"Tm target": 70
@@ -55,23 +55,34 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 				fixed: true,
 				required: ["name", "tm"],
 				valid: true,
-				id: "_2"
+				id: "_3"
 			}
 		},
 		{
-			typ: "http://purl.obolibrary.org/obo/SO_0000167",
-			name: "promoter",
+			typ: "http://purl.obolibrary.org/obo/SO_0000296",
+			name: "Origin of replication",
 			seq: "",
 			temp_params: {
 				fixed: true,
 				required: ["name", "seq"],
 				valid: false,
-				id: "_3"
+				id: "_4"
+			}
+		},
+		{
+			typ: "http://purl.obolibrary.org/obo/SO_0000167",
+			name: "Promoter",
+			seq: "",
+			temp_params: {
+				fixed: true,
+				required: ["name", "seq"],
+				valid: false,
+				id: "_5"
 			}
 		},
 		{
 			typ: "http://purl.obolibrary.org/obo/SO_0000139",
-			name:"ribosome entry site",
+			name:"Ribosome binding site",
 			end: 60,
 			parameters: {
 				"TIR target": 15000
@@ -82,12 +93,12 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 				min_end: 35,
 				max_end: 10000,
 				valid: true,
-				id: "_4"
+				id: "_6"
 			}
 		},
 		{
 			typ: "http://purl.obolibrary.org/obo/SO_0000316",
-			name: "coding sequence",
+			name: "Coding sequence",
 			options: [
 				{
 					typ: "http://purl.obolibrary.org/obo/SO_0000316",
@@ -100,18 +111,18 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 			temp_params: {
 				required: ["prot"],
 				valid: false,
-				id: "_5"
+				id: "_7"
 			}
 		},
 		{
 			typ: "http://purl.obolibrary.org/obo/SO_0000141",
-			name: "terminator",
+			name: "Terminator",
 			seq: "",
 			temp_params: {
 				fixed: true,
 				required: ["name", "seq"],
 				valid: false,
-				id: "_6"
+				id: "_8"
 			}
 		},
 	];

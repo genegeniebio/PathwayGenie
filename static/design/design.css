@@ -32,6 +32,10 @@
 	background-image: url("../sbolv/promoter.svg");
 }
 
+.feature.SO0000296 {
+	background-image: url("../sbolv/origin-of-replication.svg");
+}
+
 .feature.SO0000316 {
 	background-image: url("../sbolv/cds.svg");
 }
