@@ -1,4 +1,4 @@
-progressApp.factory("ProgressService", ["$uibModal", function($uibModal) {
+progressApp.factory("ProgressService", ["$uibModal", "$uibModalStack", function($uibModal, $uibModalStack) {
 	var obj = {};
 	
 	obj.open = function(progressTitle, cancel, update) {
@@ -23,6 +23,10 @@ progressApp.factory("ProgressService", ["$uibModal", function($uibModal) {
 				}
 			}
 		});
+	};
+	
+	obj.close = function() {
+		$uibModalStack.dismissAll("");
 	};
 	
 	return obj;

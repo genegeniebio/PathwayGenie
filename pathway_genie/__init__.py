@@ -22,7 +22,6 @@ from synbiochem.utils.ice_utils import ICEClient
 from synbiochem.utils.net_utils import NetworkError
 
 from parts_genie import parts
-
 from pathway_genie import pathway
 
 
@@ -131,6 +130,17 @@ def search_uniprot(query):
               'organism-id']
     result = seq_utils.search_uniprot(query, fields)
     return json.dumps(result.values())
+
+
+@APP.errorhandler(Exception)
+def handle_error(error):
+    '''Handles errors.'''
+    APP.logger.error('Exception: %s', (error))
+    traceback.print_exc()
+
+    response = jsonify({'message': traceback.format_exc()})
+    response.status_code = 500
+    return response
 
 
 def _connect_ice(req):

@@ -247,7 +247,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	onerror = function(message) {
 		self.response.update.status = "error";
 		self.response.update.message = "Error";
-		$scope.$apply();
+		ProgressService.close();
 		ErrorService.open(message);
 	};
 	
