@@ -8,7 +8,7 @@
 			dnd-draggable="feature"
 			dnd-effect-allowed="copy"
 			uib-tooltip="{{feature.name}}"
-			dnd-dragstart="copy({args: feature})">
+			dnd-dragstart="copyFeature({args: feature})">
 			<div class="feature SO{{feature.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}">
 			</div>
 		</button>

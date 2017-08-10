@@ -8,7 +8,7 @@ designApp.directive("designPanel", function($timeout) {
     		addDesign: "&",
     		copyDesign: "&",
     		removeDesign: "&",
-    		copy: "&"
+    		copyFeature: "&"
     	},
         templateUrl: "/static/design/design.html",
         link: function(scope, element) {

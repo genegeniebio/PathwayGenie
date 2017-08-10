@@ -127,10 +127,10 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		},
 	];
 	
-	self.copy = function(feature) {
+	self.copyFeature = function(feature) {
 		feature.temp_params.id = "_" + (new Date()).getTime();
 	}
-	
+
 	self.selected = function() {
 		return PartsGenieService.selected;
 	};
