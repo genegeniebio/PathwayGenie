@@ -9,6 +9,11 @@
 	resize: none;
 }
 
+.sequence.form-control[readonly]
+{
+	background-color: #ffffff;
+}
+
 .mutated
 {
 	border: 1px blue solid;

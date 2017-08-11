@@ -36,8 +36,12 @@
 			</tr>
 			<tr>
 				<td>Sequence</td>
-				<td class="seq">{{(feature().seq ? feature().seq :
-					dna.seq.substring(feature().start - 1, feature().end)) | uppercase }}</td>
+				<td>
+					<textarea class="form-control sequence"
+						readonly
+						data-ng-model="(feature().seq ? feature().seq : dna.seq.substring(feature().start - 1, feature().end))">
+					</textarea>
+				</td>
 			</tr>
 			<tr data-ng-repeat="(key, value) in feature().parameters">
 				<td>{{key}}</td>
