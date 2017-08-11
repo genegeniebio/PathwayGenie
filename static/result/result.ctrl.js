@@ -32,7 +32,7 @@ resultApp.controller("resultCtrl", ["$scope", "ICEService", "ResultService", fun
 		return selected;
 	};
 	
-	self.setSelected = function(ft) {
+	self.toggleSelected = function(ft) {
 		if(selected === ft) {
 			selected = self.result();
 		}
@@ -45,6 +45,6 @@ resultApp.controller("resultCtrl", ["$scope", "ICEService", "ResultService", fun
 		return self.result();
 	},               
 	function(result) {
-		self.setSelected(result);
+		self.toggleSelected(result);
 	}, true);
 }]);

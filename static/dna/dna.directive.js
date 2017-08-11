@@ -3,7 +3,7 @@ dnaApp.directive("dnaPanel", function() {
 		scope: {
 			"dna": "=",
 			"selected": "&",
-			"setSelected": "&"
+			"toggleSelected": "&"
 		},
 		templateUrl: "/static/dna/dna.html",
 	};

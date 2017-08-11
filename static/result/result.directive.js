@@ -6,7 +6,7 @@ resultApp.directive("resultPanel", function() {
     		"saveResults": "&",
     		"connected": "&",
     		"selected": "&",
-    		"setSelected": "&",
+    		"toggleSelected": "&",
     		"pagination": "=",
     	},
         templateUrl: "/static/result/result.html"
