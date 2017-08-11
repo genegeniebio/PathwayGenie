@@ -4,11 +4,11 @@
 	<div>{{dna.desc}}</div>
 
 	<div class="horizontal_scroll"
-		data-ng-init="setFeature({args: {ft: dna}})"
-		data-ng-mouseleave="setFeature({args: {ft: dna}})">
+		data-ng-init="setFeature({args: {ft: dna}})">
 		<div data-ng-repeat="f in dna.features | orderBy: f.start"
 			class="dropped feature SO{{f.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}"
-			data-ng-mouseover="setFeature({args: {ft: f}})">
+			data-ng-mouseover="setSelected({args: {ft: f}})"
+			data-ng-mouseleave="setSelected({args: {ft: dna}})">
 		</div>
 	</div>
 	
@@ -16,41 +16,41 @@
 		<tbody>
 			<tr>
 				<td>Name</td>
-				<td>{{feature().name ? feature().name : ''}}</td>
+				<td>{{selected().name ? selected().name : ''}}</td>
 			</tr>
 			<tr>
 				<td>Description</td>
-				<td>{{feature().desc ? feature().desc : ''}}</td>
+				<td>{{selected().desc ? selected().desc : ''}}</td>
 			</tr>
 			<tr>
 				<td>Start</td>
-				<td>{{feature().start ? feature().start : ''}}</td>
+				<td>{{selected().start ? selected().start : ''}}</td>
 			</tr>
 			<tr>
 				<td>End</td>
-				<td>{{feature().end ? feature().end : ''}}</td>
+				<td>{{selected().end ? selected().end : ''}}</td>
 			</tr>
 			<tr>
 				<td>Strand</td>
-				<td>{{feature().forward ? '+' : '-'}}</td>
+				<td>{{selected().forward ? '+' : '-'}}</td>
 			</tr>
 			<tr>
 				<td>Sequence</td>
 				<td>
 					<textarea class="form-control sequence"
 						readonly
-						data-ng-model="(feature().seq ? feature().seq : dna.seq.substring(feature().start - 1, feature().end))">
+						data-ng-model="(selected().seq ? selected().seq : dna.seq.substring(selected().start - 1, selected().end))">
 					</textarea>
 				</td>
 			</tr>
-			<tr data-ng-repeat="(key, value) in feature().parameters">
+			<tr data-ng-repeat="(key, value) in selected().parameters">
 				<td>{{key}}</td>
 				<td>{{value}}</td>
 			</tr>
-			<tr data-ng-show="feature().links && feature().links.length">
+			<tr data-ng-show="selected().links && selected().links.length">
 				<td>Links</td>
 				<td>
-					<div data-ng-repeat="link in feature().links">
+					<div data-ng-repeat="link in selected().links">
 						<a data-ng-href="{{link}}" target="_blank">{{link}}</a>
 					</div>
 				</td>

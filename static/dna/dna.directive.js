@@ -2,8 +2,8 @@ dnaApp.directive("dnaPanel", function() {
 	return {
 		scope: {
 			"dna": "=",
-			"feature": "&",
-			"setFeature": "&"
+			"selected": "&",
+			"setSelected": "&"
 		},
 		templateUrl: "/static/dna/dna.html",
 	};

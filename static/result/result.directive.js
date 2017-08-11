@@ -5,8 +5,8 @@ resultApp.directive("resultPanel", function() {
     		"result": "&",
     		"saveResults": "&",
     		"connected": "&",
-    		"feature": "&",
-    		"setFeature": "&",
+    		"selected": "&",
+    		"setSelected": "&",
     		"pagination": "=",
     	},
         templateUrl: "/static/result/result.html"

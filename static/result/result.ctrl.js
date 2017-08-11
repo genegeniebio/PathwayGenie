@@ -5,7 +5,7 @@ resultApp.controller("resultCtrl", ["$scope", "ICEService", "ResultService", fun
 		current: 1
 	};
 	
-	var feat = {}
+	var selected = {}
 
 	self.connected = function() {
 		return ICEService.connected
@@ -28,11 +28,11 @@ resultApp.controller("resultCtrl", ["$scope", "ICEService", "ResultService", fun
 		return ResultService.saveResults();
 	};
 	
-	self.feature = function() {
-		return feat;
+	self.selected = function() {
+		return selected;
 	};
 	
-	self.setFeature = function(ft) {
-		feat = ft;
+	self.setSelected = function(ft) {
+		selected = ft;
 	}
 }]);
