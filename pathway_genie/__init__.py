@@ -129,7 +129,7 @@ def search_uniprot(query):
     fields = ['entry name', 'protein names', 'sequence', 'ec', 'organism',
               'organism-id']
     result = seq_utils.search_uniprot(query, fields)
-    return json.dumps(result.values())
+    return json.dumps(result)
 
 
 @APP.errorhandler(Exception)

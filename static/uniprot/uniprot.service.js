@@ -33,7 +33,11 @@ uniprotApp.factory("UniprotService", ["$uibModal", function($uibModal) {
 		    ]
 	
 		    if(selected["EC number"]) {
-		    	feature.options[0].links.push("http://identifiers.org/ec-code/" + selected["EC number"]);
+		    	ecNumbers = selected["EC number"].split("; ");
+		    	
+		    	for(var i = 0; i < ecNumbers.length; i++) {
+		    		feature.options[0].links.push("http://identifiers.org/ec-code/" + ecNumbers[i]);
+		    	}
 		    }
 		});
 	};
