@@ -28,6 +28,12 @@ designApp.directive("designPanel", function($timeout) {
         			for(var j = 0; j < design.features.length; j++) {
         				feature = design.features[j];
         				
+        				// If RBS not followed by CDS:
+        				if(feature.typ == "http://purl.obolibrary.org/obo/SO_0000139") {
+        					feature.temp_params.valid = j != design.features.length - 1
+        						&& design.features[j + 1].typ == "http://purl.obolibrary.org/obo/SO_0000316";
+        				}
+        				
         				if(!feature.temp_params.valid) {
         					var id = feature.temp_params.id;
         					valid = false;

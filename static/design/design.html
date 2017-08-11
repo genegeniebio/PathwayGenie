@@ -32,7 +32,7 @@
 					<div data-ng-repeat="feature in design.features"
 						id="{{feature.temp_params.id}}"
 						name="{{feature.temp_params.id}}"
-						data-ng-class="{selected: selected() === feature}"
+						data-ng-class="{selected: selected() === feature, invalid: !feature.temp_params.valid}"
 						data-ng-click="toggleSelected({args: feature})"
 						data-ng-form
 						class="dropped feature SO{{feature.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}"
