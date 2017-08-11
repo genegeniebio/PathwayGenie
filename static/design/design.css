@@ -44,6 +44,18 @@
 	border: 1px red solid;
 }
 
+.feature.selected {
+    background-color: #b4d5fe;
+}
+
+.feature.dropped:hover {
+	background-color: #f5f5f5;
+}
+
+.feature.dropped.selected:hover {
+	background-color: #b4d5fe;
+}
+
 /***************************** Designs *****************************/
 
 .designs {
@@ -83,10 +95,6 @@
 }
 
 /***************************** General *****************************/
-
-.selected {
-    background-color: #B4D5FE;
-}
 
 .glyphicon-grey {
     opacity: 0.33;
