@@ -28,8 +28,12 @@ class PartsSolution(object):
         self.__organism = organism
         self.__filters = filters
         self.__filters['restr_enzs'] = self.__filters.get('restr_enzs', [])
-        self.__calc = rbs_calc.RbsCalculator(organism['r_rna'])
-        self.__cod_opt = seq_utils.CodonOptimiser(organism['taxonomy_id'])
+
+        self.__calc = rbs_calc.RbsCalculator(organism['r_rna']) \
+            if self.__organism else None
+
+        self.__cod_opt = seq_utils.CodonOptimiser(organism['taxonomy_id']) \
+            if self.__organism else None
 
         self.__calc_num_inv_seq_fixed()
         self.__init_seqs()
@@ -256,7 +260,7 @@ class PartsThread(SimulatedAnnealer):
 
     def __init__(self, query, verbose=True):
         solution = PartsSolution(query['designs'][0],
-                                 query['organism'],
+                                 query.get('organism', None),
                                  query['filters'])
 
         SimulatedAnnealer.__init__(self, solution, verbose=verbose)
