@@ -33,6 +33,18 @@ resultApp.controller("resultCtrl", ["$scope", "ICEService", "ResultService", fun
 	};
 	
 	self.setSelected = function(ft) {
-		selected = ft;
+		if(selected === ft) {
+			selected = self.result();
+		}
+		else {
+			selected = ft;
+		}
 	}
+	
+	$scope.$watch(function() {
+		return self.result();
+	},               
+	function(result) {
+		self.setSelected(result);
+	}, true);
 }]);
