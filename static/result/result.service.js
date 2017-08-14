@@ -5,6 +5,14 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "ICEService", "ErrorS
 	obj.setResults = function(res) {
 		obj.results = res;
 	}
+	
+	obj.appendResults = function(res) {
+		if(!obj.results) {
+			obj.results = [];
+		}
+		
+		obj.results.push.apply(obj.results, res);
+	}
 
 	obj.saveResults = function() {
 		$http.post("/save", {"result": obj.results, "ice": ICEService.ice}).then(

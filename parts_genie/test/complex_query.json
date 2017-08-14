@@ -2,85 +2,83 @@
    "app":"PartsGenie",
    "designs":[
       {
-         "dna":{
-            "name":"",
-            "desc":"",
-            "features":[
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0001416",
-                  "seq":"ACTACT",
-                  "name":"5' flanking region",
-                  "temp_params":{
-                     "fixed":true
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000167",
-                  "seq":"tttacactttatgcttccggctcgtataatg",
-                  "name":"lac promoter",
-                  "temp_params":{
-                     "fixed":true
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000546",
-                  "seq":"tttacactttttttttatgcttccggctcgtataatg",
-                  "name":"fixed region with invalid patterns",
-                  "temp_params":{
-                     "fixed":true
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000546",
-                  "seq":"tttacactttttttttatgcttccggctcgtataatg",
-                  "name":"variable region with invalid patterns",
-                  "temp_params":{
-                     "fixed":false
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000449",
-                  "end":25,
-                  "name":"random region of defined length",
-                  "temp_params":{
-                     "fixed":false
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000139",
-                  "end":60,
-                  "name":"ribosome entry site",
-                  "parameters":{
-                     "TIR target":10000
-                  },
-                  "temp_params":{
-                     "fixed":false
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000316",
-                  "options":[
-                     {
-                        "typ":"http://purl.obolibrary.org/obo/SO_0000316",
-                        "name":"coding sequence",
-                        "temp_params":{
-                           "aa_seq":"P42212",
-                           "fixed":false
-                        }
-                     }
-                  ]
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0001417",
-                  "seq":"GTCAGCTA",
-                  "name":"3' flanking region",
-                  "temp_params":{
-                     "fixed":true
-                  }
-               }
-            ]
-         }
-      }
+        "name":"",
+        "desc":"",
+        "features":[
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0001416",
+              "seq":"ACTACT",
+              "name":"5' flanking region",
+              "temp_params":{
+                 "fixed":true
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000167",
+              "seq":"tttacactttatgcttccggctcgtataatg",
+              "name":"lac promoter",
+              "temp_params":{
+                 "fixed":true
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000546",
+              "seq":"tttacactttttttttatgcttccggctcgtataatg",
+              "name":"fixed region with invalid patterns",
+              "temp_params":{
+                 "fixed":true
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000546",
+              "seq":"tttacactttttttttatgcttccggctcgtataatg",
+              "name":"variable region with invalid patterns",
+              "temp_params":{
+                 "fixed":false
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000449",
+              "end":25,
+              "name":"random region of defined length",
+              "temp_params":{
+                 "fixed":false
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000139",
+              "end":60,
+              "name":"ribosome entry site",
+              "parameters":{
+                 "TIR target":10000
+              },
+              "temp_params":{
+                 "fixed":false
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000316",
+              "options":[
+                 {
+                    "typ":"http://purl.obolibrary.org/obo/SO_0000316",
+                    "name":"coding sequence",
+                    "temp_params":{
+                       "aa_seq":"P42212",
+                       "fixed":false
+                    }
+                 }
+              ]
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0001417",
+              "seq":"GTCAGCTA",
+              "name":"3' flanking region",
+              "temp_params":{
+                 "fixed":true
+              }
+           }
+        ]
+     }
    ],
    "filters":{
       "max_repeats":6,

@@ -258,8 +258,8 @@ class PartsSolution(object):
 class PartsThread(SimulatedAnnealer):
     '''Wraps a PartsGenie job into a thread.'''
 
-    def __init__(self, query, verbose=True):
-        solution = PartsSolution(query['designs'][0],
+    def __init__(self, query, idx, verbose=True):
+        solution = PartsSolution(query['designs'][idx],
                                  query.get('organism', None),
                                  query['filters'])
 

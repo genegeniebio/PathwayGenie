@@ -7,10 +7,12 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+from threading import Thread
 import json
 import time
 
 from synbiochem.utils.ice_utils import DNAWriter
+
 from domino_genie.domino import DominoThread
 from parts_genie.parts import PartsThread
 
@@ -29,13 +31,21 @@ class PathwayGenie(object):
         query = json.loads(data)
 
         # Do job in new thread, return result when completed:
-        thread = _get_thread(query)
-        job_id = thread.get_job_id()
-        thread.add_listener(self)
-        self.__threads[job_id] = thread
-        thread.start()
+        job_ids = []
+        threads = _get_threads(query)
 
-        return job_id
+        for thread in threads:
+            job_id = thread.get_job_id()
+            job_ids.append(job_id)
+            thread.add_listener(self)
+            self.__threads[job_id] = thread
+
+        # Start new Threads:
+        for thread in threads:
+            thread_pool = ThreadPool(threads)
+            thread_pool.start()
+
+        return job_ids
 
     def get_progress(self, job_id):
         '''Returns progress of job.'''
@@ -90,12 +100,26 @@ class PathwayGenie(object):
         return json.dumps(self.__status[job_id])
 
 
-def _get_thread(query):
+class ThreadPool(Thread):
+    '''Basic class to run job Threads sequentially.'''
+
+    def __init__(self, threads):
+        self.__threads = threads
+        Thread.__init__(self)
+
+    def run(self):
+        for thread in self.__threads:
+            thread.start()
+            thread.join()
+
+
+def _get_threads(query):
     app = query.get('app', 'undefined')
 
     if app == 'PartsGenie':
-        return PartsThread(query)
+        return [PartsThread(query, idx)
+                for idx in range(len(query['designs']))]
     elif app == 'DominoGenie':
-        return DominoThread(query)
+        return [DominoThread(query)]
 
     raise ValueError('Unknown app: ' + app)

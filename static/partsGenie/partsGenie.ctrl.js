@@ -1,5 +1,6 @@
 partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGenieService", "PathwayGenieService", "ProgressService", "ResultService", "UniprotService", function($scope, ErrorService, PartsGenieService, PathwayGenieService, ProgressService, ResultService, UniprotService) {
 	var self = this;
+	var jobIds = [];
 	var jobId = null;
 	var search = false;
 	
@@ -198,6 +199,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	}
 
 	self.submit = function() {
+		jobIds = []
 		jobId = null
 		self.response = {"update": {"values": [], "status": "running", "message": "Submitting..."}};
 		error = null;
@@ -208,28 +210,8 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		
 		PathwayGenieService.submit(self.query).then(
 			function(resp) {
-				jobId = resp.data.job_id;
-				var source = new EventSource("/progress/" + jobId);
-
-				source.onmessage = function(event) {
-					self.response = JSON.parse(event.data);
-					status = self.response.update.status;
-					
-					if(status == "cancelled" || status == "error" || status == "finished") {
-						source.close();
-						
-						if(status == "finished") {
-							ResultService.setResults(self.response.result);
-						}
-					}
-					
-					$scope.$apply();
-				};
-				
-				source.onerror = function(event) {
-					source.close();
-					onerror(event.message);
-				}
+				jobIds = resp.data.job_ids;
+				listen();
 			},
 			function(errResp) {
 				onerror(errResp.data.message);
@@ -243,6 +225,40 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	self.update = function() {
 		return self.response.update;
 	};
+	
+	listen = function() {
+		if(jobIds.length == 0) {
+			return;
+		}
+		
+		var jobId = jobIds[0];
+		var source = new EventSource("/progress/" + jobId);
+
+		source.onmessage = function(event) {
+			self.response = JSON.parse(event.data);
+			status = self.response.update.status;
+			
+			if(status == "cancelled" || status == "error" || status == "finished") {
+				source.close();
+
+				if(status == "finished") {
+					ResultService.appendResults(self.response.result);
+				}
+				
+				jobIds.splice(0, 1);
+				listen();
+			}
+			
+			$scope.$apply();
+		};
+		
+		source.onerror = function(event) {
+			source.close();
+			jobIds.splice(0, 1);
+			listen();
+			onerror(event.message);
+		}
+	}
 	
 	onerror = function(message) {
 		self.response.update.status = "error";

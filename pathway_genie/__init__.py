@@ -48,7 +48,7 @@ def home():
 @APP.route('/submit', methods=['POST'])
 def submit():
     '''Responds to submission.'''
-    return json.dumps({'job_id': _MANAGER.submit(request.data)})
+    return json.dumps({'job_ids': _MANAGER.submit(request.data)})
 
 
 @APP.route('/progress/<job_id>')

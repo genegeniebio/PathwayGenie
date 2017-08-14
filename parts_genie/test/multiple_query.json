@@ -2,69 +2,65 @@
    "app":"PartsGenie",
    "designs":[
       {
-         "dna":{
-            "name":"Design 1",
-            "desc":"",
-            "features":[
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000139",
-                  "end":60,
-                  "name":"ribosome entry site",
-                  "parameters":{
-                     "TIR target":15000
-                  },
-                  "temp_params":{
-                     "fixed":false
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000316",
-                  "options":[
-                     {
-                        "typ":"http://purl.obolibrary.org/obo/SO_0000316",
-                        "name":"GFP",
-                        "temp_params":{
-                           "aa_seq":"P42212",
-                           "fixed":false
-                        }
-                     }
-                  ]
-               }
-            ]
-         }
-      },
+        "name":"Design 1",
+        "desc":"",
+        "features":[
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000139",
+              "end":60,
+              "name":"ribosome entry site",
+              "parameters":{
+                 "TIR target":15000
+              },
+              "temp_params":{
+                 "fixed":false
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000316",
+              "options":[
+                 {
+                    "typ":"http://purl.obolibrary.org/obo/SO_0000316",
+                    "name":"GFP",
+                    "temp_params":{
+                       "aa_seq":"P42212",
+                       "fixed":false
+                    }
+                 }
+              ]
+           }
+        ]
+     },
       {
-         "dna":{
-            "name":"Design 2",
-            "desc":"",
-            "features":[
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000139",
-                  "end":40,
-                  "name":"ribosome entry site",
-                  "parameters":{
-                     "TIR target":8000
-                  },
-                  "temp_params":{
-                     "fixed":false
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000316",
-                  "options":[
-                     {
-                        "typ":"http://purl.obolibrary.org/obo/SO_0000316",
-                        "name":"KSI",
-                        "temp_params":{
-                           "aa_seq":"P07445",
-                           "fixed":false
-                        }
-                     }
-                  ]
-               }
-            ]
-         }
-      }
+        "name":"Design 2",
+        "desc":"",
+        "features":[
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000139",
+              "end":40,
+              "name":"ribosome entry site",
+              "parameters":{
+                 "TIR target":8000
+              },
+              "temp_params":{
+                 "fixed":false
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000316",
+              "options":[
+                 {
+                    "typ":"http://purl.obolibrary.org/obo/SO_0000316",
+                    "name":"KSI",
+                    "temp_params":{
+                       "aa_seq":"P07445",
+                       "fixed":false
+                    }
+                 }
+              ]
+           }
+        ]
+     }
    ],
    "filters":{
       "max_repeats":6,

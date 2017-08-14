@@ -2,69 +2,67 @@
    "app":"PartsGenie",
    "designs":[
       {
-         "dna":{
-            "name":"MmP1-low",
-            "desc":"MmP1-low",
-            "features":[
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0001416",
-                  "seq":"gaattcaaaagatctgagtcTTGTA",
-                  "name":"5' flanking region",
-                  "temp_params":{
-                     "fixed":true
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000143",
-                  "name":"assembly component",
-                  "seq":"cgagtatggctgaaataacagccgtctagc",
-                  "temp_params":{
-                     "fixed":true
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000141",
-                  "seq":"aaaaaaaaccccgccctgtcaggggcggggtttttttt",
-                  "name":"terminator",
-                  "temp_params":{
-                     "fixed":true
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000449",
-                  "end":300,
-                  "name":"random region",
-                  "temp_params":{
-                     "fixed":false
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000167",
-                  "seq":"AtatttgtggcatacttgaattgtgagcgctcacaattAgctgtcaccggatgtgctttccggtctgatgagtccgtgaggacgaaacag",
-                  "name":"promoter",
-                  "temp_params":{
-                     "fixed":true
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0000143",
-                  "name":"assembly component",
-                  "seq":"aacgcatgtacaggattcagttgattggttc",
-                  "temp_params":{
-                     "fixed":true
-                  }
-               },
-               {
-                  "typ":"http://purl.obolibrary.org/obo/SO_0001417",
-                  "seq":"TTGTAgactcggatccaaactcgag",
-                  "name":"3' flanking region",
-                  "temp_params":{
-                     "fixed":true
-                  }
-               }
-            ]
-         }
-      }
+        "name":"MmP1-low",
+        "desc":"MmP1-low",
+        "features":[
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0001416",
+              "seq":"gaattcaaaagatctgagtcTTGTA",
+              "name":"5' flanking region",
+              "temp_params":{
+                 "fixed":true
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000143",
+              "name":"assembly component",
+              "seq":"cgagtatggctgaaataacagccgtctagc",
+              "temp_params":{
+                 "fixed":true
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000141",
+              "seq":"aaaaaaaaccccgccctgtcaggggcggggtttttttt",
+              "name":"terminator",
+              "temp_params":{
+                 "fixed":true
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000449",
+              "end":300,
+              "name":"random region",
+              "temp_params":{
+                 "fixed":false
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000167",
+              "seq":"AtatttgtggcatacttgaattgtgagcgctcacaattAgctgtcaccggatgtgctttccggtctgatgagtccgtgaggacgaaacag",
+              "name":"promoter",
+              "temp_params":{
+                 "fixed":true
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000143",
+              "name":"assembly component",
+              "seq":"aacgcatgtacaggattcagttgattggttc",
+              "temp_params":{
+                 "fixed":true
+              }
+           },
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0001417",
+              "seq":"TTGTAgactcggatccaaactcgag",
+              "name":"3' flanking region",
+              "temp_params":{
+                 "fixed":true
+              }
+           }
+        ]
+     }
    ],
    "filters":{
       "max_repeats":5,

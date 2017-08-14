@@ -32,7 +32,7 @@ class PartsGenieClient(object):
             query = json.load(fle)
 
         # Do job in new thread, return result when completed:
-        thread = PartsThread(query, verbose=True)
+        thread = PartsThread(query, idx=0, verbose=True)
         thread.add_listener(self)
         thread.start()
 
