@@ -23,7 +23,7 @@
                     "typ":"http://purl.obolibrary.org/obo/SO_0000316",
                     "name":"GFP",
                     "temp_params":{
-                       "aa_seq":"P42212",
+                       "aa_seq":"MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTFSYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITHGMDELYK",
                        "fixed":false
                     }
                  }
@@ -53,7 +53,7 @@
                     "typ":"http://purl.obolibrary.org/obo/SO_0000316",
                     "name":"KSI",
                     "temp_params":{
-                       "aa_seq":"P07445",
+                       "aa_seq":"MNLPTAQEVQGLMARYIELVDVGDIEAIVQMYADDATVEDPFGQPPIHGREQIAAFYRQGLGGGKVRACLTGPVRASHNGCGAMPFRVEMVWNGQPCALDVIDVMRFDEHGRIQTMQAYWSEVNLSVREPQ",
                        "fixed":false
                     }
                  }
