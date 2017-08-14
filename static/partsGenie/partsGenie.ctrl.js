@@ -10,6 +10,10 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 
 	self.restrEnzs = PathwayGenieService.restrEnzs;
 	
+	self.pagination = {
+			current: 1
+		};
+	
 	self.selectRestEnzs = function(selected) {
 		self.restrEnzs = remove(self.restrEnzs, selected);
 		self.query.filters.restr_enzs.push.apply(self.query.filters.restr_enzs, selected);
@@ -148,10 +152,11 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	
 	self.addDesign = function() {
 		PartsGenieService.addDesign();
+		self.pagination.current = self.query.designs.length;
 	};
 	
-	self.copyDesign = function(index) {
-		var origDesign = self.query.designs[index];
+	self.copyDesign = function() {
+		var origDesign = self.query.designs[self.pagination.current - 1];
 		var copiedDesign = angular.copy(origDesign);
 		
 		for(var i = 0; i < copiedDesign.features.length; i++) {
@@ -159,10 +164,12 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		}
 		
 		self.query.designs.push(copiedDesign);
+		self.pagination.current = self.query.designs.length;
 	};
 	
-	self.removeDesign = function(index) {
-		self.query.designs.splice(index, 1);
+	self.removeDesign = function() {
+		self.query.designs.splice(self.pagination.current - 1, 1);
+		self.pagination.current = self.pagination.current == 1 ? 1 : self.pagination.current - 1;
 		self.toggleSelected(null);
 	};
 	
