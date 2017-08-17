@@ -11,6 +11,7 @@ dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "ICEServ
 	
 	self.response = {"update": {}};
 	
+	var jobIds = [];
 	var jobId = null;
 
 	self.connected = function() {
@@ -20,36 +21,15 @@ dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "ICEServ
 	self.submit = function() {
 		reset();
 		
+		ProgressService.open(self.query["app"] + " dashboard", self.cancel, self.update);
+		
 		// Merge self.query and ICE parameters.
 		var query = $.extend({}, self.query, {'ice': ICEService.ice});
 		
 		PathwayGenieService.submit(query).then(
 			function(resp) {
-				jobId = resp.data.job_id;
-				var source = new EventSource("/progress/" + jobId);
-
-				source.onmessage = function(event) {
-					self.response = JSON.parse(event.data);
-					status = self.response.update.status;
-					
-					if(status == "cancelled" || status == "error" || status == "finished") {
-						source.close();
-						
-						if(status == "finished") {
-							ResultService.setResults(self.response.result);
-						}
-					}
-					
-					$scope.$apply();
-				};
-				
-				source.onerror = function(event) {
-					self.response.update.status = "error";
-					self.response.update.message = "Error";
-					$scope.$apply();
-				}
-				
-				ProgressService.open(self.query["app"] + " dashboard", self.cancel, self.update);
+				jobIds = resp.data.job_ids;
+				listen();
 			},
 			function(errResp) {
 				ErrorService.open(errResp.data.message);
@@ -62,6 +42,40 @@ dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "ICEServ
 	
 	self.update = function() {
 		return self.response.update;
+	};
+	
+	listen = function() {
+		if(jobIds.length == 0) {
+			return;
+		}
+		
+		jobId = jobIds[0];
+		var source = new EventSource("/progress/" + jobId);
+
+		source.onmessage = function(event) {
+			self.response = JSON.parse(event.data);
+			status = self.response.update.status;
+			
+			if(status == "cancelled" || status == "error" || status == "finished") {
+				source.close();
+
+				if(status == "finished") {
+					ResultService.appendResults(self.response.result);
+				}
+				
+				jobIds.splice(0, 1);
+				listen();
+			}
+			
+			$scope.$apply();
+		};
+		
+		source.onerror = function(event) {
+			source.close();
+			jobIds.splice(0, 1);
+			listen();
+			onerror(event.message);
+		}
 	};
 	
 	$scope.$watch(function() {
@@ -88,6 +102,8 @@ dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "ICEServ
 
 	reset = function() {
 		status = {"update": {}};
+		jobIds = [];
+		jobId = null;
 		error = null;
 		ResultService.setResults(null);
 	};

@@ -92,7 +92,9 @@ class DominoThread(JobThread):
 
         for design in self.__query['designs']:
             design['components'] = \
-                [self.__get_component(ice_id) for ice_id in design['design']]
+                [self.__get_component(ice_id)
+                 for ice_id in design['design']
+                 if ice_id]
 
             iteration += 1
             self.__fire_event('running', iteration,

@@ -206,8 +206,8 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	}
 
 	self.submit = function() {
-		jobIds = []
-		jobId = null
+		jobIds = [];
+		jobId = null;
 		self.response = {"update": {"values": [], "status": "running", "message": "Submitting..."}};
 		error = null;
 		self.toggleSelected(self.selected());
@@ -238,7 +238,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 			return;
 		}
 		
-		var jobId = jobIds[0];
+		jobId = jobIds[0];
 		var source = new EventSource("/progress/" + jobId);
 
 		source.onmessage = function(event) {
@@ -265,7 +265,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 			listen();
 			onerror(event.message);
 		}
-	}
+	};
 	
 	onerror = function(message) {
 		self.response.update.status = "error";
