@@ -101,7 +101,8 @@
     				<a class="btn navbar-btn" role="button"
     					data-ng-click="ctrl.showIce()"
     					data-ng-class="{'btn-success': ctrl.connected(), 'btn-danger': !ctrl.connected()}">
-  						<span class="glyphicon glyphicon-log-in"></span>
+  						<span data-ng-if="!ctrl.connected()" class="glyphicon glyphicon-log-in"></span>
+  						<span data-ng-if="ctrl.connected()" class="glyphicon glyphicon-log-out"></span>
   						<span>&nbsp;ICE</span>
 					</a>
     			</div>
