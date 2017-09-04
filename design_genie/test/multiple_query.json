@@ -1,28 +1,10 @@
 {
-   "app":"PartsGenie",
+   "app":"DesignGenie",
    "designs":[
       {
-        "name":"",
+        "name":"Design 1",
         "desc":"",
         "features":[
-           {
-              "typ":"http://purl.obolibrary.org/obo/SO_0001416",
-              "seq":"",
-              "name":"5' flanking region",
-              "temp_params":{
-                 "fixed":true
-              }
-           },
-           {
-              "typ":"http://purl.obolibrary.org/obo/SO_0000143",
-              "name":"assembly component",
-              "parameters":{
-                 "Tm target":70
-              },
-              "temp_params":{
-                 "fixed":true
-              }
-           },
            {
               "typ":"http://purl.obolibrary.org/obo/SO_0000139",
               "end":60,
@@ -39,21 +21,43 @@
               "options":[
                  {
                     "typ":"http://purl.obolibrary.org/obo/SO_0000316",
-                    "name":"coding sequence",
+                    "name":"GFP",
                     "temp_params":{
                        "aa_seq":"MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTFSYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITHGMDELYK",
                        "fixed":false
                     }
                  }
               ]
+           }
+        ]
+     },
+      {
+        "name":"Design 2",
+        "desc":"",
+        "features":[
+           {
+              "typ":"http://purl.obolibrary.org/obo/SO_0000139",
+              "end":40,
+              "name":"ribosome entry site",
+              "parameters":{
+                 "TIR target":8000
+              },
+              "temp_params":{
+                 "fixed":false
+              }
            },
            {
-              "typ":"http://purl.obolibrary.org/obo/SO_0001417",
-              "seq":"",
-              "name":"3' flanking region",
-              "temp_params":{
-                 "fixed":true
-              }
+              "typ":"http://purl.obolibrary.org/obo/SO_0000316",
+              "options":[
+                 {
+                    "typ":"http://purl.obolibrary.org/obo/SO_0000316",
+                    "name":"KSI",
+                    "temp_params":{
+                       "aa_seq":"MNLPTAQEVQGLMARYIELVDVGDIEAIVQMYADDATVEDPFGQPPIHGREQIAAFYRQGLGGGKVRACLTGPVRASHNGCGAMPFRVEMVWNGQPCALDVIDVMRFDEHGRIQTMQAYWSEVNLSVREPQ",
+                       "fixed":false
+                    }
+                 }
+              ]
            }
         ]
      }

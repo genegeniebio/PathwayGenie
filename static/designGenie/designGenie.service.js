@@ -1,8 +1,8 @@
-partsGenieApp.factory("PartsGenieService", ["$http", function($http) {
+designGenieApp.factory("DesignGenieService", ["$http", function($http) {
 	var obj = {};
 	
 	obj.query = {
-		"app": "PartsGenie",
+		"app": "DesignGenie",
 		"designs": [
 			
 		], 

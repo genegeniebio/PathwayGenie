@@ -1,7 +1,7 @@
 '''
-PartsGenie (c) University of Manchester 2017
+PathwayGenie (c) University of Manchester 2017
 
-PartsGenie is licensed under the MIT License.
+PathwayGenie is licensed under the MIT License.
 
 To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
@@ -18,7 +18,7 @@ import re
 from Bio.Seq import Seq
 from synbiochem.utils import seq_utils
 
-from parts_genie.nucl_acid_utils import NuPackRunner
+from design_genie.nucl_acid_utils import NuPackRunner
 
 
 _START_CODON_PATT = r'(?=([ACGT]TG))'

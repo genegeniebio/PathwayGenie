@@ -21,7 +21,7 @@ from synbiochem.utils import seq_utils
 from synbiochem.utils.ice_utils import ICEClient
 from synbiochem.utils.net_utils import NetworkError
 
-from parts_genie import parts
+from design_genie import design
 from pathway_genie import pathway
 
 
