@@ -15,8 +15,8 @@ partsGenieApp.factory("PartsGenieService", ["$http", function($http) {
 	
 	obj.addDesign = function() {
 		obj.query.designs.push({
-			name: "Design",
-			desc: "Design",
+			name: "Part",
+			desc: "Part",
 			features: []
 		});
 	};
