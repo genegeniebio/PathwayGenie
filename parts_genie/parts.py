@@ -1,7 +1,7 @@
 '''
-PathwayGenie (c) University of Manchester 2017
+PartsGenie (c) University of Manchester 2017
 
-PathwayGenie is licensed under the MIT License.
+PartsGenie is licensed under the MIT License.
 
 To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
@@ -15,10 +15,10 @@ import math
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import dna_utils, seq_utils
 
-from design_genie import rbs_calculator as rbs_calc
+from parts_genie import rbs_calculator as rbs_calc
 
 
-class DesignSolution(object):
+class PartsSolution(object):
     '''Solution for RBS optimisation.'''
 
     def __init__(self, dna, organism, filters):
@@ -255,13 +255,13 @@ class DesignSolution(object):
         return self.__repr__
 
 
-class DesignThread(SimulatedAnnealer):
-    '''Wraps a DesignGenie job into a thread.'''
+class PartsThread(SimulatedAnnealer):
+    '''Wraps a PartsGenie job into a thread.'''
 
     def __init__(self, query, idx, verbose=True):
-        solution = DesignSolution(query['designs'][idx],
-                                  query.get('organism', None),
-                                  query['filters'])
+        solution = PartsSolution(query['designs'][idx],
+                                 query.get('organism', None),
+                                 query['filters'])
 
         SimulatedAnnealer.__init__(self, solution, verbose=verbose)
 

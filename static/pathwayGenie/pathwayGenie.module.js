@@ -1,21 +1,21 @@
-var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "dominoGenieApp", "iceApp", "designGenieApp"]);
+var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "dominoGenieApp", "iceApp", "partsGenieApp"]);
 
 pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 	$routeProvider.when("/", {
-		controller: "designGenieCtrl",
+		controller: "partsGenieCtrl",
 		controllerAs: "ctrl",
-		templateUrl: "static/designGenie/designGenie.html",
-		app: "DesignGenie",
+		templateUrl: "static/partsGenie/partsGenie.html",
+		app: "PartsGenie",
 		resolve: {
 			"unused": function(PathwayGenieService) {
 				return PathwayGenieService.restr_enzymes_promise;
 			}
 		}
-	}).when("/designGenie", {
-		controller: "designGenieCtrl",
+	}).when("/partsGenie", {
+		controller: "partsGenieCtrl",
 		controllerAs: "ctrl",
-		templateUrl: "static/designGenie/designGenie.html",
-		app: "DesignGenie",
+		templateUrl: "static/partsGenie/partsGenie.html",
+		app: "PartsGenie",
 		resolve: {
 			"unused": function(PathwayGenieService) {
 				return PathwayGenieService.restr_enzymes_promise;

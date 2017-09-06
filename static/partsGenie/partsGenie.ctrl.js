@@ -1,11 +1,11 @@
-designGenieApp.controller("designGenieCtrl", ["$scope", "ErrorService", "DesignGenieService", "PathwayGenieService", "ProgressService", "ResultService", "UniprotService", function($scope, ErrorService, DesignGenieService, PathwayGenieService, ProgressService, ResultService, UniprotService) {
+partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGenieService", "PathwayGenieService", "ProgressService", "ResultService", "UniprotService", function($scope, ErrorService, PartsGenieService, PathwayGenieService, ProgressService, ResultService, UniprotService) {
 	var self = this;
 	var jobIds = [];
 	var jobId = null;
 	var search = false;
 	
 	self.codons_regex = new RegExp("^[ACGTacgt\s]{3}$");
-	self.query = DesignGenieService.query;
+	self.query = PartsGenieService.query;
 	self.response = {"update": {"values": [], "status": "waiting", "message": "Waiting..."}};
 
 	self.restrEnzs = PathwayGenieService.restrEnzs;
@@ -137,21 +137,21 @@ designGenieApp.controller("designGenieCtrl", ["$scope", "ErrorService", "DesignG
 	}
 
 	self.selected = function() {
-		return DesignGenieService.selected;
+		return PartsGenieService.selected;
 	};
 	
 	self.toggleSelected = function(selected) {
-		return DesignGenieService.toggleSelected(selected);
+		return PartsGenieService.toggleSelected(selected);
 	};
 	
 	self.setValid = function(valid) {
-		if(DesignGenieService.selected) {
-			DesignGenieService.selected.temp_params.valid = valid;
+		if(PartsGenieService.selected) {
+			PartsGenieService.selected.temp_params.valid = valid;
 		}
 	};
 	
 	self.addDesign = function() {
-		DesignGenieService.addDesign();
+		PartsGenieService.addDesign();
 		self.pagination.current = self.query.designs.length;
 	};
 	
@@ -191,9 +191,9 @@ designGenieApp.controller("designGenieCtrl", ["$scope", "ErrorService", "DesignG
 	self.searchUniprot = function(query) {
 		search = true;
 		
-		DesignGenieService.searchUniprot(query).then(
+		PartsGenieService.searchUniprot(query).then(
 			function(resp) {
-				UniprotService.open(resp.data, DesignGenieService.selected)
+				UniprotService.open(resp.data, PartsGenieService.selected)
 				search = false;
 			},
 			function(errResp) {

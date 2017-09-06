@@ -1,7 +1,7 @@
 '''
-PathwayGenie (c) University of Manchester 2017
+PartsGenie (c) University of Manchester 2017
 
-PathwayGenie is licensed under the MIT License.
+PartsGenie is licensed under the MIT License.
 
 To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
@@ -11,19 +11,19 @@ import json
 import sys
 import time
 
-from design_genie.design import PartsThread
+from parts_genie.parts import PartsThread
 from pathway_genie.pathway import PathwayGenie
 
 
-class DesignGenieClient(object):
-    '''Simple client class for running DesignGenie jobs from JSON file.'''
+class PartsGenieClient(object):
+    '''Simple client class for running PartsGenie jobs from JSON file.'''
 
     def __init__(self):
         self.__event = None
         self.__pathway_genie = PathwayGenie()
 
     def submit(self, filename, ice_params=None):
-        '''Submits DesignGenie job.'''
+        '''Submits PartsGenie job.'''
         self.__event = None
 
         results = []
@@ -66,7 +66,7 @@ class DesignGenieClient(object):
 
 def main(args):
     '''main method.'''
-    client = DesignGenieClient()
+    client = PartsGenieClient()
     ice_params = None if len(args) == 1 else args[1:]
     client.submit(args[0], ice_params)
 

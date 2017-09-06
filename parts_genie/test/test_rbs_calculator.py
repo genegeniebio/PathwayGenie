@@ -1,7 +1,7 @@
 '''
-PathwayGenie (c) University of Manchester 2017
+PartsGenie (c) University of Manchester 2017
 
-PathwayGenie is licensed under the MIT License.
+PartsGenie is licensed under the MIT License.
 
 To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
@@ -9,7 +9,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import unittest
 
-from design_genie.rbs_calculator import RbsCalculator
+from parts_genie.rbs_calculator import RbsCalculator
 
 
 class TestRbsCalculator(unittest.TestCase):

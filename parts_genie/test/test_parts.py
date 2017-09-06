@@ -1,7 +1,7 @@
 '''
-PathwayGenie (c) University of Manchester 2017
+PartsGenie (c) University of Manchester 2017
 
-PathwayGenie is licensed under the MIT License.
+PartsGenie is licensed under the MIT License.
 
 To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
@@ -14,11 +14,11 @@ import os
 import time
 import unittest
 
-from design_genie.design import DesignThread
+from parts_genie.parts import PartsThread
 
 
-class TestDesignThread(unittest.TestCase):
-    '''Test class for DesignThread.'''
+class TestPartsThread(unittest.TestCase):
+    '''Test class for PartsThread.'''
 
     def test_submit_simple(self):
         '''Tests submit method with simple query.'''
@@ -50,7 +50,7 @@ class TestDesignThread(unittest.TestCase):
             query = json.load(fle)
 
         # Do job in new thread, return result when completed:
-        thread = DesignThread(query, idx=0, verbose=True)
+        thread = PartsThread(query, idx=0, verbose=True)
         thread.add_listener(self)
         thread.start()
 

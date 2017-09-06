@@ -13,8 +13,8 @@ import time
 
 from synbiochem.utils.ice_utils import DNAWriter
 
-from design_genie.design import DesignThread
 from domino_genie.domino import DominoThread
+from parts_genie.parts import PartsThread
 
 
 # from metabolomics_genie.metabolomics import MetabolomicsThread
@@ -116,8 +116,8 @@ class ThreadPool(Thread):
 def _get_threads(query):
     app = query.get('app', 'undefined')
 
-    if app == 'DesignGenie':
-        return [DesignThread(query, idx)
+    if app == 'PartsGenie':
+        return [PartsThread(query, idx)
                 for idx in range(len(query['designs']))]
     elif app == 'DominoGenie':
         return [DominoThread(query)]
