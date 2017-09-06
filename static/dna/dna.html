@@ -31,6 +31,10 @@
 				<td>{{selected().end ? selected().end : ''}}</td>
 			</tr>
 			<tr>
+				<td>Length</td>
+				<td>{{selected() && selected().seq ? selected().seq.length : selected().end - selected().start - 1}}</td>
+			</tr>
+			<tr>
 				<td>Strand</td>
 				<td>{{selected().forward ? '+' : '-'}}</td>
 			</tr>
@@ -39,7 +43,7 @@
 				<td>
 					<textarea
 						class="form-control sequence"
-						readonly>{{(selected() && selected().seq ? selected().seq : dna.seq.substring(selected().start - 1, selected().end))}}</textarea>
+						readonly>{{selected() && selected().seq ? selected().seq : dna.seq.substring(selected().start - 1, selected().end)}}</textarea>
 				</td>
 			</tr>
 			<tr data-ng-repeat="(key, value) in selected().parameters">
