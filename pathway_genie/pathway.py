@@ -13,8 +13,8 @@ import time
 
 from synbiochem.utils.ice_utils import DNAWriter
 
-from domino_genie.domino import DominoThread
 from parts_genie.parts import PartsThread
+from plasmid_genie.plasmid import PlasmidThread
 
 
 # from metabolomics_genie.metabolomics import MetabolomicsThread
@@ -119,7 +119,7 @@ def _get_threads(query):
     if app == 'PartsGenie':
         return [PartsThread(query, idx)
                 for idx in range(len(query['designs']))]
-    elif app == 'DominoGenie':
-        return [DominoThread(query)]
+    elif app == 'PlasmidGenie':
+        return [PlasmidThread(query)]
 
     raise ValueError('Unknown app: ' + app)

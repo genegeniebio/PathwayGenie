@@ -1,10 +1,10 @@
-dominoGenieApp.controller("dominoGenieCtrl", ["$scope", "ErrorService", "ICEService", "PathwayGenieService", "ProgressService", "ResultService", function($scope, ErrorService, ICEService, PathwayGenieService, ProgressService, ResultService) {
+plasmidGenieApp.controller("plasmidGenieCtrl", ["$scope", "ErrorService", "ICEService", "PathwayGenieService", "ProgressService", "ResultService", function($scope, ErrorService, ICEService, PathwayGenieService, ProgressService, ResultService) {
 	var self = this;
 	self.file_name = null;
 	self.file_content = null
 	
 	self.query = {
-			"app": "DominoGenie",
+			"app": "PlasmidGenie",
 			"melt_temp": 70,
 			"circular": true
 		};

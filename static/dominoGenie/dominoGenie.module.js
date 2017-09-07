@@ -1,1 +1,1 @@
-var dominoGenieApp = angular.module("dominoGenieApp", []);
+var plamsidGenieApp = angular.module("plamsidGenieApp", []);

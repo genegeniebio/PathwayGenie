@@ -14,8 +14,8 @@ from synbiochem.utils.job import JobThread
 from synbiochem.utils.seq_utils import get_seq_by_melt_temp
 
 
-class DominoThread(JobThread):
-    '''Runs a DominoGenie job.'''
+class PlasmidThread(JobThread):
+    '''Runs a PlasmidGenie job.'''
 
     def __init__(self, query):
         JobThread.__init__(self)

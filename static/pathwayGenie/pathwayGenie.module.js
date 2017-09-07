@@ -1,4 +1,4 @@
-var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "dominoGenieApp", "iceApp", "partsGenieApp"]);
+var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "iceApp", "partsGenieApp", "plasmidGenieApp"]);
 
 pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 	$routeProvider.when("/", {
@@ -21,11 +21,11 @@ pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 				return PathwayGenieService.restr_enzymes_promise;
 			}
 		}
-	}).when("/dominoGenie", {		
-		 controller: "dominoGenieCtrl",		
+	}).when("/plasmidGenie", {		
+		 controller: "plasmidGenieCtrl",		
 		 controllerAs: "ctrl",		
-		 templateUrl: "static/dominoGenie/dominoGenie.html",		
-		 app: "DominoGenie"
+		 templateUrl: "static/plasmidGenie/plasmidGenie.html",		
+		 app: "PlasmidGenie"
 	})
 	
 	// Use the HTML5 History API:
