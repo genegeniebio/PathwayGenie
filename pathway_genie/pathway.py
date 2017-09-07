@@ -11,8 +11,7 @@ from threading import Thread
 import json
 import time
 
-from synbiochem.utils.ice_utils import DNAWriter
-
+from ice.ice import IceThread
 from parts_genie.parts import PartsThread
 from plasmid_genie.plasmid import PlasmidThread
 
@@ -67,30 +66,6 @@ class PathwayGenie(object):
         self.__threads[job_id].cancel()
         return job_id
 
-    def save(self, data):
-        '''Saves results.'''
-        ice_entry_urls = []
-
-        url = data['ice']['url']
-        data['ice']['url'] = url[:-1] if url[-1] == '/' else url
-
-        ice_key = tuple(sorted(data['ice'].values()))
-
-        if ice_key not in self.__writers:
-            self.__writers[ice_key] = DNAWriter(data['ice']['url'],
-                                                data['ice']['username'],
-                                                data['ice']['password'],
-                                                data['ice'].get('groups',
-                                                                None))
-
-        writer = self.__writers[ice_key]
-
-        for result in data['result']:
-            ice_id = writer.submit(result)
-            ice_entry_urls.append(url + '/entry/' + str(ice_id))
-
-        return ice_entry_urls
-
     def event_fired(self, event):
         '''Responds to event being fired.'''
         self.__status[event['job_id']] = event
@@ -121,5 +96,7 @@ def _get_threads(query):
                 for idx in range(len(query['designs']))]
     elif app == 'PlasmidGenie':
         return [PlasmidThread(query)]
+    elif app == 'save':
+        return [IceThread(query)]
 
     raise ValueError('Unknown app: ' + app)

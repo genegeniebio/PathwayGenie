@@ -40,8 +40,14 @@ _MANAGER = pathway.PathwayGenie()
 _ORGANISMS = seq_utils.get_codon_usage_organisms(expand=True, verbose=True)
 
 
+@APP.route('/')
+def home():
+    '''Renders homepage.'''
+    return APP.send_static_file('index.html')
+
+
 @APP.route('/<path:path>')
-def home(path):
+def path(path):
     '''Renders homepage.'''
     return APP.send_static_file('index.html')
 
@@ -63,12 +69,6 @@ def progress(job_id):
 def cancel(job_id):
     '''Cancels job.'''
     return _MANAGER.cancel(job_id)
-
-
-@APP.route('/save', methods=['POST'])
-def save():
-    '''Saves result.'''
-    return json.dumps(_MANAGER.save(json.loads(request.data)))
 
 
 @APP.route('/groups/', methods=['POST'])

@@ -10,41 +10,38 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 from __future__ import division
 
 from synbiochem.utils import dna_utils, ice_utils, pairwise, seq_utils
-from synbiochem.utils.job import JobThread
 from synbiochem.utils.seq_utils import get_seq_by_melt_temp
+from pathway_genie.utils import PathwayThread
 
 
-class PlasmidThread(JobThread):
+class PlasmidThread(PathwayThread):
     '''Runs a PlasmidGenie job.'''
 
     def __init__(self, query):
-        JobThread.__init__(self)
+        PathwayThread.__init__(self, query)
 
-        self.__query = query
         self.__ice_client = ice_utils.ICEClient(
             query['ice']['url'],
             query['ice']['username'],
             query['ice']['password'],
             group_names=query['ice'].get('groups', None))
 
-        self.__results = []
-
     def run(self):
         '''Designs dominoes (bridging oligos) for LCR.'''
         iteration = 0
 
-        if 'components' not in self.__query:
+        if 'components' not in self._query:
             self.__get_components()
 
-        self.__fire_event('running', iteration, 'Running...')
+        self._fire_designs_event('running', iteration, 'Running...')
 
-        for dsgn in self.__query['designs']:
+        for dsgn in self._query['designs']:
             orig_comps = [comp.copy() for comp in dsgn['components']]
 
             # Apply restriction site digestion:
             dsgn['components'] = [_apply_restricts(dna, restr_enz)
                                   for dna, restr_enz in zip(
-                dsgn['components'], self.__query['restr_enzs'])]
+                dsgn['components'], self._query['restr_enzs'])]
 
             # Generate plasmid DNA object:
             dna = dna_utils.concat(dsgn['components'])
@@ -54,26 +51,26 @@ class PlasmidThread(JobThread):
 
             # Generate domino sequences:
             cmps = dsgn['components'] + [dsgn['components'][0]] \
-                if self.__query['circular'] else dsgn['components']
+                if self._query['circular'] else dsgn['components']
 
             dna['children'].extend([self.__get_domino(pair)
                                     for pair in pairwise(cmps)])
 
-            self.__results.append(dna)
+            self._results.append(dna)
 
             iteration += 1
-            self.__fire_event('running', iteration, 'Running...')
+            self._fire_designs_event('running', iteration, 'Running...')
 
         if self._cancelled:
-            self.__fire_event('cancelled', iteration,
-                              message='Job cancelled')
+            self._fire_designs_event('cancelled', iteration,
+                                     message='Job cancelled')
         else:
-            self.__fire_event('finished', iteration,
-                              message='Job completed')
+            self._fire_designs_event('finished', iteration,
+                                     message='Job completed')
 
     def analyse_dominoes(self):
         '''Analyse sequences for similarity using BLAST.'''
-        for design in self.__query['designs']:
+        for design in self._query['designs']:
             ids_seqs = dict(zip(design['design'], design['seqs']))
             analysis = seq_utils.do_blast(ids_seqs, ids_seqs)
 
@@ -87,18 +84,18 @@ class PlasmidThread(JobThread):
         '''Gets DNA components from ICE.'''
         iteration = 0
 
-        self.__fire_event('running', iteration,
-                          'Extracting sequences from ICE...')
+        self._fire_designs_event('running', iteration,
+                                 'Extracting sequences from ICE...')
 
-        for design in self.__query['designs']:
+        for design in self._query['designs']:
             design['components'] = \
                 [self.__get_component(ice_id)
                  for ice_id in design['design']
                  if ice_id]
 
             iteration += 1
-            self.__fire_event('running', iteration,
-                              'Extracting sequences from ICE...')
+            self._fire_designs_event('running', iteration,
+                                     'Extracting sequences from ICE...')
 
     def __get_component(self, ice_id):
         '''Gets a DNA component from ICE.'''
@@ -116,8 +113,8 @@ class PlasmidThread(JobThread):
 
     def __get_domino_branch(self, comp, forward=True):
         '''Gets domino branch from DNA object.'''
-        target_melt_temp = self.__query['melt_temp']
-        reag_concs = self.__query.get('reagent_concs', None)
+        target_melt_temp = self._query['melt_temp']
+        reag_concs = self._query.get('reagent_concs', None)
 
         seq, melt_temp = get_seq_by_melt_temp(comp['seq'],
                                               target_melt_temp,
@@ -134,22 +131,6 @@ class PlasmidThread(JobThread):
         dna['parameters']['Tm'] = float('{0:.3g}'.format(melt_temp))
 
         return dna
-
-    def __fire_event(self, status, iteration, message=''):
-        '''Fires an event.'''
-        event = {'update': {'status': status,
-                            'message': message,
-                            'progress': iteration /
-                            len(self.__query['designs']) * 100,
-                            'iteration': iteration,
-                            'max_iter': len(self.__query['designs'])},
-                 'query': self.__query
-                 }
-
-        if status == 'finished':
-            event['result'] = self.__results
-
-        self._fire_event(event)
 
 
 def _apply_restricts(dna, restr_enz):
