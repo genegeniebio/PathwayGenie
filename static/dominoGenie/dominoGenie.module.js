@@ -1,1 +1,0 @@
-var plamsidGenieApp = angular.module("plamsidGenieApp", []);

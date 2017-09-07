@@ -107,4 +107,7 @@ plasmidGenieApp.controller("plasmidGenieCtrl", ["$scope", "ErrorService", "ICESe
 		error = null;
 		ResultService.setResults(null);
 	};
+	
+	// Initialise UI:
+	reset();
 }]);

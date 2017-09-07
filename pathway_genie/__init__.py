@@ -7,6 +7,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=unused-argument
 import json
 import os
 import sys
@@ -39,8 +40,8 @@ _MANAGER = pathway.PathwayGenie()
 _ORGANISMS = seq_utils.get_codon_usage_organisms(expand=True, verbose=True)
 
 
-@APP.route('/')
-def home():
+@APP.route('/<path:path>')
+def home(path):
     '''Renders homepage.'''
     return APP.send_static_file('index.html')
 
