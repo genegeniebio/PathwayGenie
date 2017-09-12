@@ -8,7 +8,8 @@
 							href="#collapse1">Parts</a>
 					<button type="submit" data-ng-click="ctrl.submit()"
 						data-ng-disabled="!ctrl.hasFeatures() || ctrl.response.update.status == 'running' || form.$invalid"
-						class="pull-right btn btn-default btn-xs">Submit</button>
+						data-ng-class="(!ctrl.hasFeatures() || ctrl.response.update.status == 'running' || form.$invalid) ? 'btn-danger': 'btn-success'"
+						class="pull-right btn btn-xs">Submit</button>
 				</div>
 				<div id="collapse1" class="panel-collapse collapse">
 					<design-panel
