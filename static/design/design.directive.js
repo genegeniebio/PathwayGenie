@@ -8,6 +8,7 @@ designApp.directive("designPanel", function($timeout) {
     		addDesign: "&",
     		copyDesign: "&",
     		removeDesign: "&",
+    		addFeature: "&",
     		copyFeature: "&",
     		pagination: "="
     	},

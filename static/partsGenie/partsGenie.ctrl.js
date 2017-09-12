@@ -144,8 +144,14 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		},
 	];
 	
+	self.addFeature = function(feature) {
+		var copiedFeature = angular.copy(feature)
+		self.copyFeature(copiedFeature);
+		self.query.designs[self.pagination.current - 1].features.push(copiedFeature);
+	}
+	
 	self.copyFeature = function(feature) {
-		feature.temp_params.id = "_" + (new Date()).getTime();
+		feature.temp_params.id = "_" + Math.floor(Math.random() * 65536) + "_" + (new Date()).getTime();
 	}
 
 	self.selected = function() {

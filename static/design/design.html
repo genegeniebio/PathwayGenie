@@ -4,6 +4,7 @@
 		<button data-ng-repeat="feature in templates"
 			type="button"
 			class="btn btn-default"
+			data-ng-click="addFeature({args: feature})"
 			dnd-type="'feature'"
 			dnd-draggable="feature"
 			dnd-effect-allowed="copy"
