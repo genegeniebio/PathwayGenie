@@ -226,7 +226,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	self.submit = function() {
 		jobIds = [];
 		jobId = null;
-		self.response = {"update": {"values": [], "status": "running", "message": "Submitting..."}};
+		self.response = {"update": {"values": [], "status": "submitting", "message": "Submitting..."}};
 		error = null;
 		self.toggleSelected(self.selected());
 		ResultService.setResults(null);
