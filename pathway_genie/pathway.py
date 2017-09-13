@@ -40,9 +40,8 @@ class PathwayGenie(object):
             self.__threads[job_id] = thread
 
         # Start new Threads:
-        for thread in threads:
-            thread_pool = ThreadPool(threads)
-            thread_pool.start()
+        thread_pool = ThreadPool(threads)
+        thread_pool.start()
 
         return job_ids
 
