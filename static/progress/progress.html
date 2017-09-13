@@ -4,7 +4,7 @@
 		<h4 class="modal-title">{{progressCtrl.progressTitle}}</h4>
 	</div>
 	<div class="modal-body">
-		<div data-ng-show="progressCtrl.update().message.length > 0" data-ng-class="{'alert-danger': progressCtrl.update().status == 'error', 'alert-success': progressCtrl.update().status == 'finished'}" class="alert">{{progressCtrl.update().message}}</div>
+		<div data-ng-show="progressCtrl.update().message.length > 0" data-ng-class="{'alert-danger': progressCtrl.update().status == 'error', 'alert-warning': progressCtrl.update().status == 'cancelled', 'alert-success': progressCtrl.update().status == 'finished'}" class="alert">{{progressCtrl.update().message}}</div>
 		<div class="centered">
 			<div data-ng-repeat="n in progressCtrl.range(0, progressCtrl.update().values.length)" id="progress-gauge-{{n}}" class="progress-gauge"></div>
 		</div>

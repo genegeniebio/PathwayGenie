@@ -24,15 +24,13 @@ progressApp.controller('progressInstanceCtrl', ["$scope", "$uibModalInstance", "
 	};
 
 	self.doCancel = function() {
-		self.close();
-
 		self.cancel().then(
-				function(resp) {
-					// No action required
-				},
-				function(errResp) {
-					ErrorService.open(errResp.data.message);
-				});
+			function(resp) {
+				// No action required
+			},
+			function(errResp) {
+				ErrorService.open(errResp.data.message);
+			});
 	};
 
 	self.close = function() {
