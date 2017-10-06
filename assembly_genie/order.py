@@ -9,7 +9,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import sys
 
-
 from assembly_genie.build import BuildGenieBase
 
 

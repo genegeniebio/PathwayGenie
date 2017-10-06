@@ -8,6 +8,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 from synbiochem.utils.ice_utils import DNAWriter
+
 from pathway_genie.utils import PathwayThread
 
 

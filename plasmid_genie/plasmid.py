@@ -11,6 +11,7 @@ from __future__ import division
 
 from synbiochem.utils import dna_utils, ice_utils, pairwise, seq_utils
 from synbiochem.utils.seq_utils import get_seq_by_melt_temp
+
 from pathway_genie.utils import PathwayThread
 
 

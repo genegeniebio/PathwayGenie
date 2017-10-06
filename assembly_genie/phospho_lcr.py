@@ -13,6 +13,7 @@ import sys
 from assembly_genie.assembly import AssemblyThread, _AMPLIGASE, \
     _LCR_MASTERMIX, _WATER
 
+
 _PNK = 'pnk'
 _PNK_MASTERMIX = 'pnk-mastermix'
 
