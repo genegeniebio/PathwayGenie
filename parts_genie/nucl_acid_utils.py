@@ -9,6 +9,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-arguments
+import os
 import subprocess
 import tempfile
 
@@ -62,13 +63,21 @@ class NuPackRunner(RunnerBase):
                                           filename])
 
         try:
-            with open(filename + '.' + cmd) as out_file:
+            out_filename = filename + '.' + cmd
+
+            with open(out_filename) as out_file:
                 return _read_nupack_output(out_file)
+
         except IOError:
             # Skip the comments of the text file
             for line in output.splitlines():
                 if line[0] != '%':
                     return float(line)
+        finally:
+            try:
+                os.remove(out_filename)
+            except OSError:
+                pass
 
 
 def _write_nupack_input(sequences, energy_gap=None, bp_x=None, bp_y=None):
