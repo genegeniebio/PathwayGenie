@@ -3,6 +3,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	var jobIds = [];
 	var jobId = null;
 	var search = false;
+	var nucl_regex = new RegExp("^[ACGTacgt ]+$");
 	
 	self.codons_regex = new RegExp("^[ACGTacgt\s]{3}$");
 	self.query = PartsGenieService.query;
@@ -221,7 +222,11 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	
 	self.searching = function() {
 		return search;
-	}
+	};
+	
+	self.isAmbiguousSeq = function(query) {
+		return query && nucl_regex.test(query);
+	};
 
 	self.submit = function() {
 		jobIds = [];
@@ -306,13 +311,13 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		return self.selected();
 	},               
 	function(values) {
-		self.queryJson = angular.toJson({selected: self.selected(), query: self.query}, true)
+		self.queryJson = angular.toJson({selected: self.selected(), query: self.query}, true);
 	}, true);
 	
 	$scope.$watch(function() {
 		return self.query;
 	},               
 	function(values) {
-		self.queryJson = angular.toJson({selected: self.selected(), query: self.query}, true)
+		self.queryJson = angular.toJson({selected: self.selected(), query: self.query}, true);
 	}, true);
 }]);

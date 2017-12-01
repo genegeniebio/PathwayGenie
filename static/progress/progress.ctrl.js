@@ -57,8 +57,8 @@ progressApp.controller('progressInstanceCtrl', ["$scope", "$uibModalInstance", "
 					height: 120,
 					min: values['min'],
 					max: values['max'],
-					greenFrom: values['target'] - values['max'] / 20,
-					greenTo: values['target'] + values['max'] / 20
+					greenFrom: values['target_min'],
+					greenTo: values['target_max']
 			};
 
 			var element = document.getElementById("progress-gauge-" + index);

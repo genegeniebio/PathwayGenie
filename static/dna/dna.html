@@ -46,9 +46,9 @@
 						readonly>{{selected() && selected().seq ? selected().seq : dna.seq.substring(selected().start - 1, selected().end)}}</textarea>
 				</td>
 			</tr>
-			<tr data-ng-repeat="(key, value) in selected().parameters">
+			<tr data-ng-repeat="(key, val) in selected().parameters">
 				<td>{{key}}</td>
-				<td>{{value}}</td>
+				<td>{{format(val)}}</td>
 			</tr>
 			<tr data-ng-show="selected().links && selected().links.length">
 				<td>Links</td>

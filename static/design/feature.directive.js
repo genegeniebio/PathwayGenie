@@ -4,7 +4,8 @@ designApp.directive("featurePanel", function() {
     		selected: "&",
     		setValid: "&",
     		searchUniprot: "&",
-    		searching: "&"
+    		searching: "&",
+    		isAmbiguousSeq: "&",
     	},
         templateUrl: "/static/design/feature.html",
         link: function (scope, element, attr, ctrl) {

@@ -66,7 +66,7 @@
 				</div>
 			</div>
 			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('prot') !== -1">
-				<label class="col-xs-4 col-form-label">Sequence:</label>
+				<label class="col-xs-4 col-form-label">Amino acid sequence:</label>
 				<div class="col-xs-8">
 					<textarea class="form-control sequence"
 						data-ng-model="selected().options[0].temp_params.aa_seq"
@@ -77,6 +77,12 @@
 					</textarea>
 				</div>
 			</div>
+			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('prot') !== -1 && isAmbiguousSeq({query: selected().options[0].temp_params.aa_seq})">
+				<div class="col-xs-4"></div>
+				<div class="col-xs-8">
+					<div class="alert alert-warning">Coding sequences must be submitted as amino acid sequences</div>
+				</div>
+			</div>
 			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('len') !== -1">
 				<label class="col-xs-4 col-form-label">Length:</label>
 				<div class="col-xs-8">
@@ -85,6 +91,15 @@
 						min="{{selected().temp_params.min_end}}"
 						max="{{selected().temp_params.max_end}}"
 						placeholder="Length"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 col-form-label">Fixed?</label>
+				<div class="col-xs-8">
+					<input type="checkbox" class="form-control"
+						data-ng-model="selected().temp_params.fixed"
+						placeholder="Fixed"
+						disabled/>
 				</div>
 			</div>
 		</form>

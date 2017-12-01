@@ -15,9 +15,10 @@ from pathway_genie import APP
 def main(argv):
     '''main method.'''
     if argv:
-        APP.run(host='0.0.0.0', threaded=True, port=int(argv[0]))
+        APP.run(host='0.0.0.0', threaded=True, port=int(argv[0]),
+                use_reloader=False)
     else:
-        APP.run(host='0.0.0.0', threaded=True)
+        APP.run(host='0.0.0.0', threaded=True, use_reloader=False)
 
 
 if __name__ == '__main__':
