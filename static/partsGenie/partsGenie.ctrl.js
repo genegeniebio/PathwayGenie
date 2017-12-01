@@ -25,6 +25,10 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		self.query.filters.restr_enzs = remove(self.query.filters.restr_enzs, selected);
 	}
 	
+	self.showHelp = function() {
+		return PathwayGenieService.showHelp();
+	}
+	
 	self.hasFeatures = function() {
 		for(var i = 0; i < self.query.designs.length; i++) {
 			design = self.query.designs[i];

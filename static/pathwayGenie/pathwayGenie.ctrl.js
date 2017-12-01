@@ -1,4 +1,4 @@
-pathwayGenieApp.controller("pathwayGenieCtrl", ["ICEService", function(ICEService) {
+pathwayGenieApp.controller("pathwayGenieCtrl", ["ICEService", "PathwayGenieService", function(ICEService, PathwayGenieService) {
 	var self = this;
 	
 	self.showIce = function() {
@@ -7,5 +7,9 @@ pathwayGenieApp.controller("pathwayGenieCtrl", ["ICEService", function(ICEServic
 	
 	self.connected = function() {
 		return ICEService.connected;
+	}
+	
+	self.toggleHelp = function() {
+		return PathwayGenieService.toggleHelp();
 	}
 }]);

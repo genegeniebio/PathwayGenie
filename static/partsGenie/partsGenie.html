@@ -1,113 +1,126 @@
-<!-- Submission form -->
-<div class="col-md-6">
-	<form class="form-horizontal" role="form" name="form">
-		<div class="panel-group" id="accordion">
-			<div class="panel panel-default">
-				<div class="panel-heading">
-						<a data-toggle="collapse" data-parent="#accordion"
-							href="#collapse1">Parts</a>
-					<button type="submit" data-ng-click="ctrl.submit()"
-						data-ng-disabled="!ctrl.hasFeatures() || ctrl.response.update.status == 'running' || form.$invalid"
-						data-ng-class="(!ctrl.hasFeatures() || ctrl.response.update.status == 'running' || form.$invalid) ? 'btn-danger': 'btn-success'"
-						class="pull-right btn btn-xs">Submit</button>
-				</div>
-				<div id="collapse1" class="panel-collapse collapse">
-					<design-panel
-						templates="ctrl.templates"
-						query="ctrl.query"
-						selected="ctrl.selected()"
-						toggle-selected="ctrl.toggleSelected(args)"
-						add-design="ctrl.addDesign()"
-						copy-design="ctrl.copyDesign()"
-						remove-design="ctrl.removeDesign()"
-						add-feature="ctrl.addFeature(args)"
-						copy-feature="ctrl.copyFeature(args)"
-						pagination="ctrl.pagination">
-					</design-panel>
-					<div class="panel-body">
-						<div class="form-group">
-							<label class="col-xs-4 col-form-label">Organism:</label>
-							<div class="col-xs-8" data-ng-controller="typeaheadCtrl as typeahead_ctrl">
-								<input type="text" class="form-control"
-									data-ng-init="typeahead_ctrl.url='/organisms/'"
-									data-ng-model="ctrl.query.organism"
-									data-ng-required="ctrl.organismRequired()"
-									placeholder="Select host organism" required autocomplete="off"
-									uib-typeahead="organism as organism.name for organism in typeahead_ctrl.getItem({'term': $viewValue})"
-									typeahead-min-length="3" typeahead-editable="false">
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="panel panel-default">
-				<div class="panel-heading">
-						<a data-toggle="collapse" data-parent="#accordion"
-							href="#collapse2">Filters</a>
-				</div>
-				<div id="collapse2" class="panel-collapse collapse">
-					<div class="panel-body">
-						<div class="form-group">
-							<label class="col-xs-4 col-form-label">Max repeating nucleotides:</label>
-							<div class="col-xs-8">
-								<input type="number" class="form-control"
-									data-ng-model="ctrl.query.filters.max_repeats" min="4"
-									max="1000000" step="1"
-									placeholder="Enter maximum repeating nucleotides" required>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-xs-4 col-form-label">Excluded codons:</label>
-							<div class="col-xs-8" data-ng-controller="tagInputCtrl as tag_ctrl">
-							    <tag-input
-							    	placeholder="'Codon'"
-							    	tags="ctrl.query.filters.excl_codons"
-							    	pattern="ctrl.codons_regex"
-							    	tag-text="tag_ctrl.tagText"
-							    	add-tag="tag_ctrl.addTag(args)"
-							    	valid-tag="tag_ctrl.validTag(args)">
-							    </tag-input>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-xs-12 col-form-label">Excluded restriction sites:</label>
-							<dual-listbox
-								options="ctrl.restrEnzs"
-					    		chosen="ctrl.query.filters.restr_enzs"
-					    		select="ctrl.selectRestEnzs(args)"
-					    		deselect="ctrl.deselectRestEnzs(args)">
-							</dual-listbox>
-						</div>
-					</div>
-				</div>
+<!-- Help -->
+<div data-ng-show="ctrl.showHelp()">
+	<div class="col-md-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">Help</div>
+			<div class="panel-body">
 			</div>
 		</div>
-	</form>
+	</div>
 </div>
 
-<!-- Feature panel -->
-<div class="col-md-6" data-ng-show="ctrl.selected()">
-	<feature-panel
-		selected="ctrl.selected()"
-		set-valid="ctrl.setValid(valid)"
-		search-uniprot="ctrl.searchUniprot(query)"
-		searching="ctrl.searching()"
-		is-ambiguous-seq="ctrl.isAmbiguousSeq(query)">
-	</feature-panel>
-</div>
-
-<!-- Results panel -->
-<div class="col-md-6" data-ng-controller="resultCtrl as result_ctrl"
-	data-ng-show="result_ctrl.results()">
-	<result-panel
-		results="result_ctrl.results()"
-		result="result_ctrl.result()"
-		save-results="result_ctrl.saveResults()"
-		connected="result_ctrl.connected()"
-		selected="result_ctrl.selected()"
-		toggle-selected="result_ctrl.toggleSelected(ft)"
-		pagination="result_ctrl.pagination">
-	</result-panel>
+<!-- Submission form -->
+<div data-ng-show="!ctrl.showHelp()">
+	<div class="col-md-6">
+		<form class="form-horizontal" role="form" name="form">
+			<div class="panel-group" id="accordion">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+							<a data-toggle="collapse" data-parent="#accordion"
+								href="#collapse1">Parts</a>
+						<button type="submit" data-ng-click="ctrl.submit()"
+							data-ng-disabled="!ctrl.hasFeatures() || ctrl.response.update.status == 'running' || form.$invalid"
+							data-ng-class="(!ctrl.hasFeatures() || ctrl.response.update.status == 'running' || form.$invalid) ? 'btn-danger': 'btn-success'"
+							class="pull-right btn btn-xs">Submit</button>
+					</div>
+					<div id="collapse1" class="panel-collapse collapse">
+						<design-panel
+							templates="ctrl.templates"
+							query="ctrl.query"
+							selected="ctrl.selected()"
+							toggle-selected="ctrl.toggleSelected(args)"
+							add-design="ctrl.addDesign()"
+							copy-design="ctrl.copyDesign()"
+							remove-design="ctrl.removeDesign()"
+							add-feature="ctrl.addFeature(args)"
+							copy-feature="ctrl.copyFeature(args)"
+							pagination="ctrl.pagination">
+						</design-panel>
+						<div class="panel-body">
+							<div class="form-group">
+								<label class="col-xs-4 col-form-label">Organism:</label>
+								<div class="col-xs-8" data-ng-controller="typeaheadCtrl as typeahead_ctrl">
+									<input type="text" class="form-control"
+										data-ng-init="typeahead_ctrl.url='/organisms/'"
+										data-ng-model="ctrl.query.organism"
+										data-ng-required="ctrl.organismRequired()"
+										placeholder="Select host organism" required autocomplete="off"
+										uib-typeahead="organism as organism.name for organism in typeahead_ctrl.getItem({'term': $viewValue})"
+										typeahead-min-length="3" typeahead-editable="false">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="panel panel-default">
+					<div class="panel-heading">
+							<a data-toggle="collapse" data-parent="#accordion"
+								href="#collapse2">Filters</a>
+					</div>
+					<div id="collapse2" class="panel-collapse collapse">
+						<div class="panel-body">
+							<div class="form-group">
+								<label class="col-xs-4 col-form-label">Max repeating nucleotides:</label>
+								<div class="col-xs-8">
+									<input type="number" class="form-control"
+										data-ng-model="ctrl.query.filters.max_repeats" min="4"
+										max="1000000" step="1"
+										placeholder="Enter maximum repeating nucleotides" required>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-xs-4 col-form-label">Excluded codons:</label>
+								<div class="col-xs-8" data-ng-controller="tagInputCtrl as tag_ctrl">
+								    <tag-input
+								    	placeholder="'Codon'"
+								    	tags="ctrl.query.filters.excl_codons"
+								    	pattern="ctrl.codons_regex"
+								    	tag-text="tag_ctrl.tagText"
+								    	add-tag="tag_ctrl.addTag(args)"
+								    	valid-tag="tag_ctrl.validTag(args)">
+								    </tag-input>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-xs-12 col-form-label">Excluded restriction sites:</label>
+								<dual-listbox
+									options="ctrl.restrEnzs"
+						    		chosen="ctrl.query.filters.restr_enzs"
+						    		select="ctrl.selectRestEnzs(args)"
+						    		deselect="ctrl.deselectRestEnzs(args)">
+								</dual-listbox>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+	<!-- Feature panel -->
+	<div class="col-md-6" data-ng-show="ctrl.selected()">
+		<feature-panel
+			selected="ctrl.selected()"
+			set-valid="ctrl.setValid(valid)"
+			search-uniprot="ctrl.searchUniprot(query)"
+			searching="ctrl.searching()"
+			is-ambiguous-seq="ctrl.isAmbiguousSeq(query)">
+		</feature-panel>
+	</div>
+	
+	<!-- Results panel -->
+	<div class="col-md-6" data-ng-controller="resultCtrl as result_ctrl"
+		data-ng-show="result_ctrl.results()">
+		<result-panel
+			results="result_ctrl.results()"
+			result="result_ctrl.result()"
+			save-results="result_ctrl.saveResults()"
+			connected="result_ctrl.connected()"
+			selected="result_ctrl.selected()"
+			toggle-selected="result_ctrl.toggleSelected(ft)"
+			pagination="result_ctrl.pagination">
+		</result-panel>
+	</div>
 </div>
 
 <!--
