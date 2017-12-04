@@ -75,6 +75,11 @@ class NuPackRunner(RunnerBase):
                     return float(line)
         finally:
             try:
+                os.remove(filename + '.in')
+            except OSError:
+                pass
+
+            try:
                 os.remove(out_filename)
             except OSError:
                 pass
