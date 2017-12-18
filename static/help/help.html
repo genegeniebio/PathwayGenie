@@ -46,7 +46,40 @@
 			<p>Multiple designs may be specified, by either clicking the '+' icon,
 			or by duplicating a specified design through the Copy icon. Individual
 			designs can be viewed and edited by clicking the numbered pagination
-			panel. Designs may be deleted, as can individual features within designs.  
+			panel. Designs may be deleted, as can individual features within designs.
+			
+			<h1>Feature</h1>
+			The <b>Feature</b> panel is viewed on selecting a given feature in
+			the <b>Design</b> panel.
+			<p>The <b>Feature</b> panel is specific to the
+			selected feature, which can be one of the following types:
+			<ul>
+				<li><b>Defined sequence</b>.
+				<li><b>Randomised sequence</b>.
+				<li><b>Sequence of defined melting temperature</b>.
+				<li><b>Origin of replication</b>.
+				<li><b>Promoter</b>.
+				<li><b>Ribosome binding site</b>.
+				<li><b>Coding sequence</b>.
+				<li><b>Terminator</b>.
+			</ul>
+			<p>In ease case, an individual <b>Feature</b> can be named.
+			<p>In the cases of <b>Defined sequence</b>, <b>Origin of replication</b>,
+			<b>Promoter</b> and <b>Terminator</b>, the only required parameter
+			is the nucleotide <b>Sequence</b> itself. This sequence is fixed and
+			not optimised by the PartsGenie algorithm.
+			<p><b>Randomised sequence</b> requires a <b>Length</b> of the sequence,
+			which is periodically mutated through the optimisation sequence to
+			optimise the design as a whole.
+			<p>A <b>Sequence of defined melting temperature</b> requires a defined
+			melting temperature (<b>Tm</b>).
+			<p><b>Ribosome binding site</b>s require a desired translation initiation
+			rate <b>TIR</b>.
+			<p><b>Coding sequence</b>s require an <b>Amino acid sequence</b> to
+			be specified, which may be extracted automatically through the
+			<b>Search Uniprot</b> facility:
+			<p><img src="static/help/uniprot.png" alt="Search Uniprot" class="help bordered"/>
+			
 		</div>
 	</div>
 </div>

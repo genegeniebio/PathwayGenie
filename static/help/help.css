@@ -1,5 +1,6 @@
 h1 {
-	font-size: 24px;
+	margin-top: 0px;
+	font-size: 16px;
 }
 
 p {
@@ -8,4 +9,9 @@ p {
 
 img.help {
     width: 600px;
+}
+
+img.bordered {
+   	border-radius: 3px;
+	border: 1px solid #ddd;
 }
