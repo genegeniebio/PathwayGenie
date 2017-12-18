@@ -9,7 +9,7 @@
 			<p>This user interface consists of a number of components:
 			<ul>
 				<li><b>Parts</b>: an interactive drag-and-drop interface for
-				assembling designs from features such as promoters, ribosome
+				assembling parts from features such as promoters, ribosome
 				binding sites (RBS) and coding sequences (CDS).
 				<li><b>Feature</b>: a panel allowing for the specification of
 				parameters relating to individual features.
@@ -23,15 +23,15 @@
 			
 			<h1>Parts</h1>
 			The <b>Parts</b> panel offers a simple drag-and-drop interface for
-			defining multiple designs from a collection of features represented
+			defining multiple parts from a collection of features represented
 			as buttons.
 			<p><img src="static/help/parts.png" alt="Parts" class="help"/>
-			<p>The user can build up a design by dragging-and-dropping features
+			<p>The user can build up a part by dragging-and-dropping features
 			from the palette of grey buttons. Tablet and smartphone users can
-			add features to the design by double-clicking on the feature button
+			add features to the part by double-clicking on the feature button
 			in the palette.
 			<p>The features available are described below in the feature section.
-			<p>Individual designs may be named.
+			<p>Individual parts may be named.
 			<p>Upon selecting a given feature, the <b>Feature</b> panel becomes
 			visible, allowing the specification of parameters specific to that
 			feature. Examples of this include an amino acid sequence for a CDS,
@@ -43,11 +43,11 @@
 			a red warning box if this restriction is not adhered to.
 			<p>In the case of optimising RBS or CDS, an <b>Organism</b> must be
 			specified from the autofill field.
-			<p>Multiple designs may be specified, by either clicking the '+' icon,
-			or by duplicating a specified design through the Copy icon. Individual
-			designs can be viewed and edited by clicking the numbered pagination
-			panel. Designs may be deleted, as can individual features within designs.
-			<p>Upon completing the set of designed, and adhering to all restrictions,
+			<p>Multiple parts may be specified, by either clicking the '+' icon,
+			or by duplicating a specified part through the Copy icon. Individual
+			parts can be viewed and edited by clicking the numbered pagination
+			panel. Designs may be deleted, as can individual features within parts.
+			<p>Upon completing the set of parts, and adhering to all restrictions,
 			the <b>Submit</b> button will turn green, and the job may be submitted.
 			
 			<h1>Feature</h1>
@@ -65,14 +65,14 @@
 				<li><b>Coding sequence</b>.
 				<li><b>Terminator</b>.
 			</ul>
-			<p>In ease case, an individual <b>Feature</b> can be named.
+			<p>In each case, an individual <b>Feature</b> can be named.
 			<p>In the cases of <b>Defined sequence</b>, <b>Origin of replication</b>,
 			<b>Promoter</b> and <b>Terminator</b>, the only required parameter
 			is the nucleotide <b>Sequence</b> itself. This sequence is fixed and
 			not optimised by the PartsGenie algorithm.
 			<p><b>Randomised sequence</b> requires a <b>Length</b> of the sequence,
 			which is periodically mutated through the optimisation sequence to
-			optimise the design as a whole.
+			optimise the part as a whole.
 			<p>A <b>Sequence of defined melting temperature</b> requires a defined
 			melting temperature (<b>Tm</b>).
 			<p><b>Ribosome binding site</b>s require a desired translation initiation
@@ -98,25 +98,27 @@
 			coding sequence exists.
 			
 			<h1>Results</h1>
-			Upon completion of an optimisation job (including one or more designs),
+			Upon completion of an optimisation job (including one or more parts),
 			the <b>Results</b> panel is displayed.
 			<p>The <b>Results</b> panel allows for the inspection of all optimised
-			designs, allowing for the design as a whole, and individual features,
+			parts, allowing for the part as a whole, and individual features,
 			to be viewed.
 			<p>Individual features can be viewed by selecting the feature, and
 			metadata specific to that feature can be inspected. (This may include
-			<b>TIR</b> for a RBS, or Codon Apaptation Index (<b>CAI</b>) - a measure of how
+			<b>TIR</b> for a RBS, or Codon Adaptation Index (<b>CAI</b>) - a measure of how
 			optimised codon usage is for the target host organism - for CDS features.)
 			<p><img src="static/help/results.png" alt="Results" class="help"/>
 			
 			<h1>ICE</h1>
 			Upon clicking the <b>ICE</b> button, the user is presented with a
-			form for logging into an instance of JBEI ICE. The required parameters
+			form for logging into an instance of
+			<a href="http://ice.jbei.org" target="_out">JBEI ICE</a>.
+			The required parameters
 			are <b>URL</b> of the JBEI ICE instance, <b>Username</b> and <b>Password</b>.
 			Finally, a <b>Group</b> may be specified, allowing any submitted designed
 			part to be shared between members of a JBEI ICE defined group.
 			<p>Once a user has logged into ICE, the <b>ICE</b> button will turn
-			green, after which, designs may be <b>Save</b>d to JBEI ICE from the
+			green, after which, parts may be <b>Save</b>d to JBEI ICE from the
 			<b>Results</b> panel.
 			
 			<h1>Further details</h1>
