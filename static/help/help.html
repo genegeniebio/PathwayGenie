@@ -47,6 +47,8 @@
 			or by duplicating a specified design through the Copy icon. Individual
 			designs can be viewed and edited by clicking the numbered pagination
 			panel. Designs may be deleted, as can individual features within designs.
+			<p>Upon completing the set of designed, and adhering to all restrictions,
+			the <b>Submit</b> button will turn green, and the job may be submitted.
 			
 			<h1>Feature</h1>
 			The <b>Feature</b> panel is viewed on selecting a given feature in
@@ -80,6 +82,53 @@
 			<b>Search Uniprot</b> facility:
 			<p><img src="static/help/uniprot.png" alt="Search Uniprot" class="help bordered"/>
 			
+			<h1>Filters</h1>
+			The <b>Filters</b> facility allow for the specification of constraints
+			that must be applied during the optimisation process.
+			A <b>Max repeating nucleotides</b> may be specified, preventing long
+			runs of repeating nucleotides which impede synthesis of designed parts.
+			<b>Excluded codons</b> and  <b>Excluded restriction sites</b> may
+			be specified.
+			<p>In all cases, such <b>Filters</b> should be kept to a minimum,
+			as specifying too many unnecessary constraints will increase optimisation
+			time and, in some cases, prevent optimisation altogether. For example,
+			specifying either too few max repeating nucleotides, or too many excluded
+			codons or restriction sites may result in the design space being constraint
+			to such an extent that no valid reverse translation of an amino acid
+			coding sequence exists.
+			
+			<h1>Results</h1>
+			Upon completion of an optimisation job (including one or more designs),
+			the <b>Results</b> panel is displayed.
+			<p>The <b>Results</b> panel allows for the inspection of all optimised
+			designs, allowing for the design as a whole, and individual features,
+			to be viewed.
+			<p>Individual features can be viewed by selecting the feature, and
+			metadata specific to that feature can be inspected. (This may include
+			<b>TIR</b> for a RBS, or Codon Apaptation Index (<b>CAI</b>) - a measure of how
+			optimised codon usage is for the target host organism - for CDS features.)
+			<p><img src="static/help/results.png" alt="Results" class="help"/>
+			
+			<h1>ICE</h1>
+			Upon clicking the <b>ICE</b> button, the user is presented with a
+			form for logging into an instance of JBEI ICE. The required parameters
+			are <b>URL</b> of the JBEI ICE instance, <b>Username</b> and <b>Password</b>.
+			Finally, a <b>Group</b> may be specified, allowing any submitted designed
+			part to be shared between members of a JBEI ICE defined group.
+			<p>Once a user has logged into ICE, the <b>ICE</b> button will turn
+			green, after which, designs may be <b>Save</b>d to JBEI ICE from the
+			<b>Results</b> panel.
+			
+			<h1>Further details</h1>
+			Further details are available from the publication describing this work.
+			Please cite this reference in any scientific disclosure that utilises
+			<b>PartsGenie</b>.
+			<p><b>PartsGenie: an integrated tool for optimising and sharing synthetic biology parts</b>.
+			<br/>Neil Swainston, Mark Dunstan, Adrian J Jervis, Christopher J
+			Robinson, Pablo Carbonell, Alan R Williams, Jean-Loup Faulon, Nigel
+			S Scrutton, Douglas B Kell.
+			<br/><i>bioRxiv</i>, 189357
+			<br/><a href="https://doi.org/10.1101/189357" target="_out">https://doi.org/10.1101/189357</a>
 		</div>
 	</div>
 </div>
