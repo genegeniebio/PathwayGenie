@@ -10,7 +10,7 @@
 			<ul>
 				<li><b>Parts</b>: an interactive drag-and-drop interface for
 				assembling designs from features such as promoters, ribosome
-				binding sites and coding sequences.
+				binding sites (RBS) and coding sequences (CDS).
 				<li><b>Feature</b>: a panel allowing for the specification of
 				parameters relating to individual features.
 				<li><b>Filters</b>: a panel for specifying filters to consider
@@ -20,6 +20,33 @@
 			</ul>
 			<p>In addition, there is also the functionality for saving optimised
 			parts to an instance of JBEI-ICE.
+			
+			<h1>Parts</h1>
+			The <b>Parts</b> panel offers a simple drag-and-drop interface for
+			defining multiple designs from a collection of features represented
+			as buttons.
+			<p><img src="static/help/parts.png" alt="Parts" class="help"/>
+			<p>The user can build up a design by dragging-and-dropping features
+			from the palette of grey buttons. Tablet and smartphone users can
+			add features to the design by double-clicking on the feature button
+			in the palette.
+			<p>The features available are described below in the feature section.
+			<p>Individual designs may be named.
+			<p>Upon selecting a given feature, the <b>Feature</b> panel becomes
+			visible, allowing the specification of parameters specific to that
+			feature. Examples of this include an amino acid sequence for a CDS,
+			or a translation initiation rate (TIR) for an RBS. The feature will
+			be bordered by a red warning box until these necessary features are
+			specified.
+			<p>Note that a restriction exists such that a RBS <b>must</b> be
+			immediately followed by a CDS. Again, the RBS will be bordered by
+			a red warning box if this restriction is not adhered to.
+			<p>In the case of optimising RBS or CDS, an <b>Organism</b> must be
+			specified from the autofill field.
+			<p>Multiple designs may be specified, by either clicking the '+' icon,
+			or by duplicating a specified design through the Copy icon. Individual
+			designs can be viewed and edited by clicking the numbered pagination
+			panel. Designs may be deleted, as can individual features within designs.  
 		</div>
 	</div>
 </div>

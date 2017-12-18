@@ -1,9 +1,11 @@
-h1
-{
+h1 {
 	font-size: 24px;
 }
 
-p
-{
+p {
 	margin-top: 10px;
+}
+
+img.help {
+    width: 600px;
 }
