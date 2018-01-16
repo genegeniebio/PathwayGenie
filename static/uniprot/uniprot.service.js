@@ -23,21 +23,21 @@ uniprotApp.factory("UniprotService", ["$uibModal", function($uibModal) {
 		});
 
 		modalInstance.result.then(function(selected) {
-			feature.options[0].name = selected["Entry name"];
-			feature.options[0].temp_params.aa_seq = selected.Sequence;
-			feature.options[0].temp_params.orig_seq = selected.Sequence;
-			feature.options[0].desc = selected["Protein names"].join(", ") + " (" + selected["Organism"] + ")";
+			feature.name = selected["Entry name"];
+			feature.temp_params.aa_seq = selected.Sequence;
+			feature.temp_params.orig_seq = selected.Sequence;
+			feature.desc = selected["Protein names"].join(", ") + " (" + selected["Organism"] + ")";
 			
-			feature.options[0].links = [
+			feature.links = [
 		        "http://identifiers.org/uniprot/" + selected["Entry"]
 		    ]
 	
 		    if(selected["EC number"]) {
-		    	ecNumbers = selected["EC number"].split("; ");
-		    	
-		    	for(var i = 0; i < ecNumbers.length; i++) {
-		    		feature.options[0].links.push("http://identifiers.org/ec-code/" + ecNumbers[i]);
-		    	}
+			    	ecNumbers = selected["EC number"].split("; ");
+			    	
+			    	for(var i = 0; i < ecNumbers.length; i++) {
+			    		feature.links.push("http://identifiers.org/ec-code/" + ecNumbers[i]);
+			    	}
 		    }
 		});
 	};

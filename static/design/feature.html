@@ -58,18 +58,10 @@
 				</div>
 			</div>
 			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('prot') !== -1">
-				<label class="col-xs-4 col-form-label">Name:</label>
-				<div class="col-xs-8">
-					<input type="text" class="form-control"
-						data-ng-model="selected().options[0].name"
-						placeholder="Name"/>
-				</div>
-			</div>
-			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('prot') !== -1">
 				<label class="col-xs-4 col-form-label">Amino acid sequence:</label>
 				<div class="col-xs-8">
 					<textarea class="form-control sequence"
-						data-ng-model="selected().options[0].temp_params.aa_seq"
+						data-ng-model="selected().temp_params.aa_seq"
 						data-ng-class="{mutated: selected().options[0].temp_params.orig_seq && selected().options[0].temp_params.aa_seq !== selected().options[0].temp_params.orig_seq}"
 						data-ng-pattern="/^[ACDEFGHIKLMNPQRSTVWYacdefghiklmnpqrstvwy\s]+$/"
 						data-ng-required="selected().temp_params.required.indexOf('prot') !== -1"
@@ -77,7 +69,7 @@
 					</textarea>
 				</div>
 			</div>
-			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('prot') !== -1 && isAmbiguousSeq({query: selected().options[0].temp_params.aa_seq})">
+			<div class="form-group" data-ng-show="selected().temp_params.required.indexOf('prot') !== -1 && isAmbiguousSeq({query: selected().temp_params.aa_seq})">
 				<div class="col-xs-4"></div>
 				<div class="col-xs-8">
 					<div class="alert alert-warning">Coding sequences must be submitted as amino acid sequences</div>

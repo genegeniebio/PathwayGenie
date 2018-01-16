@@ -121,19 +121,21 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		{
 			typ: "http://purl.obolibrary.org/obo/SO_0000316",
 			name: "Coding sequence",
-			options: [
-				{
-					typ: "http://purl.obolibrary.org/obo/SO_0000316",
-					name: "coding sequence",
-					temp_params: {
-						fixed: false
-					}
-				}
-			],
 			temp_params: {
-				required: ["prot"],
+				fixed: false,
+				required: ["name", "prot"],
 				valid: false,
 				id: "_7"
+			}
+		},
+		{
+			typ: "http://purl.obolibrary.org/obo/SO_0000316",
+			name: "Fixed coding sequence",
+			temp_params: {
+				fixed: true,
+				required: ["name", "seq"],
+				valid: false,
+				id: "_8"
 			}
 		},
 		{
@@ -144,7 +146,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 				fixed: true,
 				required: ["name", "seq"],
 				valid: false,
-				id: "_8"
+				id: "_9"
 			}
 		},
 	];

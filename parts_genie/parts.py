@@ -13,9 +13,10 @@ import copy
 from itertools import product
 import math
 
-from parts_genie import rbs_calculator as rbs_calc
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import dna_utils, seq_utils
+
+from parts_genie import rbs_calculator as rbs_calc
 
 
 class PartsSolution(object):
@@ -105,14 +106,13 @@ class PartsSolution(object):
     def mutate(self):
         '''Mutates and scores whole design.'''
         for feature in self.__dna_new['features']:
-            if feature['typ'] == dna_utils.SO_CDS:
-                for cds in feature['options']:
-                    if not cds['temp_params']['fixed']:
-                        mutation_rate = 5.0 / len(cds['temp_params']['aa_seq'])
-                        cds.set_seq(self.__cod_opt.mutate(
-                            cds['temp_params']['aa_seq'],
-                            cds['seq'],
-                            mutation_rate))
+            if feature['typ'] == dna_utils.SO_CDS \
+                    and not feature['temp_params']['fixed']:
+                mutation_rate = 5.0 / len(feature['temp_params']['aa_seq'])
+                feature.set_seq(self.__cod_opt.mutate(
+                    feature['temp_params']['aa_seq'],
+                    feature['seq'],
+                    mutation_rate))
             elif not feature['temp_params']['fixed']:
                 feature.set_seq(seq_utils.mutate_seq(feature['seq'],
                                                      mutations=3))
@@ -162,31 +162,31 @@ class PartsSolution(object):
         '''Returns sequences from protein ids, which may be either Uniprot ids,
         or a protein sequence itself.'''
         for idx, feature in enumerate(self.__dna['features']):
-            if feature['typ'] == dna_utils.SO_CDS:
-                for cds in feature['options']:
-                    cds['temp_params']['aa_seq'] = \
-                        ''.join(cds['temp_params']['aa_seq'].upper().split())
+            if feature['typ'] == dna_utils.SO_CDS \
+                    and not feature['temp_params']['fixed']:
+                feature['temp_params']['aa_seq'] = \
+                    ''.join(feature['temp_params']['aa_seq'].upper().split())
 
-                    if cds['temp_params']['aa_seq'][-1] != '*':
-                        cds['temp_params']['aa_seq'] += '*'
+                if feature['temp_params']['aa_seq'][-1] != '*':
+                    feature['temp_params']['aa_seq'] += '*'
 
-                    cds['links'].append(
-                        'http://identifiers.org/taxonomy/' +
-                        self.__organism['taxonomy_id'])
+                feature['links'].append(
+                    'http://identifiers.org/taxonomy/' +
+                    self.__organism['taxonomy_id'])
 
-                    cds.set_seq(self.__cod_opt.get_codon_optim_seq(
-                        cds['temp_params']['aa_seq'],
-                        self.__filters.get('excl_codons', None),
-                        self.__filters['max_repeats'],
-                        self.__filters['restr_enzs'],
-                        tolerant=False))
+                feature.set_seq(self.__cod_opt.get_codon_optim_seq(
+                    feature['temp_params']['aa_seq'],
+                    self.__filters.get('excl_codons', None),
+                    self.__filters['max_repeats'],
+                    self.__filters['restr_enzs'],
+                    tolerant=False))
 
             elif feature['typ'] == dna_utils.SO_RBS:
                 # Randomly choose an RBS that is a decent starting point,
                 # using the first CDS as the upstream sequence:
                 feature.set_seq(self.__calc.get_initial_rbs(
                     feature['end'],
-                    self.__dna['features'][idx + 1]['options'][0]['seq'],
+                    self.__dna['features'][idx + 1]['seq'],
                     feature['parameters']['TIR target']))
 
             elif feature['typ'] == dna_utils.SO_ASS_COMP:
@@ -220,16 +220,15 @@ class PartsSolution(object):
 
         for idx, feature in enumerate(dna['features']):
             if feature['typ'] == dna_utils.SO_RBS:
-                for cds in dna['features'][idx + 1]['options']:
-                    tir_err, rogue_rbs = self.__calc_tirs(feature, cds)
-                    tir_errs.append(tir_err)
-                    num_rogue_rbs += len(rogue_rbs)
+                cds = dna['features'][idx + 1]
+                tir_err, rogue_rbs = self.__calc_tirs(feature, cds)
+                tir_errs.append(tir_err)
+                num_rogue_rbs += len(rogue_rbs)
 
             elif feature['typ'] == dna_utils.SO_CDS:
-                for cds in feature['options']:
-                    cai = self.__cod_opt.get_cai(cds['seq'])
-                    cds['parameters']['CAI'] = cai
-                    cais.append(cai)
+                cai = self.__cod_opt.get_cai(feature['seq'])
+                feature['parameters']['CAI'] = cai
+                cais.append(cai)
 
         dna['temp_params']['mean_cai'] = _mean(cais)
         dna['temp_params']['mean_tir_errs'] = _mean(tir_errs) \
@@ -298,9 +297,8 @@ class PartsSolution(object):
 
         for feature in self.__dna['features']:
             if feature['typ'] == dna_utils.SO_CDS:
-                for cds in feature['options']:
-                    tirs.append(cds['parameters'].get('TIR', None))
-                    cais.append(cds['parameters']['CAI'])
+                tirs.append(feature['parameters'].get('TIR', None))
+                cais.append(feature['parameters']['CAI'])
 
         return '\t'.join([str(tirs),
                           str(cais),
@@ -377,7 +375,7 @@ def _get_all_seqs(dna):
 
     for feature in dna['features']:
         if feature['typ'] == dna_utils.SO_CDS:
-            options = [option['seq'] for option in feature['options']]
+            options = [feature['seq']]
             all_seqs = [''.join(term) for term in product(all_seqs, options)]
         else:
             for idx, seq in enumerate(all_seqs):
