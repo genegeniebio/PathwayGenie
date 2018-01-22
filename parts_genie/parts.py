@@ -40,8 +40,8 @@ class PartsSolution(object):
 
     def init(self):
         '''Initialisation method for longer initiation tasks.'''
-        self.__calc_num_fixed()
         self.__init_seqs()
+        self.__calc_num_fixed()
         self.__update(self.__dna)
 
         self.__dna_new = copy.deepcopy(self.__dna)
@@ -128,7 +128,7 @@ class PartsSolution(object):
         self.__dna_new = copy.deepcopy(self.__dna)
 
     def __calc_num_fixed(self, flank=16):
-        '''Calculate number of anomolies in fixed sequences.'''
+        '''Calculate number of anomalies in fixed sequences.'''
         fixed_seqs = [feat['seq']
                       for feat in self.__dna['features']
                       if feat['temp_params'].get('fixed', False)]
@@ -139,6 +139,7 @@ class PartsSolution(object):
         self.__calc_num_inv_seq_fixed(flanked_fixed_seqs)
         self.__calc_num_local_gc_fixed(fixed_seqs)
         self.__calc_num_repeats_fixed(fixed_seqs)
+        self.__calc_num_rogue_rbs_fixed()
 
     def __calc_num_inv_seq_fixed(self, fixed_seqs):
         '''Calculate number of invalid sequences in fixed sequences.'''
@@ -154,9 +155,23 @@ class PartsSolution(object):
             _get_local_gc(fixed_seqs)
 
     def __calc_num_repeats_fixed(self, fixed_seqs):
-        '''Calculate number of invalid sequences in fixed sequences.'''
+        '''Calculate number of repeats in fixed sequences.'''
         self.__dna['temp_params']['num_repeats_fixed'] = \
             _get_repeats(fixed_seqs)
+
+    def __calc_num_rogue_rbs_fixed(self):
+        '''Calculate number of rogue RBS sequences in fixed CDS.'''
+        num_rogue_rbs = 0
+
+        for idx, feature in enumerate(self.__dna['features']):
+            if feature['typ'] == dna_utils.SO_RBS:
+                cds = self.__dna['features'][idx + 1]
+
+                if cds['temp_params']['fixed']:
+                    _, rogue_rbs = self.__calc_tirs(feature, cds)
+                    num_rogue_rbs += len(rogue_rbs)
+
+        self.__dna['temp_params']['num_rogue_rbs_fixed'] = num_rogue_rbs
 
     def __init_seqs(self):
         '''Returns sequences from protein ids, which may be either Uniprot ids,
@@ -233,7 +248,8 @@ class PartsSolution(object):
         dna['temp_params']['mean_cai'] = _mean(cais)
         dna['temp_params']['mean_tir_errs'] = _mean(tir_errs) \
             if tir_errs else 0
-        dna['temp_params']['num_rogue_rbs'] = num_rogue_rbs
+        dna['temp_params']['num_rogue_rbs'] = num_rogue_rbs - \
+            dna['temp_params']['num_rogue_rbs_fixed']
 
         # Get number of invalid seqs:
         all_seqs = _get_all_seqs(dna)
