@@ -204,7 +204,8 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		
 			for(var j = 0; j < design.features.length; j++) {
 				if(design.features[j].typ == "http://purl.obolibrary.org/obo/SO_0000139"
-					|| design.features[j].typ == "http://purl.obolibrary.org/obo/SO_0000316") {
+					|| (design.features[j].typ == "http://purl.obolibrary.org/obo/SO_0000316"
+						&& !design.features[j].temp_params.fixed)) {
 					return true;
 				}
 			}
