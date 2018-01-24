@@ -105,3 +105,17 @@ input.ng-invalid, textarea.ng-invalid
 .feature.dropped.selected:hover {
 	background-color: #b4d5fe;
 }
+
+/***************************** Filters ******************************/
+
+.no-left-pad {
+	padding-left: 0px !important;
+}
+
+.no-right-pad {
+	padding-right: 0px !important;
+}
+
+.add-bottom-margin {
+	margin-bottom: 3px !important;
+}
