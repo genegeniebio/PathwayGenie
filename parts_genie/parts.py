@@ -29,6 +29,8 @@ class PartsSolution(object):
         self.__organism = organism
         self.__filters = filters
         self.__filters['restr_enzs'] = self.__filters.get('restr_enzs', [])
+        self.__filters['gc_min'] = float(self.__filters['gc_min']) / 100
+        self.__filters['gc_max'] = float(self.__filters['gc_max']) / 100
 
         self.__calc = rbs_calc.RbsCalculator(organism['r_rna']) \
             if self.__organism else None
@@ -78,7 +80,9 @@ class PartsSolution(object):
                     dict(zip(keys, ('global_gc',
                                     'Global GC',
                                     self.__dna['parameters']['Global GC'],
-                                    0, 1, 0.25, 0.65))),
+                                    0, 1,
+                                    self.__filters['gc_min'],
+                                    self.__filters['gc_max']))),
                     dict(zip(keys, ('local_gc',
                                     'Local GC',
                                     self.__dna['temp_params']['Local GC'],
@@ -240,12 +244,13 @@ class PartsSolution(object):
                 tir_errs.append(tir_err)
                 num_rogue_rbs += len(rogue_rbs)
 
-            elif feature['typ'] == dna_utils.SO_CDS:
+            elif feature['typ'] == dna_utils.SO_CDS \
+                    and not feature['temp_params']['fixed']:
                 cai = self.__cod_opt.get_cai(feature['seq'])
                 feature['parameters']['CAI'] = cai
                 cais.append(cai)
 
-        dna['temp_params']['mean_cai'] = _mean(cais)
+        dna['temp_params']['mean_cai'] = _mean(cais) if cais else 0
         dna['temp_params']['mean_tir_errs'] = _mean(tir_errs) \
             if tir_errs else 0
         dna['temp_params']['num_rogue_rbs'] = num_rogue_rbs - \
@@ -274,7 +279,9 @@ class PartsSolution(object):
         dna['temp_params']['energy'] = dna['temp_params']['mean_tir_errs'] + \
             dna['temp_params']['num_inv_seq'] + \
             dna['temp_params']['num_rogue_rbs'] + \
-            _get_delta_range(0.25, 0.65, dna['parameters']['Global GC']) + \
+            _get_delta_range(self.__filters['gc_min'],
+                             self.__filters['gc_max'],
+                             dna['parameters']['Global GC']) * 100 + \
             dna['temp_params']['Local GC'] + \
             dna['temp_params']['num_repeats']
 
@@ -314,7 +321,7 @@ class PartsSolution(object):
         for feature in self.__dna['features']:
             if feature['typ'] == dna_utils.SO_CDS:
                 tirs.append(feature['parameters'].get('TIR', None))
-                cais.append(feature['parameters']['CAI'])
+                cais.append(feature['parameters'].get('CAI', None))
 
         return '\t'.join([str(tirs),
                           str(cais),
