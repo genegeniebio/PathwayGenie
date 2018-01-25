@@ -14,12 +14,13 @@ from synbiochem.utils import ice_utils
 import pandas as pd
 
 
-def write(filename, ice_url, ice_username, ice_password, typ, comp_columns,
-          group_name):
+def write(in_filename, out_filename,
+          ice_url, ice_username, ice_password,
+          typ, comp_columns, group_name):
     '''Write.'''
-    df = pd.read_csv(filename)
+    df = pd.read_csv(in_filename)
     ice_client = ice_utils.ICEClient(ice_url, ice_username, ice_password)
-    product_ids = []
+    output = []
 
     for _, row in df.iterrows():
         comp1 = ice_client.get_ice_entry(row[comp_columns[0]])
@@ -46,9 +47,11 @@ def write(filename, ice_url, ice_username, ice_password, typ, comp_columns,
             ice_client.add_permission(product.get_ice_id(),
                                       groups[group_name])
 
-        product_ids.append(product.get_ice_id())
+        output.append({typ: product.get_ice_id(),
+                       comp_columns[0] + '_seq': comp1.get_seq(),
+                       comp_columns[1] + '_seq': comp2.get_seq()})
 
     # Update dataframe:
-    df[typ] = product_ids
+    df = df.join(pd.DataFrame(output, index=df.index))
 
-    df.to_csv('out.csv', index=False)
+    df.to_csv(out_filename, index=False)
