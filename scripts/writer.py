@@ -10,13 +10,13 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=invalid-name
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-locals
-from synbiochem.utils import ice_utils
+from synbiochem.utils import dna_utils, ice_utils
 import pandas as pd
 
 
 def write(in_filename, out_filename,
           ice_url, ice_username, ice_password,
-          typ, comp_columns, group_name):
+          typ, comp_columns, group_name, write_seq=False):
     '''Write.'''
     df = pd.read_csv(in_filename)
     ice_client = ice_utils.ICEClient(ice_url, ice_username, ice_password)
@@ -40,6 +40,11 @@ def write(in_filename, out_filename,
         ice_client.set_ice_entry(product)
         ice_client.add_link(product.get_ice_id(), comp1.get_ice_id())
         ice_client.add_link(product.get_ice_id(), comp2.get_ice_id())
+
+        if write_seq:
+            product.set_dna(dna_utils.concat(
+                [comp1.get_dna(), comp2.get_dna()]))
+
         ice_client.set_ice_entry(product)
 
         if group_name:

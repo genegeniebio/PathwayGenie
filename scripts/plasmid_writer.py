@@ -20,7 +20,7 @@ def do_write(in_filename, out_filename, ice_url, ice_username, ice_password,
     comp_columns = ['part', 'vector']
     typ = 'PLASMID'
     write(in_filename, out_filename, ice_url, ice_username, ice_password,
-          typ, comp_columns, group_name)
+          typ, comp_columns, group_name, write_seq=True)
 
 
 def main(args):
