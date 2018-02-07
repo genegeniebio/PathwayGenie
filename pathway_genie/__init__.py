@@ -8,6 +8,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=unused-argument
+from collections import defaultdict
 import json
 import os
 import sys
@@ -38,6 +39,8 @@ APP.config.from_object(__name__)
 
 _MANAGER = pathway.PathwayGenie()
 _ORGANISMS = seq_utils.get_codon_usage_organisms(expand=True, verbose=True)
+
+_ICE_IDS = defaultdict(list)
 
 
 @APP.route('/')
@@ -108,7 +111,13 @@ def get_restr_enzymes():
 def connect_ice():
     '''Connects to ICE.'''
     try:
-        _connect_ice(request)
+        ice_client = _connect_ice(request)
+
+        for typ in ['PLASMID', 'STRAIN']:
+            resp = ice_client.advanced_search('*', typ, 2**8)
+            _ICE_IDS[typ] = [result['entryInfo']['partId']
+                             for result in resp['results']]
+
         return json.dumps({'connected': True})
     except ConnectionError, err:
         print str(err)
@@ -128,15 +137,10 @@ def connect_ice():
 def search_ice():
     '''Search ICE.'''
     try:
-        ice_client = _connect_ice(request)
         data = json.loads(request.data)
-        resp = ice_client.advanced_search('*', data['type'], 2**8)
-
-        print json.dumps([result['entryInfo']['partId']
-                          for result in resp['results']])
-
-        return json.dumps([result['entryInfo']['partId']
-                           for result in resp['results']])
+        return json.dumps([ice_id
+                           for ice_id in _ICE_IDS[data['type']]
+                           if data['term'] in ice_id])
     except ConnectionError, err:
         print str(err)
         message = 'Unable to connect. Is the URL correct?'
