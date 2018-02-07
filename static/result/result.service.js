@@ -2,7 +2,8 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "ICEService", "ErrorS
 	var obj = {};
 	obj.results = null;
 	obj.response = {"update": {}};
-
+	results_saved = false;
+	
 	var jobIds = [];
 	var jobId = null;
 	
@@ -27,9 +28,14 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "ICEService", "ErrorS
 					obj.listen();
 				},
 				function(errResp) {
+					results_saved = false;
 					ErrorService.open(errResp.data.message);
 				});
 	};
+	
+	obj.results_saved = function() {
+		return results_saved;
+	}
 	
 	obj.cancel = function() {
 		return PathwayGenieService.cancel(jobId);
@@ -41,6 +47,7 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "ICEService", "ErrorS
 	
 	obj.listen = function() {
 		if(jobIds.length == 0) {
+			results_saved = true;
 			return;
 		}
 		
@@ -63,7 +70,7 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "ICEService", "ErrorS
 				}
 				
 				jobIds.splice(0, 1);
-				listen();
+				obj.listen();
 			}
 			
 			$rootScope.$apply();

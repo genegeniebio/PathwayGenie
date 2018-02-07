@@ -15,6 +15,10 @@ resultApp.controller("resultCtrl", ["$scope", "ICEService", "ResultService", fun
 		return ResultService.results;
 	};
 	
+	self.results_saved = function() {
+		return ResultService.results_saved();
+	};
+	
 	self.result = function() {
 		if(self.results()) {
 			return self.results()[self.pagination.current - 1];
