@@ -40,9 +40,9 @@ class PlasmidThread(PathwayThread):
             orig_comps = [comp.copy() for comp in dsgn['components']]
 
             # Apply restriction site digestion:
-            dsgn['components'] = [_apply_restricts(dna, restr_enz)
-                                  for dna, restr_enz in zip(
-                dsgn['components'], self._query['restr_enzs'])]
+            dsgn['components'] = \
+                [_apply_restricts(dna, self._query['restr_enzs'])
+                 for dna in dsgn['components']]
 
             # Generate plasmid DNA object:
             dna = dna_utils.concat(dsgn['components'])
@@ -139,7 +139,7 @@ def _apply_restricts(dna, restr_enz):
     if not restr_enz:
         return dna
 
-    restrict_dnas = dna_utils.apply_restricts(dna, restr_enz.split(','))
+    restrict_dnas = dna_utils.apply_restricts(dna, restr_enz)
 
     # This is a bit fudgy...
     # Essentially, return the longest fragment remaining after digestion.

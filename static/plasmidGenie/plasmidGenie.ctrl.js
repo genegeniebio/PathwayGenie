@@ -6,13 +6,26 @@ plasmidGenieApp.controller("plasmidGenieCtrl", ["$scope", "ErrorService", "ICESe
 	self.query = {
 			"app": "PlasmidGenie",
 			"melt_temp": 70,
-			"circular": true
+			"circular": true,
+			"restr_enzs": []
 		};
 	
 	self.response = {"update": {}};
 	
+	self.restrEnzs = PathwayGenieService.restrEnzs;
+	
 	var jobIds = [];
 	var jobId = null;
+	
+	self.selectRestEnzs = function(selected) {
+		self.restrEnzs = remove(self.restrEnzs, selected);
+		self.query.restr_enzs.push.apply(self.query.restr_enzs, selected);
+	}
+	
+	self.deselectRestEnzs = function(selected) {
+		self.restrEnzs.push.apply(self.restrEnzs, selected);
+		self.query.restr_enzs = remove(self.query.restr_enzs, selected);
+	}
 
 	self.connected = function() {
 		return ICEService.connected;
@@ -86,12 +99,9 @@ plasmidGenieApp.controller("plasmidGenieCtrl", ["$scope", "ErrorService", "ICESe
 		if(values) {
 			var lines = values.match(/[^\r\n]+/g);
 			
-			tokens = lines[0].split("\t")
-			self.query.restr_enzs = tokens.slice(1, tokens.length);
-			
 			var designs = []
 			
-			for(var i=1; i < lines.length; i++ ) {
+			for(var i=0; i < lines.length; i++ ) {
 				tokens = lines[i].split("\t")
 				designs.push({"name": tokens[0], "design": tokens.slice(1, tokens.length)})
 			}
@@ -106,6 +116,14 @@ plasmidGenieApp.controller("plasmidGenieCtrl", ["$scope", "ErrorService", "ICESe
 		jobId = null;
 		error = null;
 		ResultService.setResults(null);
+	};
+	
+	remove = function(array, toRemove) {
+		array = array.filter(function(elem) {
+			return !toRemove.includes(elem);
+		});
+		
+		return array;
 	};
 	
 	// Initialise UI:
