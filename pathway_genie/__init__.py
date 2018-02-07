@@ -124,9 +124,36 @@ def connect_ice():
     return response
 
 
+@APP.route('/ice/search/', methods=['POST'])
+def search_ice():
+    '''Search ICE.'''
+    try:
+        ice_client = _connect_ice(request)
+        data = json.loads(request.data)
+        resp = ice_client.advanced_search('*', data['type'], 2**8)
+
+        print json.dumps([result['entryInfo']['partId']
+                          for result in resp['results']])
+
+        return json.dumps([result['entryInfo']['partId']
+                           for result in resp['results']])
+    except ConnectionError, err:
+        print str(err)
+        message = 'Unable to connect. Is the URL correct?'
+        status_code = 503
+    except NetworkError, err:
+        print str(err)
+        message = 'Unable to connect. Are the username and password correct?'
+        status_code = err.get_status()
+
+    response = jsonify({'message': message})
+    response.status_code = status_code
+    return response
+
+
 @APP.route('/uniprot/<query>')
 def search_uniprot(query):
-    '''Gets supported restriction enzymes.'''
+    '''Search Uniprot.'''
     fields = ['entry name', 'protein names', 'sequence', 'ec', 'organism',
               'organism-id']
     result = seq_utils.search_uniprot(query, fields)

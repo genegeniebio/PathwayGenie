@@ -29,6 +29,10 @@ iceApp.controller("iceInstanceCtrl", ["$uibModalInstance", "ICEService", "Typeah
 		return TypeaheadService.getItem("/groups/", {"term": term, "ice": ICEService.ice});
 	}
 	
+	self.searchIce = function(type, term) {
+		return TypeaheadService.getItem("/ice/search/", {"type": type, "term": term, "ice": ICEService.ice});
+	}
+	
 	self.close = function() {
 		$uibModalInstance.close();
 	};
