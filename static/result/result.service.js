@@ -63,9 +63,12 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "ICEService", "ErrorS
 
 				if(status == "finished") {
 					for (i = 0; i < obj.response.result.length; i++) {
-						if(obj.results[i].links.indexOf(obj.response.result[i]) == -1 ) {
-							obj.results[i].links.push(obj.response.result[i]);
+						for( j = 0; j < obj.response.result[i].length; j++ ) {
+							if(obj.results[i].links.indexOf(obj.response.result[i][j]) == -1 ) {
+								obj.results[i].links.push(obj.response.result[i][j]);
+							}
 						}
+						
 					}
 				}
 				

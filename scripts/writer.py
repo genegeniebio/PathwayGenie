@@ -10,7 +10,9 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=invalid-name
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-locals
-from synbiochem.utils import dna_utils, ice_utils
+from synbiochem.utils import ice_utils
+
+from ice.ice import write_ice_entry
 import pandas as pd
 
 
@@ -23,34 +25,10 @@ def write(in_filename, out_filename,
     output = []
 
     for _, row in df.iterrows():
-        comp1 = ice_client.get_ice_entry(row[comp_columns[0]])
-        comp2 = ice_client.get_ice_entry(row[comp_columns[1]])
-
-        name = comp1.get_metadata()['name'] + \
-            ' (' + comp2.get_metadata()['name'] + ')'
-
-        product = ice_utils.ICEEntry(typ=typ)
-        product.set_values({'name': name[:127], 'shortDescription': name})
-
-        taxonomy = comp1.get_parameter('Taxonomy')
-
-        if taxonomy:
-            product.set_parameter('Taxonomy', taxonomy)
-
-        ice_client.set_ice_entry(product)
-        ice_client.add_link(product.get_ice_id(), comp1.get_ice_id())
-        ice_client.add_link(product.get_ice_id(), comp2.get_ice_id())
-
-        if write_seq:
-            product.set_dna(dna_utils.concat(
-                [comp1.get_dna(), comp2.get_dna()]))
-
-        ice_client.set_ice_entry(product)
-
-        if group_name:
-            groups = ice_client.get_groups()
-            ice_client.add_permission(product.get_ice_id(),
-                                      groups[group_name])
+        ice_id1 = row[comp_columns[0]]
+        ice_id2 = row[comp_columns[1]]
+        product, comp1, comp2 = write_ice_entry(ice_client, ice_id1, ice_id2,
+                                                typ, write_seq, [group_name])
 
         output.append({typ: product.get_ice_id(),
                        comp_columns[0] + '_seq': comp1.get_seq(),

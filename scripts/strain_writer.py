@@ -17,7 +17,7 @@ from scripts.writer import write
 def do_write(in_filename, out_filename, ice_url, ice_username, ice_password,
              group_name=None):
     '''Write.'''
-    comp_columns = ['host', 'plasmid']
+    comp_columns = ['plasmid', 'host']
     typ = 'STRAIN'
     write(in_filename, out_filename, ice_url, ice_username, ice_password,
           typ, comp_columns, group_name)

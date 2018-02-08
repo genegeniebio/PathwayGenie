@@ -7,9 +7,12 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-from pathway_genie.utils import PathwayThread
-from synbiochem.utils.ice_utils import DNAWriter
+# pylint: disable=too-many-arguments
+from synbiochem.utils import dna_utils
+from synbiochem.utils.ice_utils import DNAWriter, ICEClient, ICEEntry
 from synbiochem.utils.net_utils import NetworkError
+
+from pathway_genie.utils import PathwayThread
 
 
 class IceThread(PathwayThread):
@@ -17,6 +20,15 @@ class IceThread(PathwayThread):
 
     def __init__(self, query):
         PathwayThread.__init__(self, query)
+
+        self.__group_names = self._query['ice'].get('groups', None)
+
+        self.__ice_client = ICEClient(query['ice']['url'],
+                                      query['ice']['username'],
+                                      query['ice']['password'],
+                                      group_names=[self.__group_names])
+
+        self.__dna_writer = DNAWriter(self.__ice_client)
 
     def run(self):
         '''Saves results.'''
@@ -29,14 +41,14 @@ class IceThread(PathwayThread):
             url = self._query['ice']['url']
             self._query['ice']['url'] = url[:-1] if url[-1] == '/' else url
 
-            writer = DNAWriter(self._query['ice']['url'],
-                               self._query['ice']['username'],
-                               self._query['ice']['password'],
-                               self._query['ice'].get('groups', None))
-
             for result in self._query['designs']:
-                ice_id = writer.submit(result)
-                self._results.append(url + '/entry/' + str(ice_id))
+                ice_id, plasmid_id, strain_id = self.__write_design(result)
+
+                # Append links to results.
+                self._results.append([url + '/entry/' + str(entry_id)
+                                      for entry_id in [ice_id, plasmid_id,
+                                                       strain_id]
+                                      if entry_id])
                 iteration += 1
                 self._fire_designs_event('running', iteration, 'Saving...')
 
@@ -49,3 +61,69 @@ class IceThread(PathwayThread):
         except NetworkError, err:
             self._fire_designs_event('error', iteration,
                                      message=err.get_text())
+
+    def __write_design(self, result):
+        '''Write an individual design.'''
+        ice_id, typ = self.__dna_writer.submit(result)
+        plasmid_id = ice_id if typ == 'PLASMID' else None
+        strain_id = None
+
+        if typ == 'PART' and self._query['ice'].get('plasmid', None):
+            # Write plasmid.
+            plasmid, _, _ = \
+                write_ice_entry(self.__ice_client,
+                                ice_id,
+                                self._query['ice']['plasmid'],
+                                'PLASMID',
+                                True,
+                                self.__group_names)
+            plasmid_id = plasmid.get_ice_id()
+
+        if plasmid_id and self._query['ice'].get('strain', None):
+            # Write strain.
+            strain, _, _ = \
+                write_ice_entry(self.__ice_client,
+                                plasmid_id,
+                                self._query['ice']['strain'],
+                                'STRAIN',
+                                False,
+                                self.__group_names)
+            strain_id = strain.get_ice_id()\
+
+        return ice_id, plasmid_id, strain_id
+
+
+def write_ice_entry(ice_client, ice_id1, ice_id2, typ, write_seq, group_names):
+    '''Write a composite ICE entry (part in plasmid, or plasmid in strain).'''
+    comp1 = ice_client.get_ice_entry(ice_id1)
+    comp2 = ice_client.get_ice_entry(ice_id2)
+
+    name = comp1.get_metadata()['name'] + \
+        ' (' + comp2.get_metadata()['name'] + ')'
+
+    product = ICEEntry(typ=typ)
+    product.set_values({'name': name[:127], 'shortDescription': name})
+
+    taxonomy = comp1.get_parameter('Taxonomy')
+
+    if taxonomy:
+        product.set_parameter('Taxonomy', taxonomy)
+
+    ice_client.set_ice_entry(product)
+    ice_client.add_link(product.get_ice_id(), comp1.get_ice_id())
+    ice_client.add_link(product.get_ice_id(), comp2.get_ice_id())
+
+    if write_seq:
+        product.set_dna(dna_utils.concat(
+            [comp1.get_dna(), comp2.get_dna()]))
+
+    ice_client.set_ice_entry(product)
+
+    if group_names:
+        groups = ice_client.get_groups()
+
+        for group_name in group_names:
+            ice_client.add_permission(product.get_ice_id(),
+                                      groups[group_name])
+
+    return product, comp1, comp2
