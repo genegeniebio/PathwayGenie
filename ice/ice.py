@@ -21,12 +21,13 @@ class IceThread(PathwayThread):
     def __init__(self, query):
         PathwayThread.__init__(self, query)
 
-        self.__group_names = self._query['ice'].get('groups', None)
+        group_name = self._query['ice'].get('groups', None)
+        self.__group_names = [group_name] if group_name else []
 
         self.__ice_client = ICEClient(query['ice']['url'],
                                       query['ice']['username'],
                                       query['ice']['password'],
-                                      group_names=[self.__group_names])
+                                      group_names=self.__group_names)
 
         self.__dna_writer = DNAWriter(self.__ice_client)
 
