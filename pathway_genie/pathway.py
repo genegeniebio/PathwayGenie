@@ -7,11 +7,11 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-from threading import Thread
 import json
+from threading import Thread
 import time
 
-from ice.ice import IceThread
+import ice.ice
 from parts_genie.parts import PartsThread
 from plasmid_genie.plasmid import PlasmidThread
 
@@ -96,6 +96,6 @@ def _get_threads(query):
     elif app == 'PlasmidGenie':
         return [PlasmidThread(query)]
     elif app == 'save':
-        return [IceThread(query)]
+        return [ice.ice.IceThread(query)]
 
     raise ValueError('Unknown app: ' + app)
