@@ -1,4 +1,4 @@
-var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "helpApp", "iceApp", "partsGenieApp", "plasmidGenieApp"]);
+var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "assemblyGenieApp", "helpApp", "iceApp", "partsGenieApp", "plasmidGenieApp"]);
 
 pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 	$routeProvider.when("/", {
@@ -26,7 +26,13 @@ pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 		 controllerAs: "ctrl",		
 		 templateUrl: "static/plasmidGenie/plasmidGenie.html",		
 		 app: "PlasmidGenie"
+	}).when("/assemblyGenie", {		
+		 controller: "assemblyGenieCtrl",		
+		 controllerAs: "ctrl",		
+		 templateUrl: "static/assemblyGenie/assemblyGenie.html",		
+		 app: "AssemblyGenie"
 	})
+	
 	
 	// Use the HTML5 History API:
     $locationProvider.html5Mode(true);
