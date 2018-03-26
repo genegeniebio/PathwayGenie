@@ -10,6 +10,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=invalid-name
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-locals
+# pylint: disable=wrong-import-order
 from synbiochem.utils import ice_utils
 
 from ice.ice import write_ice_entry
