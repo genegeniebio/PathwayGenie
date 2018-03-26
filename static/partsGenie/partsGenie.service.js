@@ -8,8 +8,8 @@ partsGenieApp.factory("PartsGenieService", ["$http", function($http) {
 		], 
 		"filters": {
 			"max_repeats": 5,
-			"gc_min": 25,
-			"gc_max": 65,
+			"gc_min": 0.25,
+			"gc_max": 0.65,
 			"restr_enzs": [],
 			"excl_codons": []
 		},

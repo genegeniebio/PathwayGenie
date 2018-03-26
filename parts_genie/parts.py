@@ -29,8 +29,8 @@ class PartsSolution(object):
         self.__organism = organism
         self.__filters = filters
         self.__filters['restr_enzs'] = self.__filters.get('restr_enzs', [])
-        self.__filters['gc_min'] = float(self.__filters['gc_min']) / 100
-        self.__filters['gc_max'] = float(self.__filters['gc_max']) / 100
+        self.__filters['gc_min'] = float(self.__filters['gc_min'])
+        self.__filters['gc_max'] = float(self.__filters['gc_max'])
 
         self.__calc = rbs_calc.RbsCalculator(organism['r_rna']) \
             if self.__organism else None

@@ -85,7 +85,7 @@
 												<input type="number" class="form-control"
 													data-ng-model="ctrl.query.filters.gc_min"
 													min="0"
-													max="{{ctrl.query.filters.gc_max}}" step="1"
+													max="{{ctrl.query.filters.gc_max}}" step="0.01"
 													placeholder="Global GC minimum" required>
 											</div>
 											<label class="no-left-pad col-xs-4 col-form-label">Maximum:</label>
@@ -93,7 +93,7 @@
 												<input type="number" class="form-control"
 													data-ng-model="ctrl.query.filters.gc_max"
 													min="{{ctrl.query.filters.gc_min}}"
-													max="100" step="1"
+													max="1" step="0.01"
 													placeholder="Global GC maximum" required>
 											</div>
 										</div>
