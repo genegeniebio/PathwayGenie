@@ -1,5 +1,5 @@
 '''
-PathwayGenie (c) University of Manchester 2017
+PathwayGenie (c) GeneGenie Bioinformatics Ltd. 2018
 
 PathwayGenie is licensed under the MIT License.
 
@@ -9,6 +9,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 # pylint: disable=redefined-outer-name
 # pylint: disable=unused-argument
+# pylint: disable=wrong-import-order
 from collections import defaultdict
 import json
 import os

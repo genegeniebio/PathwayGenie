@@ -1,13 +1,14 @@
 '''
-PartsGenie (c) University of Manchester 2017
+PathwayGenie (c) GeneGenie Bioinformatics Ltd. 2018
 
-PartsGenie is licensed under the MIT License.
+PathwayGenie is licensed under the MIT License.
 
 To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
 # pylint: disable=no-self-use
+# pylint: disable=wrong-import-order
 import collections
 import copy
 from itertools import product

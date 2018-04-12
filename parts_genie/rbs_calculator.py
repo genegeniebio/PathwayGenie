@@ -1,7 +1,7 @@
 '''
-PartsGenie (c) University of Manchester 2017
+PathwayGenie (c) GeneGenie Bioinformatics Ltd. 2018
 
-PartsGenie is licensed under the MIT License.
+PathwayGenie is licensed under the MIT License.
 
 To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
@@ -11,6 +11,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
+# pylint: disable=wrong-import-order
 import math
 import random
 import re

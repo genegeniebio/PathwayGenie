@@ -1,5 +1,5 @@
 '''
-PathwayGenie (c) University of Manchester 2017
+PathwayGenie (c) GeneGenie Bioinformatics Ltd. 2018
 
 PathwayGenie is licensed under the MIT License.
 

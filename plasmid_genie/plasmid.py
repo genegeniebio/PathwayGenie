@@ -1,5 +1,5 @@
 '''
-PathwayGenie (c) University of Manchester 2017
+PathwayGenie (c) GeneGenie Bioinformatics Ltd. 2018
 
 PathwayGenie is licensed under the MIT License.
 
@@ -7,6 +7,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=wrong-import-order
 from __future__ import division
 
 from synbiochem.utils import dna_utils, ice_utils, pairwise, seq_utils
@@ -80,6 +81,8 @@ class PlasmidThread(PathwayThread):
                     for hsp in alignment.hsps:
                         if result.query != alignment.hit_def:
                             return hsp
+
+        return None
 
     def __get_components(self):
         '''Gets DNA components from ICE.'''
