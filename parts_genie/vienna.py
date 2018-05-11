@@ -7,286 +7,92 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-import os.path
-import popen2
-import random
-import re
-import string
-import time
+import RNA
 
+from parts_genie import nupack_utils
 
-_TMP_DIR = os.path.dirname(os.path.abspath(__file__)) + '/tmp'
 
-if not os.path.exists(_TMP_DIR):
-    os.mkdir(_TMP_DIR)
+def mfe(sequences, temp=37.0, dangles='some'):
+    '''mfe.'''
+    model = RNA.md()
+    model.temperature = temp
+    model.dangles = _get_dangles(dangles)
+    result = map(list, zip(*[RNA.fold_compound(sequence, model).mfe()
+                             for sequence in sequences]))
 
-
-class ViennaRNA(dict):
-    '''Class to encapsulate Vienna RNA.'''
-    debug_mode = 0
-    RT = 0.61597  # gas constant times 310 Kelvin (in units of kcal/mol)
+    bp_xs, bp_ys = _get_numbered_pairs(result[0])
 
-    def __init__(self, sequence_list, material='rna37'):
+    return result[1], bp_xs, bp_ys
 
-        self.ran = 0
 
-        exp = re.compile('[ATGCU]', re.IGNORECASE)
+def subopt(sequences, energy_gap, temp=37.0, dangles='some'):
+    '''subopt.'''
+    model = RNA.md()
+    model.temperature = temp
+    model.dangles = _get_dangles(dangles)
+    return [RNA.fold_compound(sequence, model).subopt(energy_gap)[1]
+            for sequence in sequences]
 
-        for seq in sequence_list:
-            if not exp.match(seq):
-                error_string = 'Invalid letters found in inputted ' + \
-                    'sequences. Only ATGCU allowed. \n Sequence is \'' + \
-                    str(seq) + '\'.'
-                raise ValueError(error_string)
 
-        self['sequences'] = sequence_list
-        self['material'] = material
-
-        random.seed(time.time())
-        long_id = ''.join(
-            [random.choice(string.letters + string.digits) for _ in range(10)])
-        self.prefix = _TMP_DIR + '/temp_' + long_id
-
-    def mfe(self, strands, temp=37.0, dangles='all'):
-        '''mfe.'''
-        self['mfe_composition'] = strands
-
-        assert temp > 0
-
-        seq_string = '&'.join(self['sequences'])
-        input_string = seq_string + '\n'
-
-        handle = open(self.prefix, 'w')
-        handle.write(input_string)
-        handle.close()
+def energy(sequences, bp_x, bp_y, temp=37.0, dangles='some'):
+    '''energy.'''
+    model = RNA.md()
+    model.temperature = temp
+    model.dangles = _get_dangles(dangles)
+    return [RNA.fold_compound(sequence, model).ev(energy_gap)[1]
+            for sequence in sequences]
 
-        # Set arguments
-        if dangles == 'none':
-            dangles = ' -d0 '
-        elif dangles == 'some':
-            dangles = ' -d1 '
-        elif dangles == 'all':
-            dangles = ' -d2 '
 
-        # Call ViennaRNA C programs
-        cmd = 'RNAcofold'
-        args = dangles + ' < ' + self.prefix
+def _get_dangles(dangles):
+    '''Get dangles.'''
+    return 0 if dangles == 'none' else 1 if dangles == 'some' else 2
 
-        output = popen2.Popen3(cmd + args)
-
-        while output.poll() < 0:
-            try:
-                output.wait()
-                time.sleep(0.001)
-            except Exception:
-                break
-
-        # Skip the unnecessary output lines
-        output.fromchild.readline()
-
-        line = output.fromchild.readline()
-        words = line.split(' ')
-        bracket_string = words[0]
-        (strands, bp_x, bp_y) = _get_numbered_pairs(bracket_string)
-
-        energy = float(
-            words[len(words) - 1].replace(')', '').replace('(', '').strip())
-
-        self._cleanup()
-        self['program'] = 'mfe'
-        self['mfe_basepairing_x'] = [bp_x]
-        self['mfe_basepairing_y'] = [bp_y]
-        self['mfe_energy'] = [energy]
-        self['totalnt'] = strands
-
-    def subopt(self, strands, energy_gap, temp=37.0, dangles='all',
-               output_ps=False):
-        '''subopt.'''
-        self['subopt_composition'] = strands
-
-        assert temp > 0
-
-        seq_string = '&'.join(self['sequences'])
-        input_string = seq_string + '\n'
-
-        handle = open(self.prefix, 'w')
-        handle.write(input_string)
-        handle.close()
-
-        # Set arguments
-        if dangles == 'none':
-            dangles = ' -d0 '
-        elif dangles == 'some':
-            dangles = ' -d1 '
-        elif dangles == 'all':
-            dangles = ' -d2 '
-
-        # Call ViennaRNA C programs
-        cmd = 'RNAsubopt'
-        args = ' -e ' + str(energy_gap) + ' < ' + self.prefix
-
-        output = popen2.Popen3(cmd + args)
-
-        while output.poll() < 0:
-            try:
-                output.wait()
-                time.sleep(0.001)
-            except Exception:
-                break
-
-        # Skip unnecessary line
-        line = output.fromchild.readline()
-
-        self['subopt_basepairing_x'] = []
-        self['subopt_basepairing_y'] = []
-        self['subopt_energy'] = []
-        self['totalnt'] = []
-        counter = 0
-
-        while line:
-            line = output.fromchild.readline()
-            if line:
-                counter += 1
-                words = line.split(' ')
-                bracket_string = words[0]
-                energy = float(words[len(words) - 1].replace('\n', ''))
-
-                (strands, bp_x, bp_y) = _get_numbered_pairs(bracket_string)
-
-                self['subopt_energy'].append(energy)
-                self['subopt_basepairing_x'].append(bp_x)
-                self['subopt_basepairing_y'].append(bp_y)
-
-        self['subopt_NumStructs'] = counter
-
-        self._cleanup()
-        self['program'] = 'subopt'
-
-    def energy(self, strands, base_pairing_x, base_pairing_y, temp=37.0,
-               dangles='all'):
-        '''energy.'''
-        self['energy_composition'] = strands
-
-        assert temp > 0
-
-        seq_string = '&'.join(self['sequences'])
-        strands = [len(seq) for seq in self['sequences']]
-        bracket_string = _get_bracket(
-            strands, base_pairing_x, base_pairing_y)
-        input_string = seq_string + '\n' + bracket_string + '\n'
-
-        handle = open(self.prefix, 'w')
-        handle.write(input_string)
-        handle.close()
-
-        # Set arguments
-        if dangles == 'none':
-            dangles = ' -d0 '
-        elif dangles == 'some':
-            dangles = ' -d1 '
-        elif dangles == 'all':
-            dangles = ' -d2 '
-
-        # Call ViennaRNA C programs
-        cmd = 'RNAeval'
-        args = dangles + ' < ' + self.prefix
-
-        output = popen2.Popen3(cmd + args)
-
-        while output.poll() < 0:
-            try:
-                output.wait()
-                time.sleep(0.001)
-            except Exception:
-                break
-
-        self['energy_energy'] = []
-
-        # Skip the unnecessary output lines
-        output.fromchild.readline()
-
-        line = output.fromchild.readline()
-        words = line.split(' ')
-        energy = float(
-            words[len(words) - 1].replace('(', '').replace(')', '').strip())
-
-        self['program'] = 'energy'
-        self['energy_energy'].append(energy)
-        self['energy_basepairing_x'] = [base_pairing_x]
-        self['energy_basepairing_y'] = [base_pairing_y]
-        self._cleanup()
-
-        return energy
-
-    def _cleanup(self):
-        if os.path.exists(self.prefix):
-            os.remove(self.prefix)
-
-
-def _get_numbered_pairs(bracket_string):
-    '''_get_numbered_pairs.'''
-    bp_x = []
-    bp_y = []
-    strands = []
-
-    for _ in range(bracket_string.count(')')):
-        bp_y.append([])
-
-    last_nt_x_list = []
-    counter = 0
-    num_strands = 0
-    for (pos, letter) in enumerate(bracket_string[:]):
-        if letter == '.':
-            counter += 1
-
-        elif letter == '(':
-            bp_x.append(pos - num_strands)
-            last_nt_x_list.append(pos - num_strands)
-            counter += 1
-
-        elif letter == ')':
-            nt_x = last_nt_x_list.pop()
-            nt_x_pos = bp_x.index(nt_x)
-            bp_y[nt_x_pos] = pos - num_strands
-            counter += 1
-
-        elif letter == '&':
-            strands.append(counter)
-            counter = 0
-            num_strands += 1
-
-        else:
-            raise ValueError('Error! Invalid character in bracket notation.')
-
-    if last_nt_x_list:
-        raise ValueError('Error! Leftover unpaired nucleotides when ' +
-                         'converting from bracket notation to numbered base ' +
-                         'pairs.')
-
-    strands.append(counter)
-    bp_x = [pos + 1 for pos in bp_x[:]]  # Shift so that 1st position is 1
-    bp_y = [pos + 1 for pos in bp_y[:]]  # Shift so that 1st position is 1
-
-    return (strands, bp_x, bp_y)
-
-
-def _get_bracket(strands, bp_x, bp_y):
-    '''get_bracket.'''
-    bp_x = [pos - 1 for pos in bp_x[:]]  # Shift so that 1st position is 0
-    bp_y = [pos - 1 for pos in bp_y[:]]  # Shift so that 1st position is 0
-
-    bracket_notation = []
-    counter = 0
-    for (strand_number, seq_len) in enumerate(strands):
-        if strand_number > 0:
-            bracket_notation.append('&')
-        for pos in range(counter, seq_len + counter):
-            if pos in bp_x:
-                bracket_notation.append('(')
-            elif pos in bp_y:
-                bracket_notation.append(')')
-            else:
-                bracket_notation.append('.')
-        counter += seq_len
-
-    return ''.join(bracket_notation)
+
+def _get_numbered_pairs(bracket_strs):
+    '''_get_numbered_pairs'''
+    all_bp_x = []
+    all_bp_y = []
+
+    for bracket_str in bracket_strs:
+        bp_x = []
+        bp_y = [None for _ in range(bracket_str.count(')'))]
+        last_nt_x = []
+
+        for pos, letter in enumerate(bracket_str):
+            if letter == '(':
+                bp_x.append(pos)
+                last_nt_x.append(pos)
+
+            elif letter == ')':
+                nt_x = last_nt_x.pop()
+                nt_x_pos = bp_x.index(nt_x)
+                bp_y[nt_x_pos] = pos
+
+        all_bp_x.append([pos + 1 for pos in bp_x])
+        all_bp_y.append([pos + 1 for pos in bp_y])
+
+    return all_bp_x, all_bp_y
+
+
+def _get_brackets(sequences, bp_x, bp_y):
+    '''_get_brackets'''
+    bracket_strs = []
+
+    for sequence in sequences:
+        bp_x = [pos - 1 for pos in bp_x]
+        bp_y = [pos - 1 for pos in bp_y]
+
+        bracket_str = ['(' if pos in bp_x
+                       else ')' if pos in bp_y
+                       else '.'
+                       for pos in range(len(sequence))]
+
+        bracket_strs.append(''.join(bracket_str))
+
+    return bracket_strs
+
+
+m_rna = 'AGGGGGGATCTCCCCCCAAAAAATAAGAGGTACACATGACTAAAACTTTCAAAGGCTCAGTATT' + \
+    'CCCACT'
+print mfe([m_rna], dangles='none')
+print nupack_utils.run('mfe', [m_rna], temp=37.0, dangles='none')
