@@ -19,7 +19,7 @@ import re
 from Bio.Seq import Seq
 from synbiochem.utils import seq_utils
 
-from parts_genie.nucl_acid_utils import NuPackRunner
+from parts_genie.nucl_acid_utils import NuclAcidCalcRunner
 
 
 _START_CODON_PATT = r'(?=([ACGT]TG))'
@@ -30,9 +30,9 @@ _K = 2500.0
 class RbsCalculator(object):
     '''Class for calculating RBS.'''
 
-    def __init__(self, r_rna, temp=37.0):
+    def __init__(self, r_rna, calc, temp=37.0):
         self.__r_rna = r_rna.upper()
-        self.__runner = NuPackRunner(temp)
+        self.__runner = NuclAcidCalcRunner(calc, temp)
         self.__optimal_spacing = 5
         self.__cutoff = 35
 
