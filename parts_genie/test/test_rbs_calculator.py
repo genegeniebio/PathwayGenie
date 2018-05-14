@@ -9,17 +9,18 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import unittest
 
-import parts_genie.nupack_utils as nupack_calc
 from parts_genie.rbs_calculator import RbsCalculator
+import parts_genie.vienna_utils as utils
 
 
+# import parts_genie.nupack_utils as utils
 class TestRbsCalculator(unittest.TestCase):
     '''Test class for RbsCalculator.'''
 
     def test_calc_kinetic_score(self):
         '''Tests calc_kinetic_score method.'''
         r_rna = 'acctcctta'
-        calc = RbsCalculator(r_rna, nupack_calc)
+        calc = RbsCalculator(r_rna, utils)
 
         m_rna = 'TTCTAGAGGGGGGATCTCCCCCCAAAAAATAAGAGGTACACATGACTAAAACTTTCA' + \
             'AAGGCTCAGTATTCCCACTGAG'
@@ -31,7 +32,7 @@ class TestRbsCalculator(unittest.TestCase):
     def test_get_calc_dgs(self):
         '''Tests calc_dgs method.'''
         r_rna = 'acctcctta'
-        calc = RbsCalculator(r_rna, nupack_calc)
+        calc = RbsCalculator(r_rna, utils)
 
         m_rna = 'TTCTAGAGGGGGGATCTCCCCCCAAAAAATAAGAGGTACACATGACTAAAACTTTCA' + \
             'AAGGCTCAGTATTCCCACTGAG'

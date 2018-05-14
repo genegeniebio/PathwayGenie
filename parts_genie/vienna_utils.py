@@ -10,8 +10,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-arguments
 import RNA
 
-from parts_genie import nupack_utils
-
 
 def run(cmd, sequences, temp, dangles, energy_gap=None, bp_x=None, bp_y=None):
     '''Runs ViennaRNA.'''
@@ -45,8 +43,15 @@ def _subopt(sequences, energy_gap, temp=37.0, dangles='some'):
     model = RNA.md()
     model.temperature = temp
     model.dangles = _get_dangles(dangles)
-    return [RNA.fold_compound(sequence, model).subopt(energy_gap)[1]
-            for sequence in sequences]
+
+    result = \
+        RNA.fold_compound('&'.join(sequences), model).subopt(int(energy_gap))
+
+    print result
+
+    bp_xs, bp_ys = _get_numbered_pairs(result[0].structure)
+
+    return result[0].energy, bp_xs, bp_ys
 
 
 def _energy(sequences, bp_xs, bp_ys, temp=37.0, dangles='some'):
@@ -101,9 +106,3 @@ def _get_brackets(seq_len, bp_x, bp_y):
                     else ')' if pos in bp_y
                     else '.'
                     for pos in range(seq_len)])
-
-
-m_rna = 'AGGGGGGATCTCCCCCCAAAAAATAAGAGGTACACATGACTAAAACTTTCAAAGGCTCAGTATT' + \
-    'CCCACT'
-print run('mfe', [m_rna], temp=37.0, dangles='none')
-print nupack_utils.run('mfe', [m_rna], temp=37.0, dangles='none')
