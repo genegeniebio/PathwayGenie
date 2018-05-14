@@ -13,6 +13,8 @@ import RNA
 
 def run(cmd, sequences, temp, dangles, energy_gap=None, bp_x=None, bp_y=None):
     '''Runs ViennaRNA.'''
+    sequences = [str(seq) for seq in sequences]
+
     if cmd == 'mfe':
         return _mfe(sequences, temp, dangles)
 
@@ -91,7 +93,7 @@ def _get_brackets(seq_lens, bp_x, bp_y):
     brackets = []
     counter = 0
 
-    for strand_num, seq_len in enumerate(seq_lens):
+    for seq_len in seq_lens:
         for pos in range(counter, seq_len + counter):
             if pos in bp_x:
                 brackets.append('(')
