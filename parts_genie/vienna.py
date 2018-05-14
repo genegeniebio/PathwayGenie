@@ -39,7 +39,7 @@ def energy(sequences, bp_x, bp_y, temp=37.0, dangles='some'):
     model = RNA.md()
     model.temperature = temp
     model.dangles = _get_dangles(dangles)
-    return [RNA.fold_compound(sequence, model).ev(energy_gap)[1]
+    return [RNA.fold_compound(sequence, model).eval_structure(structure)[1]
             for sequence in sequences]
 
 
@@ -74,22 +74,15 @@ def _get_numbered_pairs(bracket_strs):
     return all_bp_x, all_bp_y
 
 
-def _get_brackets(sequences, bp_x, bp_y):
+def _get_brackets(seq_len, bp_x, bp_y):
     '''_get_brackets'''
-    bracket_strs = []
+    bp_x = [pos - 1 for pos in bp_x]
+    bp_y = [pos - 1 for pos in bp_y]
 
-    for sequence in sequences:
-        bp_x = [pos - 1 for pos in bp_x]
-        bp_y = [pos - 1 for pos in bp_y]
-
-        bracket_str = ['(' if pos in bp_x
-                       else ')' if pos in bp_y
-                       else '.'
-                       for pos in range(len(sequence))]
-
-        bracket_strs.append(''.join(bracket_str))
-
-    return bracket_strs
+    return ''.join(['(' if pos in bp_x
+                    else ')' if pos in bp_y
+                    else '.'
+                    for pos in range(seq_len)])
 
 
 m_rna = 'AGGGGGGATCTCCCCCCAAAAAATAAGAGGTACACATGACTAAAACTTTCAAAGGCTCAGTATT' + \
