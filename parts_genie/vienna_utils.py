@@ -30,12 +30,9 @@ def _mfe(sequences, temp=37.0, dangles='some'):
     model = RNA.md()
     model.temperature = temp
     model.dangles = _get_dangles(dangles)
-    result = map(list, zip(*[RNA.fold_compound(sequence, model).mfe()
-                             for sequence in sequences]))
-
-    bp_xs, bp_ys = _get_numbered_pairs(result[0])
-
-    return result[1], bp_xs, bp_ys
+    result = RNA.fold_compound(sequences[0], model).mfe()
+    bp_x, bp_y = _get_numbered_pairs(result[0])
+    return [result[1]], [bp_x], [bp_y]
 
 
 def _subopt(sequences, energy_gap, temp=37.0, dangles='some'):
@@ -44,26 +41,21 @@ def _subopt(sequences, energy_gap, temp=37.0, dangles='some'):
     model.temperature = temp
     model.dangles = _get_dangles(dangles)
 
-    result = \
+    results = \
         RNA.fold_compound('&'.join(sequences), model).subopt(int(energy_gap))
 
-    print result
-
-    bp_xs, bp_ys = _get_numbered_pairs(result[0].structure)
-
-    return result[0].energy, bp_xs, bp_ys
+    return zip(*[[result.energy] + _get_numbered_pairs(result.structure)
+                 for result in results])
 
 
-def _energy(sequences, bp_xs, bp_ys, temp=37.0, dangles='some'):
+def _energy(sequences, bp_x, bp_y, temp=37.0, dangles='some'):
     '''energy.'''
     model = RNA.md()
     model.temperature = temp
     model.dangles = _get_dangles(dangles)
-    structure = '&'.join([_get_brackets(len(seq), bp_x, bp_y)
-                          for seq, bp_x, bp_y in zip(sequences, bp_xs, bp_ys)])
-
-    return [RNA.fold_compound(sequence, model).eval_structure(structure)[1]
-            for sequence in sequences]
+    sequence = '&'.join(sequences)
+    structure = _get_brackets([len(seq) for seq in sequences], bp_x, bp_y)
+    return RNA.fold_compound(sequence, model).eval_structure(structure)
 
 
 def _get_dangles(dangles):
@@ -71,38 +63,42 @@ def _get_dangles(dangles):
     return 0 if dangles == 'none' else 1 if dangles == 'some' else 2
 
 
-def _get_numbered_pairs(bracket_strs):
+def _get_numbered_pairs(bracket_str):
     '''_get_numbered_pairs'''
-    all_bp_x = []
-    all_bp_y = []
+    bp_x = []
+    bp_y = [None for _ in range(bracket_str.count(')'))]
+    last_nt_x = []
+    strand_num = 0
 
-    for bracket_str in bracket_strs:
-        bp_x = []
-        bp_y = [None for _ in range(bracket_str.count(')'))]
-        last_nt_x = []
+    for pos, letter in enumerate(bracket_str):
+        if letter == '(':
+            bp_x.append(pos - strand_num)
+            last_nt_x.append(pos - strand_num)
+        elif letter == ')':
+            nt_x = last_nt_x.pop()
+            nt_x_pos = bp_x.index(nt_x)
+            bp_y[nt_x_pos] = pos - strand_num
+        elif letter == '&':
+            strand_num += 1
 
-        for pos, letter in enumerate(bracket_str):
-            if letter == '(':
-                bp_x.append(pos)
-                last_nt_x.append(pos)
-
-            elif letter == ')':
-                nt_x = last_nt_x.pop()
-                nt_x_pos = bp_x.index(nt_x)
-                bp_y[nt_x_pos] = pos
-
-        all_bp_x.append([pos + 1 for pos in bp_x])
-        all_bp_y.append([pos + 1 for pos in bp_y])
-
-    return all_bp_x, all_bp_y
+    return [[pos + 1 for pos in bp_x], [pos + 1 for pos in bp_y]]
 
 
-def _get_brackets(seq_len, bp_x, bp_y):
+def _get_brackets(seq_lens, bp_x, bp_y):
     '''_get_brackets'''
     bp_x = [pos - 1 for pos in bp_x]
     bp_y = [pos - 1 for pos in bp_y]
+    brackets = []
+    counter = 0
 
-    return ''.join(['(' if pos in bp_x
-                    else ')' if pos in bp_y
-                    else '.'
-                    for pos in range(seq_len)])
+    for strand_num, seq_len in enumerate(seq_lens):
+        for pos in range(counter, seq_len + counter):
+            if pos in bp_x:
+                brackets.append('(')
+            elif pos in bp_y:
+                brackets.append(')')
+            else:
+                brackets.append('.')
+        counter += seq_len
+
+    return ''.join(brackets)
