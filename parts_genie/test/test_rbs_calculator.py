@@ -9,11 +9,10 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import unittest
 
+import parts_genie.nupack_utils as utils
 from parts_genie.rbs_calculator import RbsCalculator
-import parts_genie.vienna_utils as utils
 
 
-# import parts_genie.nupack_utils as utils
 class TestRbsCalculator(unittest.TestCase):
     '''Test class for RbsCalculator.'''
 
