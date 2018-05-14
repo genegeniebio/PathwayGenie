@@ -7,12 +7,27 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=too-many-arguments
 import RNA
 
 from parts_genie import nupack_utils
 
 
-def mfe(sequences, temp=37.0, dangles='some'):
+def run(cmd, sequences, temp, dangles, energy_gap=None, bp_x=None, bp_y=None):
+    '''Runs ViennaRNA.'''
+    if cmd == 'mfe':
+        return _mfe(sequences, temp, dangles)
+
+    if cmd == 'subopt':
+        return _subopt(sequences, energy_gap, temp, dangles)
+
+    if cmd == 'energy':
+        return _energy(sequences, bp_x, bp_y, temp, dangles)
+
+    return None
+
+
+def _mfe(sequences, temp=37.0, dangles='some'):
     '''mfe.'''
     model = RNA.md()
     model.temperature = temp
@@ -25,7 +40,7 @@ def mfe(sequences, temp=37.0, dangles='some'):
     return result[1], bp_xs, bp_ys
 
 
-def subopt(sequences, energy_gap, temp=37.0, dangles='some'):
+def _subopt(sequences, energy_gap, temp=37.0, dangles='some'):
     '''subopt.'''
     model = RNA.md()
     model.temperature = temp
@@ -34,11 +49,14 @@ def subopt(sequences, energy_gap, temp=37.0, dangles='some'):
             for sequence in sequences]
 
 
-def energy(sequences, bp_x, bp_y, temp=37.0, dangles='some'):
+def _energy(sequences, bp_xs, bp_ys, temp=37.0, dangles='some'):
     '''energy.'''
     model = RNA.md()
     model.temperature = temp
     model.dangles = _get_dangles(dangles)
+    structure = '&'.join([_get_brackets(len(seq), bp_x, bp_y)
+                          for seq, bp_x, bp_y in zip(sequences, bp_xs, bp_ys)])
+
     return [RNA.fold_compound(sequence, model).eval_structure(structure)[1]
             for sequence in sequences]
 
@@ -87,5 +105,5 @@ def _get_brackets(seq_len, bp_x, bp_y):
 
 m_rna = 'AGGGGGGATCTCCCCCCAAAAAATAAGAGGTACACATGACTAAAACTTTCAAAGGCTCAGTATT' + \
     'CCCACT'
-print mfe([m_rna], dangles='none')
+print run('mfe', [m_rna], temp=37.0, dangles='none')
 print nupack_utils.run('mfe', [m_rna], temp=37.0, dangles='none')
