@@ -66,6 +66,18 @@ class TestRbsCalculator(unittest.TestCase):
 
         self.assertTrue(nt_in_r_rna)
 
+    def test_subopt_fail(self):
+        '''Tests subopt method.'''
+        r_rna = 'CCC'
+        m_rna = 'CCC'
+
+        energies, bp_xs, bp_ys = utils.run('subopt', [m_rna, r_rna], temp=37.0,
+                                           dangles='all', energy_gap=3.0)
+
+        self.assertEqual(energies, [])
+        self.assertEqual(bp_xs, [])
+        self.assertEqual(bp_ys, [])
+
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']

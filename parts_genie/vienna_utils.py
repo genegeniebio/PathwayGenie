@@ -34,7 +34,11 @@ def _mfe(sequences, temp=37.0, dangles='some'):
     model.dangles = _get_dangles(dangles)
     result = RNA.fold_compound(sequences[0], model).mfe()
     bp_x, bp_y = _get_numbered_pairs(result[0])
-    return [result[1]], [bp_x], [bp_y]
+
+    if bp_x and bp_y:
+        return [result[1]], [bp_x], [bp_y]
+
+    return [None], [[]], [[]]
 
 
 def _subopt(sequences, energy_gap, temp=37.0, dangles='some'):
@@ -46,8 +50,19 @@ def _subopt(sequences, energy_gap, temp=37.0, dangles='some'):
     results = \
         RNA.fold_compound('&'.join(sequences), model).subopt(int(energy_gap))
 
-    return zip(*[[result.energy] + _get_numbered_pairs(result.structure)
-                 for result in results])
+    energies = []
+    bp_xs = []
+    bp_ys = []
+
+    for result in results:
+        bp_x, bp_y = _get_numbered_pairs(result.structure)
+
+        if bp_x and bp_y:
+            energies.append(result.energy)
+            bp_xs.append(bp_x)
+            bp_ys.append(bp_y)
+
+    return energies, bp_xs, bp_ys
 
 
 def _energy(sequences, bp_x, bp_y, temp=37.0, dangles='some'):
@@ -67,8 +82,13 @@ def _get_dangles(dangles):
 
 def _get_numbered_pairs(bracket_str):
     '''_get_numbered_pairs'''
+    bracket_count = bracket_str.count(')')
+
+    if not bracket_count:
+        return [None, None]
+
     bp_x = []
-    bp_y = [None for _ in range(bracket_str.count(')'))]
+    bp_y = [None for _ in range(bracket_count)]
     last_nt_x = []
     strand_num = 0
 
