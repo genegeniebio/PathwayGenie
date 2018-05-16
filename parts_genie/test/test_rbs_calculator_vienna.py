@@ -46,6 +46,17 @@ class TestRbsCalculator(unittest.TestCase):
         self.assertAlmostEqual(dgs[41][0], -6.088674036389431)
         self.assertAlmostEqual(dgs[74][0], 5.793940143051147)
 
+    def test_mfe_fail(self):
+        '''Tests mfe method.'''
+        m_rna = 'GCGGGAATTACACATGGCATGGACGAACTTTATAAATGA'
+
+        energies, bp_xs, bp_ys = utils.run('mfe', [m_rna], temp=37.0,
+                                           dangles='none')
+
+        self.assertEqual(energies, [0.0])
+        self.assertEqual(bp_xs, [[]])
+        self.assertEqual(bp_ys, [[]])
+
     def test_subopt(self):
         '''Tests subopt method.'''
         r_rna = 'ACCTCCTTA'

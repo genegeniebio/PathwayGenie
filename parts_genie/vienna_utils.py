@@ -38,7 +38,7 @@ def _mfe(sequences, temp=37.0, dangles='some'):
     if bp_x and bp_y:
         return [result[1]], [bp_x], [bp_y]
 
-    return [None], [[]], [[]]
+    return [0.0], [[]], [[]]
 
 
 def _subopt(sequences, energy_gap, temp=37.0, dangles='some'):
