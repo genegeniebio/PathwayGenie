@@ -296,7 +296,12 @@ class PartsSolution(object):
         cds['temp_params']['tir_vals'] = tir_vals
 
         # Get TIR:
-        tir = tir_vals[rbs['end']][1]
+        try:
+            tir = tir_vals[rbs['end']][1]
+        except KeyError:
+            # If RBS cannot be found at start position, set tir to be zero:
+            tir = 0
+
         cds['parameters']['TIR'] = tir
         target = rbs['parameters']['TIR target']
 

@@ -276,6 +276,11 @@ class RbsCalculator(object):
                 bp_x_target.append(nt_x)
                 bp_y_target.append(nt_y)
 
+        if most_5p_m_rna == float('inf'):
+            raise ValueError(
+                'Warning: The 16S r_rna has no predicted binding site. ' +
+                'Start codon is considered as leaderless and ignored.')
+
         # The r_rna-binding site is between the nucleotides at positions
         # most_5p_m_rna and most_3p_m_rna
         # Now, fold the pre-sequence, r_rna-binding-sequence and post-sequence
