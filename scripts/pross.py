@@ -23,12 +23,10 @@ def generate_variants(ice_url, ice_username, ice_password,
     ice_client = ice_utils.ICEClient(ice_url, ice_username, ice_password,
                                      group_names=group_names)
 
-    ice_entry = ice_client.get_ice_entry(template_ice_id)
-    _, cds_feat, cds_aa_seq = _get_cds_feat(ice_entry)
-
     for variants_aa_name, variant_aa_seq in variants_aas.iteritems():
         # Generate new variant ICEEntry:
-        print variants_aa_name
+        ice_entry = ice_client.get_ice_entry(template_ice_id)
+        _, cds_feat, cds_aa_seq = _get_cds_feat(ice_entry)
         var_ice_entry = ice_entry.copy()
         var_ice_entry.get_metadata()['name'] = variants_aa_name
 
@@ -45,13 +43,7 @@ def generate_variants(ice_url, ice_username, ice_password,
 
         ice_client.set_ice_entry(var_ice_entry)
 
-        print [[pos, ice, fasta]
-               for pos, (ice, fasta) in enumerate(zip(str(Seq(var_ice_entry.get_dna()['seq']).translate()[5:]),
-                                                      variant_aa_seq))
-               if ice != fasta]
-
-        assert (str(Seq(var_ice_entry.get_dna()['seq']).translate()).find(
-            variant_aa_seq) > 0)
+        assert _translate(var_ice_entry) == variant_aa_seq
 
 
 def _get_cds_feat(ice_entry):
@@ -73,21 +65,23 @@ def _get_cds_feat(ice_entry):
 def _mutate(var_ice_entry, template_nucl_seq, cds_start, cds_aa_seq,
             variant_aa_seq, cod_opt):
     '''Perform mutation.'''
+    var_seq = template_nucl_seq
 
     for pos, pair in enumerate(zip(cds_aa_seq, variant_aa_seq)):
         if pair[0] != pair[1]:
             codon_start = (cds_start - 1) + pos * 3
 
-            # print str(pos) + ' ' + str(pair) + ' ' + \
-            #    nucl_seq[codon_start:codon_start + 3] + ' ' + \
-            #    cod_opt.get_best_codon(pair[1])
-
             var_seq = \
-                template_nucl_seq[:codon_start] + \
+                var_seq[:codon_start] + \
                 cod_opt.get_best_codon(pair[1]) + \
-                template_nucl_seq[codon_start + 3:]
+                var_seq[codon_start + 3:]
 
-            var_ice_entry.get_dna().set_seq(var_seq)
+    var_ice_entry.get_dna().set_seq(var_seq)
+
+
+def _translate(var_ice_entry):
+    '''Return translation.'''
+    return str(Seq(var_ice_entry.get_dna()['seq']).translate())[5:]
 
 
 def main(args):
