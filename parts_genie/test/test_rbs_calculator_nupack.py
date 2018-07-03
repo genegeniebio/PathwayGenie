@@ -62,17 +62,14 @@ class TestRbsCalculator(unittest.TestCase):
         r_rna = 'ACCTCCTTA'
         m_rna = 'AACCTAATTGATAGCGGCCTAGGACCCCCATCAAC'
 
-        energies, bp_xs, bp_ys = utils.run('subopt', [m_rna, r_rna], temp=37.0,
-                                           dangles='all', energy_gap=3.0)
-
-        print energies, bp_xs, bp_ys
+        _, _, bp_ys = utils.run('subopt', [m_rna, r_rna], temp=37.0,
+                                dangles='all', energy_gap=3.0)
 
         nt_in_r_rna = False
 
         for bp_y in bp_ys:
             for nt_y in bp_y:
                 if nt_y > len(m_rna):
-                    print str(nt_y) + '\t' + str(len(m_rna))
                     nt_in_r_rna = True
 
         self.assertTrue(nt_in_r_rna)
