@@ -3,15 +3,17 @@ FROM python:2.7
 COPY . /
 WORKDIR /
 
-RUN cd /nupack3.0.6 \
-	&& make clean \
+ARG VIENNA_VERSION="ViennaRNA-2.4.8"
+
+RUN curl -fsSL https://www.tbi.univie.ac.at/RNA/download/sourcecode/2_4_x/$VIENNA_VERSION.tar.gz -o /opt/$VIENNA_VERSION.tar.gz \
+	&& tar zxvf /opt/$VIENNA_VERSION.tar.gz -C /opt/ \
+	&& cd /opt/$VIENNA_VERSION \
+	&& ./configure \
 	&& make \
+	&& make install \
 	&& cd / \
 	&& pip install --upgrade pip \
 	&& pip install -r requirements.txt
-
-ENV PATH /nupack3.0.6/bin:${PATH}
-ENV NUPACKHOME /nupack3.0.6/
 
 ENTRYPOINT ["python"]
 CMD ["app.py"]

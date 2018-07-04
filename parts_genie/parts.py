@@ -18,7 +18,7 @@ from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 from synbiochem.utils import dna_utils, seq_utils
 
 from parts_genie import rbs_calculator as rbs_calc
-from parts_genie import nupack_utils as calc
+from parts_genie import vienna_utils as calc
 
 
 class PartsSolution(object):
