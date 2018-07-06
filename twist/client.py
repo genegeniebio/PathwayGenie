@@ -16,57 +16,63 @@ import requests
 
 
 _APITOKEN = '''
-    eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjQwMDc4OGU1LWI1MDUtNGVmNC05
-    NTQ4LThmNmIxZDgwYTMzNiIsInVzZXJfaWQiOiIzM2JlYTFkZC0yYjYzLTQ5ZGMtYTgwMy0zN
-    jYzMTM4OWU3YTUiLCJ1c2VybmFtZSI6ImdpbmtnbyIsImV4cCI6MTYwODI4OTQ1M30.w6JiWO
-    1937Ewv21orXEJKwPvGSftgPNxPRnq1pkno1w
+    eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjI2Y2QzNmU3LTBiNWEtNGUwMC1h
+    NTc5LWE5ZWYxYzMxOGJiNiIsInVzZXJfaWQiOiJhZmQ0MTdhNi02YjUwLTQ3ODEtYWNjMC00M
+    mJlNjhiYmEyZGYiLCJ1c2VybmFtZSI6Im1hbmNoZXN0ZXJfdW5pX2FwaSIsImV4cCI6MTYxMT
+    QxMzUwNH0.WtfTiuBhWWxxQCgqzk5v8uoY3bbWKYoAfKlobDw9gvs
     '''
 
 _EUTOKEN = '''
-    eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6ImE0aTB4MDAwMDAwMDFHNUFBSSIs
-    ImVtYWlsIjoibmtyYWtvd3NraUB0d2lzdGJpb3NjaWVuY2UuY29tIiwiYWNjb3VudCI6IjAwM
-    TMxMDAwMDFwNVVZcEFBTSIsImFjY291bnRfYWRtaW4iOnRydWUsInJlYWQiOnRydWUsIndyaX
-    RlIjp0cnVlLCJleHAiOjE2MDgzMTA4NjV9.eBH4t4uQCaJ3hRSHbT6QsZVFfMNy56nIjPKpp4
-    Zg-jw
+    eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6ImE0azBtMDAwMDAwOFJFYUFBTSIs
+    ImVtYWlsIjoibmVpbC5zd2FpbnN0b25AbWFuY2hlc3Rlci5hYy51ayIsImFjY291bnQiOiIwM
+    DEzMTAwMDAxY1NDRVRBQTQiLCJhY2NvdW50X2FkbWluIjp0cnVlLCJyZWFkIjp0cnVlLCJ3cm
+    l0ZSI6dHJ1ZSwiZXhwIjoxNjAyNzczNzM0fQ.Ix1BMjpfufnqXMd8VXotm4Pimq10IBk9sZgA
+    N-29bBo
     '''
 
-_HOST = 'https://twist-api.twistbioscience-staging.com'
+_HOST = 'https://twist-api.twistbioscience-staging.com/'
 
 
 class TwistClient(object):
     '''Class to define client for the Twist API.'''
 
-    def __init__(self, email):
+    def __init__(self, email, password, username='manchester_uni_api'):
+        self.__password = password
         self.__email = email
+        self.__username = username
         self.__session = requests.Session()
         self.__session.headers.update(
             {'Authorization': 'JWT ' + ''.join(_APITOKEN.split()),
              'X-End-User-Token': ''.join(_EUTOKEN.split()),
              'Accept-Encoding': 'json'})
 
-        self.__user_data = self.__get('{}/v1/users/{}/')
+    def get_accounts(self):
+        '''Get accounts.'''
+        return self.__get(self.__get_email_url('v1/accounts/'))
 
-        return self.__user_data
+    def get_prices(self):
+        '''Get prices.'''
+        return self.__get('v1/prices/')
+
+    def get_user_data(self):
+        '''Get user data.'''
+        return self.__get(self.__get_email_url('v1/users/{}/'))
 
     def get_addresses(self):
         '''Get addresses.'''
-        return self.__get('{}/v1/users/{}/addresses/')
+        return self.__get(self.__get_email_url('v1/users/{}/addresses/'))
 
     def get_payments(self):
         '''Get payments.'''
-        return self.__get('{}/v1/users/{}/payments/')
-
-    def get_accounts(self):
-        '''Get accounts.'''
-        return self.__get('{}/v1/users/{}/accounts/')
+        return self.__get(self.__get_email_url('v1/users/{}/payments/'))
 
     def get_vectors(self):
         '''Get vectors.'''
-        return self.__user_data['vectors']
+        return self.get_user_data()['vectors']
 
     def submit_constructs(self, constructs):
         '''Submit constructs.'''
-        resp = self.__get('{}/v1/users/{}/constructs/',
+        resp = self.__get(self.__get_email_url('v1/users/{}/constructs/'),
                           json=constructs)
 
         return self.__get_scores([i['id'] for i in resp.json()])
@@ -76,7 +82,8 @@ class TwistClient(object):
         data = []
 
         while set([datum['id'] for datum in data]) != set(ids):
-            data = self.__get('{}/v1/users/{}/constructs/describe/',
+            url = self.__get_email_url('v1/users/{}/constructs/describe/')
+            data = self.__get(url,
                               params={'scored': True,
                                       'id__in': ','.join(ids)})
             time.sleep(100)
@@ -98,7 +105,8 @@ class TwistClient(object):
                 'cloning_strategies': [],
                 'advanced_options': {}}
 
-        resp = self.__.post('{}/v1/users/{}/quotes/', json=json)
+        url = self.__get_email_url('v1/users/{}/quotes/')
+        resp = self.__.post(url, json=json)
 
         return resp.json()['id']
 
@@ -107,7 +115,8 @@ class TwistClient(object):
         data = None
 
         while not data or data['status_info']['status'] == 'PENDING':
-            resp = self.__get('{}/v1/users/{}/quotes/%s/') % quote_id
+            url = self.__get_email_url('v1/users/{}/quotes/%s/') % quote_id
+            resp = self.__get(url)
             quote_data = resp.json()
             time.sleep(100)
 
@@ -121,7 +130,7 @@ class TwistClient(object):
         payments = self.__get_payments()
 
         if payments:
-            return self.__post('{}/v1/users/{}/orders/',
+            return self.__post(self.__get_email_url('v1/users/{}/orders/'),
                                json={'quote_id': quote_id,
                                      'payment_method_id': payments[0]['id']})
         else:
@@ -147,14 +156,39 @@ class TwistClient(object):
         with open(filename, 'w+') as fle:
             fle.write(json.dumps(constructs))
 
-    def __get(self, url, **kwargs):
+    def get_example_constructs_file(self, filename):
+        '''Make example constructs file.'''
+        sequences = []
+        names = []
+
+        for i in range(0, 5):
+            sequences.append(''.join(
+                [random.choice('ACTG')
+                 for _ in range(0, random.randint(150, 1500))]))
+
+            names.append('seq{}'.format(i + 1))
+
+        self.get_constructs_file(sequences, names, filename)
+
+    def __get_token(self):
+        '''Get token.'''
+        json = self.__post('/api-token-auth/',
+                           username=self.__username, password=self.__password)
+
+        return json['token']
+
+    def __get_email_url(self, url):
+        '''Get email URL.'''
+        return url.format(self.__email)
+
+    def __get(self, url):
         '''GET method.'''
-        resp = self.__session.get(url.format(_HOST, self.__email), **kwargs)
+        resp = self.__session.get(_HOST + url)
         return check_response(resp, 200)
 
-    def __post(self, url, **kwargs):
+    def __post(self, url, **json):
         '''POST method.'''
-        resp = self.__session.post(url.format(_HOST, self.__email), **kwargs)
+        resp = self.__session.post(_HOST + url, json=json)
         return check_response(resp, 200)
 
 
@@ -166,48 +200,37 @@ def check_response(resp, target):
     return resp.json()
 
 
-def main(argv):
+def main(args):
     '''''main method.'''
-    client = TwistClient(argv[0])
+    client = TwistClient(args[0], args[1])
 
-    if argv[1] == '-d':
-        print client.get_addresses()
+    print 'Accounts\t' + str(client.get_accounts())
 
-    elif argv[1] == '-p':
-        print client.get_payments()
+    print 'Prices\t' + str(client.get_prices())
 
-    elif argv[1] == '-g':
-        sequences = []
-        names = []
+    print 'User data\t' + str(client.get_user_data())
 
-        for i in range(0, 5):
-            sequences.append(''.join(
-                [random.choice('ACTG')
-                 for _ in range(0, random.randint(150, 1500))]))
+    print 'Addresses\t' + str(client.get_addresses())
 
-            names.append('seq{}'.format(i))
+    print 'Payments\t' + str(client.get_payments())
 
-        client.get_constructs_file(sequences, names, argv[2])
+    print 'Vectors\t' + str(client.get_vectors())
 
-    elif argv[1] == '-a':
-        print client.get_accounts()
+    client.get_example_constructs_file(args[2])
 
-    elif argv[1] == '-v':
-        return client.get_vectors()
-
-    elif argv[1] == '-c':
-        with open(argv[2]) as fle:
+    if args[2] == '-c':
+        with open(args[3]) as fle:
             resp = client.submit_constructs(json.loads(fle).read())
 
-        if len(argv) > 3 and argv[3] == '-q':
+        if len(args) > 4 and args[4] == '-q':
             quote_id = client.get_quote(resp['ids'])
             print client.check_quote(quote_id)
 
-            if len(argv) > 4 and argv[4] == '-o':
+            if len(args) > 5 and args[5] == '-o':
                 print client.submit_order(quote_id)
 
-    elif argv[1] == '-m':
-        print client.submit_order(argv[2])
+    elif args[2] == '-m':
+        print client.submit_order(args[3])
 
 
 if __name__ == '__main__':
