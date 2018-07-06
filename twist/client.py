@@ -7,7 +7,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-import json
 import random
 import sys
 import time
@@ -70,12 +69,14 @@ class TwistClient(object):
         '''Get vectors.'''
         return self.get_user_data()['vectors']
 
-    def submit_constructs(self, constructs):
+    def submit_constructs(self, sequences, names, typ='NON_CLONED_GENE'):
         '''Submit constructs.'''
-        resp = self.__get(self.__get_email_url('v1/users/{}/constructs/'),
-                          json=constructs)
+        constructs = self.__get_constructs(sequences, names, typ)
 
-        return self.__get_scores([i['id'] for i in resp.json()])
+        resp = self.__post(self.__get_email_url('v1/users/{}/constructs/'),
+                           constructs, target=201)
+
+        return self.get_scores([i['id'] for i in resp])
 
     def get_scores(self, ids):
         '''Get scores.'''
@@ -83,9 +84,7 @@ class TwistClient(object):
 
         while set([datum['id'] for datum in data]) != set(ids):
             url = self.__get_email_url('v1/users/{}/constructs/describe/')
-            data = self.__get(url,
-                              params={'scored': True,
-                                      'id__in': ','.join(ids)})
+            data = self.__get(url, {'scored': True, 'id__in': ','.join(ids)})
             time.sleep(100)
 
         return data
@@ -136,9 +135,8 @@ class TwistClient(object):
         else:
             raise ValueError('No payment data available.')
 
-    def get_constructs_file(self, sequences, names, filename,
-                            typ='NON_CLONED_GENE'):
-        '''Get constructs file.'''
+    def __get_constructs(self, sequences, names, typ='NON_CLONED_GENE'):
+        '''Get constructs.'''
         constructs = []
 
         for idx, (seq, name) in enumerate(zip(sequences, names)):
@@ -153,27 +151,13 @@ class TwistClient(object):
 
             constructs.append(construct)
 
-        with open(filename, 'w+') as fle:
-            fle.write(json.dumps(constructs))
-
-    def get_example_constructs_file(self, filename):
-        '''Make example constructs file.'''
-        sequences = []
-        names = []
-
-        for i in range(0, 5):
-            sequences.append(''.join(
-                [random.choice('ACTG')
-                 for _ in range(0, random.randint(150, 1500))]))
-
-            names.append('seq{}'.format(i + 1))
-
-        self.get_constructs_file(sequences, names, filename)
+        return constructs
 
     def __get_token(self):
         '''Get token.'''
         json = self.__post('/api-token-auth/',
-                           username=self.__username, password=self.__password)
+                           {'username': self.__username,
+                            'password': self.__password})
 
         return json['token']
 
@@ -181,15 +165,15 @@ class TwistClient(object):
         '''Get email URL.'''
         return url.format(self.__email)
 
-    def __get(self, url):
+    def __get(self, url, params={}):
         '''GET method.'''
-        resp = self.__session.get(_HOST + url)
+        resp = self.__session.get(_HOST + url, **params)
         return check_response(resp, 200)
 
-    def __post(self, url, **json):
+    def __post(self, url, json, target=200):
         '''POST method.'''
         resp = self.__session.post(_HOST + url, json=json)
-        return check_response(resp, 200)
+        return check_response(resp, target)
 
 
 def check_response(resp, target):
@@ -205,32 +189,27 @@ def main(args):
     client = TwistClient(args[0], args[1])
 
     print 'Accounts\t' + str(client.get_accounts())
-
     print 'Prices\t' + str(client.get_prices())
-
     print 'User data\t' + str(client.get_user_data())
-
     print 'Addresses\t' + str(client.get_addresses())
-
     print 'Payments\t' + str(client.get_payments())
-
     print 'Vectors\t' + str(client.get_vectors())
 
-    client.get_example_constructs_file(args[2])
+    # Produce dummy order:
+    sequences = []
+    names = []
 
-    if args[2] == '-c':
-        with open(args[3]) as fle:
-            resp = client.submit_constructs(json.loads(fle).read())
+    for i in range(0, 5):
+        sequences.append(''.join(
+            [random.choice('ACTG')
+             for _ in range(0, random.randint(300, 1800))]))
 
-        if len(args) > 4 and args[4] == '-q':
-            quote_id = client.get_quote(resp['ids'])
-            print client.check_quote(quote_id)
+        names.append('seq{}'.format(i + 1))
 
-            if len(args) > 5 and args[5] == '-o':
-                print client.submit_order(quote_id)
-
-    elif args[2] == '-m':
-        print client.submit_order(args[3])
+    resp = client.submit_constructs(sequences, names)
+    quote_id = client.get_quote(resp['ids'])
+    print client.check_quote(quote_id)
+    print client.submit_order(quote_id)
 
 
 if __name__ == '__main__':
