@@ -10,7 +10,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import random
 import sys
 import time
-
+import uuid
 import requests
 
 
@@ -85,7 +85,7 @@ class TwistClient(object):
         while True:
             url = self.__get_email_url('v1/users/{}/constructs/describe/')
             data = self.__get(url, {'scored': 'True',
-                                    'id__in': ids[0]})
+                                    'id__in': ','.join(ids)})
 
             if set([datum['id'] for datum in data]) == set(ids):
                 break
@@ -222,7 +222,7 @@ def main(args):
     resp = client.submit_constructs(sequences, names)
     address_id = client.get_addresses()[0]
     quote_id = client.get_quote([datum['id'] for datum in resp],
-                                external_id=None,
+                                external_id=str(uuid.uuid4()),
                                 address_id=address_id)
     print client.check_quote(quote_id)
     print client.submit_order(quote_id)
