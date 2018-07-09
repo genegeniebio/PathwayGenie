@@ -80,11 +80,16 @@ class TwistClient(object):
 
     def get_scores(self, ids):
         '''Get scores.'''
-        data = []
+        data = None
 
-        while set([datum['id'] for datum in data]) != set(ids):
+        while True:
             url = self.__get_email_url('v1/users/{}/constructs/describe/')
-            data = self.__get(url, {'scored': True, 'id__in': ','.join(ids)})
+            data = self.__get(url, {'scored': 'True',
+                                    'id__in': ids[0]})
+
+            if set([datum['id'] for datum in data]) == set(ids):
+                break
+
             time.sleep(100)
 
         return data
