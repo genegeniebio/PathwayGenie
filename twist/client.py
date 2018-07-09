@@ -71,7 +71,7 @@ class TwistClient(object):
 
     def submit_constructs(self, sequences, names, typ='NON_CLONED_GENE'):
         '''Submit constructs.'''
-        constructs = self.__get_constructs(sequences, names, typ)
+        constructs = _get_constructs(sequences, names, typ)
 
         resp = self.__post(self.__get_email_url('v1/users/{}/constructs/'),
                            constructs, target=201)
@@ -105,7 +105,7 @@ class TwistClient(object):
                 'advanced_options': {}}
 
         url = self.__get_email_url('v1/users/{}/quotes/')
-        resp = self.__.post(url, json=json)
+        resp = self.__post(url, json=json)
 
         return resp.json()['id']
 
@@ -113,20 +113,24 @@ class TwistClient(object):
         '''Check quote.'''
         data = None
 
-        while not data or data['status_info']['status'] == 'PENDING':
+        while True:
             url = self.__get_email_url('v1/users/{}/quotes/%s/') % quote_id
             resp = self.__get(url)
-            quote_data = resp.json()
+            data = resp.json()
+
+            if data['status_info']['status'] != 'PENDING':
+                break
+
             time.sleep(100)
 
-        if quote_data['status_info']['status'] == 'SUCCESS':
-            return quote_data['status_info']['status']
+        if data['status_info']['status'] == 'SUCCESS':
+            return data['status_info']['status']
 
-        raise ValueError(quote_data['status_info']['status'])
+        raise ValueError(data['status_info']['status'])
 
     def submit_order(self, quote_id):
         '''Submit order.'''
-        payments = self.__get_payments()
+        payments = self.get_payments()
 
         if payments:
             return self.__post(self.__get_email_url('v1/users/{}/orders/'),
@@ -134,24 +138,6 @@ class TwistClient(object):
                                      'payment_method_id': payments[0]['id']})
         else:
             raise ValueError('No payment data available.')
-
-    def __get_constructs(self, sequences, names, typ='NON_CLONED_GENE'):
-        '''Get constructs.'''
-        constructs = []
-
-        for idx, (seq, name) in enumerate(zip(sequences, names)):
-            construct = {'sequences': seq,
-                         'name': name,
-                         'type': typ,
-                         'insertion_point_mes_uid': 'na',
-                         'vector_mes_uid': 'na',
-                         'column': idx / 8,
-                         'row': idx % 8,
-                         'plate': idx / 96}
-
-            constructs.append(construct)
-
-        return constructs
 
     def __get_token(self):
         '''Get token.'''
@@ -165,9 +151,12 @@ class TwistClient(object):
         '''Get email URL.'''
         return url.format(self.__email)
 
-    def __get(self, url, params={}):
+    def __get(self, url, params=None):
         '''GET method.'''
-        resp = self.__session.get(_HOST + url, **params)
+        if not params:
+            params = {}
+
+        resp = self.__session.get(_HOST + url, params=params)
         return check_response(resp, 200)
 
     def __post(self, url, json, target=200):
@@ -182,6 +171,25 @@ def check_response(resp, target):
         raise Exception('{}: {}'.format(resp.content, resp.status_code))
 
     return resp.json()
+
+
+def _get_constructs(sequences, names, typ='NON_CLONED_GENE'):
+    '''Get constructs.'''
+    constructs = []
+
+    for idx, (seq, name) in enumerate(zip(sequences, names)):
+        construct = {'sequences': seq,
+                     'name': name,
+                     'type': typ,
+                     'insertion_point_mes_uid': 'na',
+                     'vector_mes_uid': 'na',
+                     'column': idx / 8,
+                     'row': idx % 8,
+                     'plate': idx / 96}
+
+        constructs.append(construct)
+
+    return constructs
 
 
 def main(args):
@@ -207,7 +215,10 @@ def main(args):
         names.append('seq{}'.format(i + 1))
 
     resp = client.submit_constructs(sequences, names)
-    quote_id = client.get_quote(resp['ids'])
+    address_id = client.get_addresses()[0]
+    quote_id = client.get_quote([datum['id'] for datum in resp],
+                                external_id=None,
+                                address_id=address_id)
     print client.check_quote(quote_id)
     print client.submit_order(quote_id)
 

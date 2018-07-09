@@ -8,10 +8,11 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=too-many-arguments
-from pathway_genie.utils import PathwayThread
 from synbiochem.utils import dna_utils
 from synbiochem.utils.ice_utils import DNAWriter, ICEClient, ICEEntry
 from synbiochem.utils.net_utils import NetworkError
+
+from pathway_genie.utils import PathwayThread
 
 
 class IceThread(PathwayThread):
