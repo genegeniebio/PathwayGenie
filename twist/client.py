@@ -73,24 +73,30 @@ class TwistClient(object):
         '''Submit constructs.'''
         constructs = _get_constructs(sequences, names, typ)
 
-        resp = self.__post(self.__get_email_url('v1/users/{}/constructs/'),
+        return self.__post(self.__get_email_url('v1/users/{}/constructs/'),
                            constructs, target=201)
 
-        return self.get_scores([i['id'] for i in resp])
-
-    def get_scores(self, ids):
+    def get_scores(self, ids, max_errors=8):
         '''Get scores.'''
         data = None
+        errors = 0
 
         while True:
             url = self.__get_email_url('v1/users/{}/constructs/describe/')
-            data = self.__get(url, {'scored': 'True',
-                                    'id__in': ','.join(ids)})
 
-            if set([datum['id'] for datum in data]) == set(ids):
-                break
+            try:
+                data = self.__get(url, {'scored': 'True',
+                                        'id__in': ','.join(ids)})
 
-            time.sleep(100)
+                if set([datum['id'] for datum in data]) == set(ids):
+                    break
+            except TwistError, exc:
+                errors += 1
+
+                if errors == max_errors:
+                    raise exc
+
+            time.sleep(1)
 
         return data
 
@@ -170,10 +176,17 @@ class TwistClient(object):
         return check_response(resp, target)
 
 
+class TwistError(Exception):
+    '''Class to represent a TwistException.'''
+
+    def __init__(self, message, status_code):
+        Exception.__init__(self, '{}: {}'.format(message, status_code))
+
+
 def check_response(resp, target):
     '''Check response.'''
     if not resp.status_code == target:
-        raise Exception('{}: {}'.format(resp.content, resp.status_code))
+        raise TwistError(resp.content, resp.status_code)
 
     return resp.json()
 
@@ -220,8 +233,11 @@ def main(args):
         names.append('seq{}'.format(i + 1))
 
     resp = client.submit_constructs(sequences, names)
+    ids = [i['id'] for i in resp]
+    print 'Scores\t' + str(client.get_scores(ids))
+
     address_id = client.get_addresses()[0]
-    quote_id = client.get_quote([datum['id'] for datum in resp],
+    quote_id = client.get_quote(ids,
                                 external_id=str(uuid.uuid4()),
                                 address_id=address_id)
     print client.check_quote(quote_id)
