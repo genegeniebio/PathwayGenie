@@ -78,17 +78,17 @@ class TwistClient(object):
 
     def get_scores(self, ids, max_errors=8):
         '''Get scores.'''
-        data = None
+        resp = None
         errors = 0
 
         while True:
             url = self.__get_email_url('v1/users/{}/constructs/describe/')
 
             try:
-                data = self.__get(url, {'scored': 'True',
+                resp = self.__get(url, {'scored': 'True',
                                         'id__in': ','.join(ids)})
 
-                if set([datum['id'] for datum in data]) == set(ids):
+                if set([datum['id'] for datum in resp]) == set(ids):
                     break
             except TwistError, exc:
                 errors += 1
@@ -98,14 +98,14 @@ class TwistClient(object):
 
             time.sleep(1)
 
-        return data
+        return resp
 
     def get_quote(self, construct_ids, external_id, address_id):
         '''Get quote.'''
         json = {'external_id': external_id,
                 'containers': [{'constructs': [
-                    {'id': id_, 'index': index}
-                    for id_, index in enumerate(construct_ids)],
+                    {'index': index, 'id': id_}
+                    for index, id_ in enumerate(construct_ids)],
                     'type': '96_WELL_PLATE',
                     'fill_method': 'VERTICAL'}],
                 'shipment': {'recipient_address_id': address_id,
@@ -116,39 +116,33 @@ class TwistClient(object):
                 'advanced_options': {}}
 
         url = self.__get_email_url('v1/users/{}/quotes/')
-        resp = self.__post(url, json=json)
+        resp = self.__post(url, json=json, target=201)
 
-        return resp.json()['id']
+        return resp['id']
 
     def check_quote(self, quote_id):
         '''Check quote.'''
-        data = None
+        resp = None
 
         while True:
             url = self.__get_email_url('v1/users/{}/quotes/%s/') % quote_id
             resp = self.__get(url)
-            data = resp.json()
 
-            if data['status_info']['status'] != 'PENDING':
+            if resp['status_info']['status'] != 'PENDING':
                 break
 
             time.sleep(100)
 
-        if data['status_info']['status'] == 'SUCCESS':
-            return data['status_info']['status']
+        if resp['status_info']['status'] == 'SUCCESS':
+            return resp
 
-        raise ValueError(data['status_info']['status'])
+        raise ValueError(resp['status_info']['status'])
 
-    def submit_order(self, quote_id):
+    def submit_order(self, quote_id, payment_id):
         '''Submit order.'''
-        payments = self.get_payments()
-
-        if payments:
-            return self.__post(self.__get_email_url('v1/users/{}/orders/'),
-                               json={'quote_id': quote_id,
-                                     'payment_method_id': payments[0]['id']})
-        else:
-            raise ValueError('No payment data available.')
+        return self.__post(self.__get_email_url('v1/users/{}/orders/'),
+                           json={'quote_id': quote_id,
+                                 'payment_method_id': payment_id})
 
     def __get_token(self):
         '''Get token.'''
@@ -214,11 +208,14 @@ def main(args):
     '''''main method.'''
     client = TwistClient(args[0], args[1])
 
+    addresses = client.get_addresses()
+    payments = client.get_payments()
+
     print 'Accounts\t' + str(client.get_accounts())
     print 'Prices\t' + str(client.get_prices())
     print 'User data\t' + str(client.get_user_data())
-    print 'Addresses\t' + str(client.get_addresses())
-    print 'Payments\t' + str(client.get_payments())
+    print 'Addresses\t' + str(addresses)
+    print 'Payments\t' + str(payments)
     print 'Vectors\t' + str(client.get_vectors())
 
     # Produce dummy order:
@@ -236,12 +233,15 @@ def main(args):
     ids = [i['id'] for i in resp]
     print 'Scores\t' + str(client.get_scores(ids))
 
-    address_id = client.get_addresses()[0]
     quote_id = client.get_quote(ids,
                                 external_id=str(uuid.uuid4()),
-                                address_id=address_id)
-    print client.check_quote(quote_id)
-    print client.submit_order(quote_id)
+                                address_id=addresses[0]['id'])
+
+    print 'Quote\t' + str(client.check_quote(quote_id))
+
+    if payments:
+        print 'Submission\t' + \
+            str(client.submit_order(quote_id, payments[0]['id']))
 
 
 if __name__ == '__main__':
