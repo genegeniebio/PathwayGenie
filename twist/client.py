@@ -7,6 +7,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=too-many-arguments
 import random
 import sys
 import time
@@ -100,19 +101,22 @@ class TwistClient(object):
 
         return resp
 
-    def get_quote(self, construct_ids, external_id, address_id):
+    def get_quote(self, construct_ids, external_id, address_id,
+                  typ='96_WELL_PLATE', fill_method='VERTICAL',
+                  shipment_method='MULTIPLE_SHIPMENTS',
+                  vectors=None, cloning_strategies=None):
         '''Get quote.'''
         json = {'external_id': external_id,
                 'containers': [{'constructs': [
                     {'index': index, 'id': id_}
                     for index, id_ in enumerate(construct_ids)],
-                    'type': '96_WELL_PLATE',
-                    'fill_method': 'VERTICAL'}],
+                    'type': typ,
+                    'fill_method': fill_method}],
                 'shipment': {'recipient_address_id': address_id,
                              'preferences': {
-                                 'shipment_method': 'MULTIPLE_SHIPMENTS'}},
-                'vectors': [],
-                'cloning_strategies': [],
+                                 'shipment_method': shipment_method}},
+                'vectors': vectors or [],
+                'cloning_strategies': cloning_strategies or [],
                 'advanced_options': {}}
 
         url = self.__get_email_url('v1/users/{}/quotes/')
