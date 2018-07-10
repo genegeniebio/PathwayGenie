@@ -33,6 +33,8 @@ class IceThread(PathwayThread):
 
     def run(self):
         '''Saves results.'''
+        keys = ['part', 'plasmid', 'strain']
+
         try:
             iteration = 0
 
@@ -43,13 +45,14 @@ class IceThread(PathwayThread):
             self._query['ice']['url'] = url[:-1] if url[-1] == '/' else url
 
             for result in self._query['designs']:
-                ice_id, plasmid_id, strain_id = self.__write_design(result)
+                # Append links to results:
+                links = {key: {'link': url + '/entry/' + str(entry_id),
+                               'ice_id': str(entry_id)}
+                         for key, entry_id in zip(keys,
+                                                  self.__write_design(result))
+                         if entry_id}
 
-                # Append links to results.
-                self._results.append([url + '/entry/' + str(entry_id)
-                                      for entry_id in [ice_id, plasmid_id,
-                                                       strain_id]
-                                      if entry_id])
+                self._results.append(links)
                 iteration += 1
                 self._fire_designs_event('running', iteration, 'Saving...')
 

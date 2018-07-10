@@ -63,12 +63,16 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "ICEService", "ErrorS
 
 				if(status == "finished") {
 					for (i = 0; i < obj.response.result.length; i++) {
-						for( j = 0; j < obj.response.result[i].length; j++ ) {
-							if(obj.results[i].links.indexOf(obj.response.result[i][j]) == -1 ) {
-								obj.results[i].links.push(obj.response.result[i][j]);
+						ice_ids = obj.response.result[i];
+						
+						for(var key in ice_ids) {
+							link = ice_ids[key].link;
+							
+							if(obj.results[i].links.indexOf(link) == -1 ) {
+								obj.results[i].links.push(link);
 							}
 						}
-						
+						obj.results[i].ice_ids = ice_ids;
 					}
 				}
 				
