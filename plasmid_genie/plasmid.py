@@ -49,6 +49,7 @@ class PlasmidThread(PathwayThread):
             dna = dna_utils.concat(dsgn['components'])
             dna['name'] = dsgn['name']
             dna['typ'] = dna_utils.SO_PLASMID
+            dna['parameters']['Design id'] = self._query['design_id']
             dna['children'].extend(orig_comps)
 
             # Generate domino sequences:
