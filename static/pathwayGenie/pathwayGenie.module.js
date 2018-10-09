@@ -1,4 +1,4 @@
-var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "assemblyGenieApp", "helpApp", "iceApp", "partsGenieApp", "plasmidGenieApp"]);
+var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "helpApp", "iceApp", "lcrGenieApp", "partsGenieApp", "plasmidGenieApp"]);
 
 pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 	$routeProvider.when("/", {
@@ -26,11 +26,11 @@ pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 		 controllerAs: "ctrl",		
 		 templateUrl: "static/plasmidGenie/plasmidGenie.html",		
 		 app: "PlasmidGenie"
-	}).when("/assemblyGenie", {		
-		 controller: "assemblyGenieCtrl",		
+	}).when("/lcrGenie", {		
+		 controller: "lcrGenieCtrl",		
 		 controllerAs: "ctrl",		
-		 templateUrl: "static/assemblyGenie/assemblyGenie.html",		
-		 app: "AssemblyGenie"
+		 templateUrl: "static/lcrGenie/lcrGenie.html",		
+		 app: "LcrGenie"
 	})
 	
 	
