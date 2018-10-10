@@ -171,16 +171,19 @@ def search_uniprot(query):
 @APP.route('/export', methods=['POST'])
 def exportOrder():
     '''Export order.'''
+    # Form DataFrame from results object:
     df = pd.DataFrame(json.loads(request.data)['designs'])
     df.rename(columns={'name': 'Name',
                        'seq': 'Sequence',
                        'desc': 'Description'}, inplace=True)
 
+    # Get ICE ids:
     df['Part ID'] = df['links'].apply(lambda link: _get_ice_id(link, 0))
     df['Cloned ICE ID'] = df['links'].apply(lambda link: _get_ice_id(link, 1))
 
-    # Name,options,parameters,Sequence,start,temp_params,typ,Part ID,Cloned
-    # ICE ID
+    # Return selected columns:
+    df = df[['Part ID', 'Cloned ICE ID', 'Name', 'Sequence', 'Description']]
+
     return _save_export(df, str(uuid.uuid4()).replace('-', '_'))
 
 
