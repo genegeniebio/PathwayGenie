@@ -7,6 +7,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=invalid-name
 # pylint: disable=no-member
 # pylint: disable=wrong-import-order
 from collections import defaultdict
@@ -24,6 +25,7 @@ from synbiochem.utils import seq_utils
 from synbiochem.utils.ice_utils import ICEClient
 from synbiochem.utils.net_utils import NetworkError
 
+import pandas as pd
 from parts_genie import parts
 from pathway_genie import pathway
 
@@ -51,9 +53,10 @@ def home():
 
 
 @APP.route('/<path:path>')
-def get_path(_):
+def get_path(path):
     '''Renders homepage.'''
-    return APP.send_static_file('index.html')
+    return_path = path if path.startswith('export') else 'index.html'
+    return APP.send_static_file(return_path)
 
 
 @APP.route('/submit', methods=['POST'])
@@ -169,14 +172,10 @@ def search_uniprot(query):
 def get_twist_plate():
     '''Get Twist plate order.'''
     data = json.loads(request.data)
-    content = 'attachment; filename=mycsv.csv'
 
-    csv = 'foo,bar,baz\nhai,bai,crai\n'
-    response = make_response(csv)
-    response.headers['Content-Disposition'] = content
-    response.mimetype = 'text/csv'
+    df = pd.DataFrame([['a', 'b']], columns=['1', '2'])
 
-    return response
+    return _save_export(df, str(uuid.uuid4()).replace('-', '_'))
 
 
 @APP.errorhandler(Exception)
@@ -197,3 +196,16 @@ def _connect_ice(req):
     return ICEClient(data['ice']['url'],
                      data['ice']['username'],
                      data['ice']['password'])
+
+
+def _save_export(df, file_id):
+    '''Save export file, returning the url.'''
+    dir_name = os.path.join(_STATIC_FOLDER, 'export')
+
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+
+    filename = file_id + '.csv'
+    df.to_csv(os.path.join(dir_name, filename), index=False)
+
+    return json.dumps({'path': 'export/' + filename})
