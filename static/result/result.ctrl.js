@@ -28,8 +28,8 @@ resultApp.controller("resultCtrl", ["$scope", "ICEService", "ResultService", fun
 		}
 	}
 	
-	self.getTwistPlate = function() {
-		return ResultService.getTwistPlate();
+	self.exportOrder = function() {
+		return ResultService.exportOrder();
 	};
 
 	self.saveResults = function() {

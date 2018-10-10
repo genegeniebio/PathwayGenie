@@ -19,8 +19,8 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "$window", "ICEServic
 		obj.results.push.apply(obj.results, res);
 	};
 	
-	obj.getTwistPlate = function() {
-		$http.post("/twist", {"designs": obj.results}).then(
+	obj.exportOrder = function() {
+		$http.post("/export", {"designs": obj.results}).then(
 				function(resp) {
 					var newWindow = $window.open();
 					newWindow.location = resp.data.path;

@@ -168,9 +168,9 @@ def search_uniprot(query):
     return json.dumps(result)
 
 
-@APP.route('/twist', methods=['POST'])
-def get_twist_plate():
-    '''Get Twist plate order.'''
+@APP.route('/export', methods=['POST'])
+def exportOrder():
+    '''Export order.'''
     data = json.loads(request.data)
 
     df = pd.DataFrame([['a', 'b']], columns=['1', '2'])
