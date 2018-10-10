@@ -2,7 +2,7 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "$window", "ICEServic
 	var obj = {};
 	obj.results = null;
 	obj.response = {"update": {}};
-	results_saved = false;
+	resultsSaved = false;
 	
 	var jobIds = [];
 	var jobId = null;
@@ -39,13 +39,13 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "$window", "ICEServic
 					obj.listen();
 				},
 				function(errResp) {
-					results_saved = false;
+					resultsSaved = false;
 					ErrorService.open(errResp.data.message);
 				});
 	};
 	
-	obj.results_saved = function() {
-		return results_saved;
+	obj.resultsSaved = function() {
+		return resultsSaved;
 	}
 	
 	obj.cancel = function() {
@@ -58,7 +58,7 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "$window", "ICEServic
 	
 	obj.listen = function() {
 		if(jobIds.length == 0) {
-			results_saved = true;
+			resultsSaved = true;
 			return;
 		}
 		

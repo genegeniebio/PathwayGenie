@@ -5,6 +5,7 @@ resultApp.directive("resultPanel", function() {
     		"result": "&",
     		"exportOrder": "&",
     		"saveResults": "&",
+    		"resultsSaved": "&",
     		"connected": "&",
     		"selected": "&",
     		"toggleSelected": "&",
