@@ -92,7 +92,7 @@ def get_organisms():
     '''Gets organisms from search term.'''
     query = json.loads(request.data)
 
-    url = "https://www.denovodna.com/software/return_species_list?term=" + \
+    url = 'https://www.denovodna.com/software/return_species_list?term=' + \
         query['term']
 
     response = urllib2.urlopen(url)
@@ -171,9 +171,10 @@ def search_uniprot(query):
 @APP.route('/export', methods=['POST'])
 def exportOrder():
     '''Export order.'''
-    data = json.loads(request.data)
-
-    df = pd.DataFrame([['a', 'b']], columns=['1', '2'])
+    df = pd.DataFrame(json.loads(request.data)['designs'])
+    df.rename(columns={'name': 'Name',
+                       'seq': 'Sequence',
+                       'desc': 'Description'}, inplace=True)
 
     return _save_export(df, str(uuid.uuid4()).replace('-', '_'))
 
