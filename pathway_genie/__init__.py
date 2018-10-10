@@ -7,8 +7,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-# pylint: disable=redefined-outer-name
-# pylint: disable=unused-argument
+# pylint: disable=no-member
 # pylint: disable=wrong-import-order
 from collections import defaultdict
 import json
@@ -19,7 +18,7 @@ import urllib2
 import uuid
 
 from Bio import Restriction
-from flask import Flask, jsonify, request, Response
+from flask import Flask, jsonify, make_response, request, Response
 from requests.exceptions import ConnectionError
 from synbiochem.utils import seq_utils
 from synbiochem.utils.ice_utils import ICEClient
@@ -52,7 +51,7 @@ def home():
 
 
 @APP.route('/<path:path>')
-def path(path):
+def get_path(_):
     '''Renders homepage.'''
     return APP.send_static_file('index.html')
 
@@ -164,6 +163,20 @@ def search_uniprot(query):
               'organism-id']
     result = seq_utils.search_uniprot(query, fields)
     return json.dumps(result)
+
+
+@APP.route('/twist', methods=['POST'])
+def get_twist_plate():
+    '''Get Twist plate order.'''
+    data = json.loads(request.data)
+    content = 'attachment; filename=mycsv.csv'
+
+    csv = 'foo,bar,baz\nhai,bai,crai\n'
+    response = make_response(csv)
+    response.headers['Content-Disposition'] = content
+    response.mimetype = 'text/csv'
+
+    return response
 
 
 @APP.errorhandler(Exception)

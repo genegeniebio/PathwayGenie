@@ -3,6 +3,7 @@ resultApp.directive("resultPanel", function() {
     	scope: {
     		"results": "&",
     		"result": "&",
+    		"getTwistPlate": "&",
     		"saveResults": "&",
     		"connected": "&",
     		"selected": "&",

@@ -27,6 +27,10 @@ resultApp.controller("resultCtrl", ["$scope", "ICEService", "ResultService", fun
 			return null;
 		}
 	}
+	
+	self.getTwistPlate = function() {
+		return ResultService.getTwistPlate();
+	};
 
 	self.saveResults = function() {
 		return ResultService.saveResults();

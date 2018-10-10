@@ -18,6 +18,22 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "ICEService", "ErrorS
 		
 		obj.results.push.apply(obj.results, res);
 	};
+	
+	obj.getTwistPlate = function() {
+		$http.post("/twist", {"designs": obj.results}).then(
+				function(resp) {
+					var contDisp = resp.headers("content-disposition");
+                    // Retrieve file name from content-disposition:
+                    var filename = contDisp.substr(contDisp.indexOf("filename=") + 9);
+                    filename = filename.replace(/\"/g, "");
+                    var contType = resp.headers("content-type");
+                    var blob = new Blob([resp.data], {type: contType});
+                    // saveAs(blob, filename);
+				},
+				function(errResp) {
+					ErrorService.open(errResp.data.message);
+				});
+	};
 
 	obj.saveResults = function() {
 		ProgressService.open("Save dashboard", obj.cancel, obj.update);
