@@ -169,9 +169,11 @@ def search_uniprot(query):
 
 
 @APP.route('/export', methods=['POST'])
-def exportOrder():
+def export_order():
     '''Export order.'''
     # Form DataFrame from results object:
+
+    # TODO: recursively extract children:
     df = pd.DataFrame(json.loads(request.data)['designs'])
     df.rename(columns={'name': 'Name',
                        'seq': 'Sequence',
@@ -209,7 +211,10 @@ def _connect_ice(req):
 
 def _get_ice_id(link, idx):
     '''Get ICE id.'''
-    return get_ice_id(link[idx].split('/')[-1])
+    if idx < len(link):
+        return get_ice_id(link[idx].split('/')[-1])
+
+    return None
 
 
 def _save_export(df, file_id):
