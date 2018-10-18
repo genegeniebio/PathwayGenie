@@ -31,7 +31,6 @@ from pathway_genie import pathway
 
 
 # Configuration:
-DEBUG = True
 SECRET_KEY = str(uuid.uuid4())
 
 # Create application:
