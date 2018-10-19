@@ -8,10 +8,13 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "$window", "ICEServic
 	var jobId = null;
 	
 	obj.setResults = function(res) {
+		resultsSaved = false;
 		obj.results = res;
 	};
 	
 	obj.appendResults = function(res) {
+		resultsSaved = false;
+		
 		if(!obj.results) {
 			obj.results = [];
 		}
