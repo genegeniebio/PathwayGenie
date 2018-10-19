@@ -13,7 +13,7 @@ RUN curl -fsSL https://www.tbi.univie.ac.at/RNA/download/sourcecode/2_4_x/$VIENN
 	&& make install \
 	&& cd / \
 	&& pip install --upgrade pip \
-	&& pip install -r requirements.txt
+	&& pip install -r requirements.txt --upgrade
 
 ENTRYPOINT ["python"]
 CMD ["app.py"]
