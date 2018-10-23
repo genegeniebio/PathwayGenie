@@ -1,4 +1,4 @@
-partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "$uibModalInstance", "ErrorService", "PartsGenieService", "PathwayGenieService", "ProgressService", "ResultService", "UniprotService", function($scope, $uibModal, $uibModalInstance, ErrorService, PartsGenieService, PathwayGenieService, ProgressService, ResultService, UniprotService) {
+partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService", "PartsGenieService", "PathwayGenieService", "ProgressService", "ResultService", "UniprotService", function($scope, $uibModal, ErrorService, PartsGenieService, PathwayGenieService, ProgressService, ResultService, UniprotService) {
 	var self = this;
 	var jobIds = [];
 	var jobId = null;
@@ -17,6 +17,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "$uibModalIns
 	
 	self.uniprotTerms = null;
 	feature_idx = -1;
+	uniprotModal = null;
 	
 	self.selectRestEnzs = function(selected) {
 		self.restrEnzs = remove(self.restrEnzs, selected);
@@ -193,19 +194,26 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "$uibModalIns
 		
 		self.query.designs.push(copiedDesign);
 		self.pagination.current = self.query.designs.length;
+		
+		return copiedDesign;
 	};
 	
 	self.bulkUniprot = function(feat_idx) {
-		self.feature_idx = feat_idx;
+		feature_idx = feat_idx;
 		
-		$uibModal.open({
+		var modalScope = $scope.$new();
+		
+		uniprotModal = $uibModal.open({
 			animation: true,
 			ariaLabelledBy: 'modal-title',
 			ariaDescribedBy: 'modal-body',
 			templateUrl: '/static/uniprot/uniprot_terms.html',
 			controller: 'partsGenieCtrl',
 			controllerAs: 'ctrl',
+			scope: modalScope
 		});
+		
+		modalScope.uniprotModal = uniprotModal;
 	}
 	
 	self.removeDesign = function() {
@@ -286,12 +294,11 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "$uibModalIns
 		for(var i = 0; i < uniprotIds.length; i++) {
 			autoUniprot(uniprotIds[i], i, self.pagination.current - 1);
 		}
-		
-		feature_idx = -1;
 	};
 	
 	self.close = function() {
-		$uibModalInstance.close();
+		$scope.uniprotModal.dismiss("cancel");
+		uniprotModal = null;
 		self.uniprotTerms = null;
 	};
 	
@@ -349,11 +356,15 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "$uibModalIns
 		
 		PartsGenieService.searchUniprot(uniprotId).then(
 				function(resp) {
+					var curr_design = null;
+					
 					if(idx > 0) {
-						self.copyDesign();
+						curr_design = self.copyDesign();
+					}
+					else {
+						curr_design = self.query.designs[initial_idx]
 					}
 					
-					var curr_design = self.query.designs[idx + initial_idx];
 					UniprotService.updateFeature(curr_design.features[feature_idx], resp.data[0]);
 					search = false;
 				},
