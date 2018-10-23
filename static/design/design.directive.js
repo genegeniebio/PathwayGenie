@@ -10,6 +10,7 @@ designApp.directive("designPanel", function($timeout) {
     		removeDesign: "&",
     		addFeature: "&",
     		copyFeature: "&",
+    		bulkUniprot: "&",
     		pagination: "="
     	},
         templateUrl: "/static/design/design.html",

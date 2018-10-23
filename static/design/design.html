@@ -50,6 +50,10 @@
 						novalidate>
 						<div class="glyphicon glyphicon-remove pull-right glyphicon-grey glyphicon-small" data-ng-click="query().designs[pagination.current - 1].features.splice($index, 1)">
 						</div>
+						<div class="glyphicon glyphicon-copy pull-left glyphicon-grey glyphicon-small"
+							data-ng-click="bulkUniprot({args: $index})"
+							data-ng-if="feature.typ == 'http://purl.obolibrary.org/obo/SO_0000316'">
+						</div>
 					</div>
 				</div>
 			</div>

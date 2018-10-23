@@ -192,6 +192,14 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		self.pagination.current = self.query.designs.length;
 	};
 	
+	self.bulkUniprot = function(feature_idx) {
+		var uniprotIds = ["HXK1_HUMAN", "HXK2_HUMAN"];
+		
+		for(var i = 0; i < uniprotIds.length; i++) {
+			autoUniprot(uniprotIds[i], i, self.pagination.current - 1, feature_idx);
+		}
+	}
+	
 	self.removeDesign = function() {
 		self.query.designs.splice(self.pagination.current - 1, 1);
 		self.pagination.current = self.pagination.current == 1 ? 1 : self.pagination.current - 1;
@@ -311,6 +319,24 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		
 		return array;
 	};
+	
+	autoUniprot = function(uniprotId, idx, initial_idx, feature_idx) {
+		search = true;
+		
+		PartsGenieService.searchUniprot(uniprotId).then(
+				function(resp) {
+					if(idx > 0) {
+						self.copyDesign();
+					}
+					
+					var curr_design = self.query.designs[idx + initial_idx];
+					UniprotService.updateFeature(curr_design.features[feature_idx], resp.data[0]);
+					search = false;
+				},
+				function(errResp) {
+					search = false;
+				});
+	}
 	
 	self.queryJson = angular.toJson({selected: self.selected(), query: self.query}, true);
 	
