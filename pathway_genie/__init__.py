@@ -117,7 +117,7 @@ def connect_ice():
         ice_client = _connect_ice(request)
 
         for typ in ['PART', 'PLASMID', 'STRAIN']:
-            resp = ice_client.advanced_search('*', typ, 2**32)
+            resp = ice_client.advanced_search('*', typ, 2**12)
             _ICE_IDS[typ] = [result['entryInfo']['partId']
                              for result in resp['results']]
 
