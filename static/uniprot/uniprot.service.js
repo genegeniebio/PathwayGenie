@@ -1,6 +1,25 @@
 uniprotApp.factory("UniprotService", ["$uibModal", function($uibModal) {
 	var obj = {};
 	
+	obj.updateFeature = function(feature, selected) {
+		feature.name = selected["Entry name"];
+		feature.temp_params.aa_seq = selected.Sequence;
+		feature.temp_params.orig_seq = selected.Sequence;
+		feature.desc = selected["Protein names"].join(", ") + " (" + selected["Organism"] + ")";
+		
+		feature.links = [
+	        "http://identifiers.org/uniprot/" + selected["Entry"]
+	    ]
+
+	    if(selected["EC number"]) {
+		    	ecNumbers = selected["EC number"].split("; ");
+		    	
+		    	for(var i = 0; i < ecNumbers.length; i++) {
+		    		feature.links.push("http://identifiers.org/ec-code/" + ecNumbers[i]);
+		    	}
+	    }
+	}
+	
 	obj.open = function(options, feature) {
 		var modalInstance = $uibModal.open({
 			animation: true,
@@ -23,22 +42,7 @@ uniprotApp.factory("UniprotService", ["$uibModal", function($uibModal) {
 		});
 
 		modalInstance.result.then(function(selected) {
-			feature.name = selected["Entry name"];
-			feature.temp_params.aa_seq = selected.Sequence;
-			feature.temp_params.orig_seq = selected.Sequence;
-			feature.desc = selected["Protein names"].join(", ") + " (" + selected["Organism"] + ")";
-			
-			feature.links = [
-		        "http://identifiers.org/uniprot/" + selected["Entry"]
-		    ]
-	
-		    if(selected["EC number"]) {
-			    	ecNumbers = selected["EC number"].split("; ");
-			    	
-			    	for(var i = 0; i < ecNumbers.length; i++) {
-			    		feature.links.push("http://identifiers.org/ec-code/" + ecNumbers[i]);
-			    	}
-		    }
+			obj.updateFeature(feature, selected);
 		});
 	};
 	
