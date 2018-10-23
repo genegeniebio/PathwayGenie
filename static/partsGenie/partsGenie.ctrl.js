@@ -327,4 +327,11 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	function(values) {
 		self.queryJson = angular.toJson({selected: self.selected(), query: self.query}, true);
 	}, true);
+	
+	$scope.$watch(function() {
+		return self.pagination;
+	},               
+	function(values) {
+		PartsGenieService.selected = null;
+	}, true);
 }]);
