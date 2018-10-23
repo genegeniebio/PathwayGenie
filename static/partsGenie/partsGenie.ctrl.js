@@ -1,4 +1,4 @@
-partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGenieService", "PathwayGenieService", "ProgressService", "ResultService", "UniprotService", function($scope, ErrorService, PartsGenieService, PathwayGenieService, ProgressService, ResultService, UniprotService) {
+partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "$uibModalInstance", "ErrorService", "PartsGenieService", "PathwayGenieService", "ProgressService", "ResultService", "UniprotService", function($scope, $uibModal, $uibModalInstance, ErrorService, PartsGenieService, PathwayGenieService, ProgressService, ResultService, UniprotService) {
 	var self = this;
 	var jobIds = [];
 	var jobId = null;
@@ -14,6 +14,9 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 	self.pagination = {
 			current: 1
 		};
+	
+	self.uniprotTerms = null;
+	feature_idx = -1;
 	
 	self.selectRestEnzs = function(selected) {
 		self.restrEnzs = remove(self.restrEnzs, selected);
@@ -192,12 +195,17 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		self.pagination.current = self.query.designs.length;
 	};
 	
-	self.bulkUniprot = function(feature_idx) {
-		var uniprotIds = ["HXK1_HUMAN", "HXK2_HUMAN"];
+	self.bulkUniprot = function(feat_idx) {
+		self.feature_idx = feat_idx;
 		
-		for(var i = 0; i < uniprotIds.length; i++) {
-			autoUniprot(uniprotIds[i], i, self.pagination.current - 1, feature_idx);
-		}
+		$uibModal.open({
+			animation: true,
+			ariaLabelledBy: 'modal-title',
+			ariaDescribedBy: 'modal-body',
+			templateUrl: '/static/uniprot/uniprot_terms.html',
+			controller: 'partsGenieCtrl',
+			controllerAs: 'ctrl',
+		});
 	}
 	
 	self.removeDesign = function() {
@@ -271,6 +279,22 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		return self.response.update;
 	};
 	
+	self.ok = function() {
+		var uniprotIds = self.uniprotTerms.split(/,?\s+/);
+		self.close();
+		
+		for(var i = 0; i < uniprotIds.length; i++) {
+			autoUniprot(uniprotIds[i], i, self.pagination.current - 1);
+		}
+		
+		feature_idx = -1;
+	};
+	
+	self.close = function() {
+		$uibModalInstance.close();
+		self.uniprotTerms = null;
+	};
+	
 	listen = function() {
 		if(jobIds.length == 0) {
 			return;
@@ -320,7 +344,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "ErrorService", "PartsGeni
 		return array;
 	};
 	
-	autoUniprot = function(uniprotId, idx, initial_idx, feature_idx) {
+	autoUniprot = function(uniprotId, idx, initial_idx) {
 		search = true;
 		
 		PartsGenieService.searchUniprot(uniprotId).then(

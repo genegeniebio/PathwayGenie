@@ -1,0 +1,25 @@
+<div>
+	<div class="modal-header">
+		<h4 class="modal-title">Bulk import Uniprot ids</h4>
+	</div>
+	<div class="modal-body">
+		<form class="form-horizontal" role="form">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">Uniprot ids</label>
+				<div class="col-sm-10">
+					<textarea
+						class="form-control"
+						rows="12"
+						placeholder="Uniprot ids"
+						data-ng-model="ctrl.uniprotTerms"></textarea>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-default"
+			data-ng-click="ctrl.close()">Cancel</button>
+		<button type="button" class="btn btn-primary"
+			data-ng-click="ctrl.ok()">OK</button>
+	</div>
+</div>
