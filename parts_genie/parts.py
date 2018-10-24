@@ -158,7 +158,7 @@ class PartsSolution(object):
     def __calc_num_local_gc_fixed(self, fixed_seqs):
         '''Calculate number of invalid sequences in fixed sequences.'''
         self.__dna['temp_params']['num_local_gc_fixed'] = \
-            _get_local_gc(fixed_seqs)
+            self.__get_local_gc(fixed_seqs)
 
     def __calc_num_repeats_fixed(self, fixed_seqs):
         '''Calculate number of repeats in fixed sequences.'''
@@ -272,7 +272,7 @@ class PartsSolution(object):
         dna['parameters']['Global GC'] = \
             _mean([_get_gc(seq) for seq in all_seqs])
 
-        dna['temp_params']['Local GC'] = _get_local_gc(all_seqs) - \
+        dna['temp_params']['Local GC'] = self.__get_local_gc(all_seqs) - \
             self.__dna['temp_params']['num_local_gc_fixed']
 
         dna['temp_params']['num_repeats'] = _get_repeats(all_seqs) - \
@@ -319,6 +319,21 @@ class PartsSolution(object):
                      rbs['parameters']['TIR target'] * cutoff]
 
         return tir_err, rogue_rbs
+
+    def __get_local_gc(self, seqs):
+        '''Get local GC score.'''
+        local_gc = 0
+
+        window_size = self.__filters['local_gc_window']
+
+        for seq in seqs:
+            for idx in range(len(seq) - window_size + 1):
+                if _get_delta_range(self.__filters['local_gc_min'],
+                                    self.__filters['local_gc_max'],
+                                    _get_gc(seq[idx:idx + window_size])):
+                    local_gc += 1
+
+        return local_gc
 
     def __repr__(self):
         # return '%r' % (self.__dict__)
@@ -371,19 +386,6 @@ def _get_delta_range(min_val, max_val, val):
 def _get_gc(seq):
     '''Get GC content.'''
     return (seq.count('G') + seq.count('C')) / float(len(seq))
-
-
-def _get_local_gc(seqs, window_size=50, min_val=0.15, max_val=0.8):
-    '''Get local GC score.'''
-    local_gc = 0
-
-    for seq in seqs:
-        for idx in range(len(seq) - window_size + 1):
-            if _get_delta_range(min_val, max_val,
-                                _get_gc(seq[idx:idx + window_size])):
-                local_gc += 1
-
-    return local_gc
 
 
 def _get_repeats(seqs, window_size=25):
