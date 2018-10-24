@@ -104,7 +104,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 		},
 		{
 			typ: "http://purl.obolibrary.org/obo/SO_0000139",
-			name:"Ribosome binding site",
+			name:"RBS",
 			end: 60,
 			parameters: {
 				"TIR target": 15000
@@ -120,7 +120,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 		},
 		{
 			typ: "http://purl.obolibrary.org/obo/SO_0000316",
-			name: "Coding sequence",
+			name: "CDS",
 			temp_params: {
 				fixed: false,
 				required: ["name", "prot"],
