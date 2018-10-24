@@ -18,8 +18,9 @@
 	</div>
 	<div class="modal-footer">
 		<button type="button" class="btn btn-default"
-			data-ng-click="ctrl.close()">Cancel</button>
+			data-ng-click="ctrl.cancel()">Cancel</button>
 		<button type="button" class="btn btn-primary"
-			data-ng-click="ctrl.ok()">OK</button>
+			data-ng-click="ctrl.ok()"
+			data-ng-disabled="ctrl.uniprotTerms == null">OK</button>
 	</div>
 </div>

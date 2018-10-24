@@ -15,10 +15,6 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 			current: 1
 		};
 	
-	self.uniprotTerms = null;
-	feature_idx = -1;
-	uniprotModal = null;
-	
 	self.selectRestEnzs = function(selected) {
 		self.restrEnzs = remove(self.restrEnzs, selected);
 		self.query.filters.restr_enzs.push.apply(self.query.filters.restr_enzs, selected);
@@ -198,22 +194,19 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 		return copiedDesign;
 	};
 	
-	self.bulkUniprot = function(feat_idx) {
-		feature_idx = feat_idx;
-		
-		var modalScope = $scope.$new();
-		
-		uniprotModal = $uibModal.open({
+	self.bulkUniprot = function(feature_idx) {
+		$uibModal.open({
 			animation: true,
 			ariaLabelledBy: 'modal-title',
 			ariaDescribedBy: 'modal-body',
-			templateUrl: '/static/uniprot/uniprot_terms.html',
-			controller: 'partsGenieCtrl',
+			templateUrl: '/static/uniprot/uniprotTerms.html',
+			controller: 'uniprotTermsCtrl',
 			controllerAs: 'ctrl',
-			scope: modalScope
-		});
-		
-		modalScope.uniprotModal = uniprotModal;
+		}).result.then(function(uniprotIds) {
+			for(var i = 0; i < uniprotIds.length; i++) {
+            	autoUniprot(uniprotIds[i], i, self.pagination.current - 1, feature_idx);
+            }
+        }); 
 	}
 	
 	self.removeDesign = function() {
@@ -287,21 +280,6 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 		return self.response.update;
 	};
 	
-	self.ok = function() {
-		var uniprotIds = self.uniprotTerms.split(/,?\s+/);
-		self.close();
-		
-		for(var i = 0; i < uniprotIds.length; i++) {
-			autoUniprot(uniprotIds[i], i, self.pagination.current - 1);
-		}
-	};
-	
-	self.close = function() {
-		$scope.uniprotModal.dismiss("cancel");
-		uniprotModal = null;
-		self.uniprotTerms = null;
-	};
-	
 	listen = function() {
 		if(jobIds.length == 0) {
 			return;
@@ -351,7 +329,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 		return array;
 	};
 	
-	autoUniprot = function(uniprotId, idx, initial_idx) {
+	autoUniprot = function(uniprotId, idx, initial_idx, feature_idx) {
 		search = true;
 		
 		PartsGenieService.searchUniprot(uniprotId).then(
