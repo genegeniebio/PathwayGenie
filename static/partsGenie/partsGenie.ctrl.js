@@ -195,6 +195,8 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 	};
 	
 	self.bulkUniprot = function(feature_idx) {
+		search = true;
+		
 		$uibModal.open({
 			animation: true,
 			ariaLabelledBy: 'modal-title',
@@ -206,6 +208,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 			for(var i = 0; i < uniprotIds.length; i++) {
             	autoUniprot(uniprotIds[i], i, self.pagination.current - 1, feature_idx);
             }
+			search = false;
         }); 
 	}
 	
