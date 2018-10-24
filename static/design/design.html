@@ -52,7 +52,7 @@
 						</div>
 						<div class="glyphicon glyphicon-copy pull-left glyphicon-grey glyphicon-small"
 							data-ng-click="bulkUniprot({args: $index})"
-							data-ng-if="feature.typ == 'http://purl.obolibrary.org/obo/SO_0000316'">
+							data-ng-if="feature.typ == 'http://purl.obolibrary.org/obo/SO_0000316' && !feature.temp_params.fixed">
 						</div>
 					</div>
 				</div>
