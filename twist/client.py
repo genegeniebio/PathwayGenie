@@ -8,6 +8,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=too-many-arguments
+# pylint: disable=too-many-locals
 import random
 import sys
 import time
@@ -68,7 +69,7 @@ class TwistClient(object):
 
     def get_vectors(self):
         '''Get vectors.'''
-        return self.get_user_data()['vectors']
+        return self.get_user_data().get('vectors', [])
 
     def submit_constructs(self, sequences, names, typ='NON_CLONED_GENE'):
         '''Submit constructs.'''
@@ -102,6 +103,7 @@ class TwistClient(object):
         return resp
 
     def get_quote(self, construct_ids, external_id, address_id,
+                  first_name, last_name,
                   typ='96_WELL_PLATE', fill_method='VERTICAL',
                   shipment_method='MULTIPLE_SHIPMENTS',
                   vectors=None, cloning_strategies=None):
@@ -113,6 +115,8 @@ class TwistClient(object):
                     'type': typ,
                     'fill_method': fill_method}],
                 'shipment': {'recipient_address_id': address_id,
+                             'first_name': first_name,
+                             'last_name': last_name,
                              'preferences': {
                                  'shipment_method': shipment_method}},
                 'vectors': vectors or [],
@@ -239,7 +243,9 @@ def main(args):
 
     quote_id = client.get_quote(ids,
                                 external_id=str(uuid.uuid4()),
-                                address_id=addresses[0]['id'])
+                                address_id=addresses[0]['id'],
+                                first_name=args[2],
+                                last_name=args[3])
 
     print 'Quote\t' + str(client.check_quote(quote_id))
 
