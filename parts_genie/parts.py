@@ -89,6 +89,10 @@ class PartsSolution(object):
                                     'Local GC',
                                     self.__dna['temp_params']['Local GC'],
                                     0, 10, 0, 0.5))),
+                    dict(zip(keys, ('gc_var',
+                                    'GC variance',
+                                    self.__dna['temp_params']['GC variance'],
+                                    0, 10, 0, 0.5))),
                     dict(zip(keys, ('repeats',
                                     'Repeats',
                                     self.__dna['temp_params']['num_repeats'],
@@ -268,12 +272,14 @@ class PartsSolution(object):
                  for seq in all_seqs]) - \
             dna['temp_params']['num_inv_seq_fixed']
 
-        # Calculate global GC content:
+        # Calculate GC content:
         dna['parameters']['Global GC'] = \
             _mean([_get_gc(seq) for seq in all_seqs])
 
         dna['temp_params']['Local GC'] = self.__get_local_gc(all_seqs) - \
             self.__dna['temp_params']['num_local_gc_fixed']
+
+        dna['temp_params']['GC variance'] = _get_gc_var(all_seqs)
 
         dna['temp_params']['num_repeats'] = _get_repeats(all_seqs) - \
             self.__dna['temp_params']['num_repeats_fixed']
@@ -285,6 +291,7 @@ class PartsSolution(object):
                              self.__filters['gc_max'],
                              dna['parameters']['Global GC']) * 100 + \
             dna['temp_params']['Local GC'] + \
+            dna['temp_params']['GC variance'] + \
             dna['temp_params']['num_repeats']
 
         return self.get_energy(dna)
@@ -322,18 +329,21 @@ class PartsSolution(object):
 
     def __get_local_gc(self, seqs):
         '''Get local GC score.'''
-        local_gc = 0
+        local_gc_count = 0
 
         window_size = self.__filters['local_gc_window']
 
         for seq in seqs:
-            for idx in range(len(seq) - window_size + 1):
+            local_gcs = [_get_gc(seq[idx:idx + window_size])
+                         for idx in range(len(seq) - window_size + 1)]
+
+            for local_gc in local_gcs:
                 if _get_delta_range(self.__filters['local_gc_min'],
                                     self.__filters['local_gc_max'],
-                                    _get_gc(seq[idx:idx + window_size])):
-                    local_gc += 1
+                                    local_gc):
+                    local_gc_count += 1
 
-        return local_gc
+        return local_gc_count
 
     def __repr__(self):
         # return '%r' % (self.__dict__)
@@ -351,6 +361,7 @@ class PartsSolution(object):
                           str(self.__dna['temp_params']['num_inv_seq']),
                           str(self.__dna['temp_params']['num_rogue_rbs']),
                           str(self.__dna['temp_params']['Local GC']),
+                          str(self.__dna['temp_params']['GC variance']),
                           str(self.__dna['temp_params']['num_repeats'])])
 
     def __print__(self):
@@ -386,6 +397,20 @@ def _get_delta_range(min_val, max_val, val):
 def _get_gc(seq):
     '''Get GC content.'''
     return (seq.count('G') + seq.count('C')) / float(len(seq))
+
+
+def _get_gc_var(seqs, window_size=50, tol=0.52):
+    '''Get local GC variance.'''
+    local_gc_var = 0
+
+    for seq in seqs:
+        local_gcs = sorted([_get_gc(seq[idx:idx + window_size])
+                            for idx in range(len(seq) - window_size + 1)])
+
+        if local_gcs[-1] - local_gcs[0] > tol:
+            local_gc_var += 1
+
+    return local_gc_var
 
 
 def _get_repeats(seqs, window_size=25):
