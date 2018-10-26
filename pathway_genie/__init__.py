@@ -42,8 +42,6 @@ APP.config.from_object(__name__)
 _MANAGER = pathway.PathwayGenie()
 _ORGANISMS = seq_utils.get_codon_usage_organisms(expand=True, verbose=True)
 
-_ICE_IDS = defaultdict(list)
-
 
 @APP.route('/')
 def home():
@@ -83,7 +81,8 @@ def get_groups():
     ice_client = _connect_ice(request)
     data = json.loads(request.data)
     return json.dumps([group['label']
-                       for group in ice_client.search_groups(data['term'])])
+                       for group in ice_client.search_groups(data['term'])
+                       if data['term'] in group['label']])
 
 
 @APP.route('/organisms/', methods=['POST'])
@@ -114,17 +113,7 @@ def get_restr_enzymes():
 def connect_ice():
     '''Connects to ICE.'''
     try:
-        ice_client = _connect_ice(request)
-
-        print 'CONNECTED'
-
-        for typ in ['PART', 'STRAIN']:
-            resp = ice_client.advanced_search('*', typ, 2**12)
-            _ICE_IDS[typ] = [result['entryInfo']['partId']
-                             for result in resp['results']]
-
-            print typ
-
+        _connect_ice(request)
         return json.dumps({'connected': True})
     except ConnectionError, err:
         print str(err)
@@ -144,10 +133,12 @@ def connect_ice():
 def search_ice():
     '''Search ICE.'''
     try:
+        ice_client = _connect_ice(request)
         data = json.loads(request.data)
-        return json.dumps([ice_id
-                           for ice_id in _ICE_IDS[data['type']]
-                           if data['term'] in ice_id])
+        resp = ice_client.advanced_search(data['term'], data['type'], 16)
+        return json.dumps([result['entryInfo']['partId']
+                           for result in resp['results']
+                           if data['term'] in result['entryInfo']['partId']])
     except ConnectionError, err:
         print str(err)
         message = 'Unable to connect. Is the URL correct?'

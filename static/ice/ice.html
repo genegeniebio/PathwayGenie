@@ -67,7 +67,7 @@
 					data-ng-disabled="ctrl.status() != 'CONNECTED'"
 					placeholder="Assign Part to Vector backbone" autocomplete="off"
 					uib-typeahead="backbone for backbone in ctrl.searchIce('PART', $viewValue)"
-					typeahead-min-length="3" typeahead-editable="false">
+					typeahead-min-length="5" typeahead-editable="false">
 				</div>
 			</div>
 			<div class="form-group">
@@ -78,7 +78,7 @@
 					data-ng-disabled="ctrl.status() != 'CONNECTED'"
 					placeholder="Assign Plasmid to Strain" autocomplete="off"
 					uib-typeahead="strain for strain in ctrl.searchIce('STRAIN', $viewValue)"
-					typeahead-min-length="3" typeahead-editable="false">
+					typeahead-min-length="5" typeahead-editable="false">
 				</div>
 			</div>
   		</div>
