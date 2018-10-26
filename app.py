@@ -9,15 +9,16 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import sys
 
-from gevent import wsgi
 from pathway_genie import APP
 
 
 def main(argv):
     '''main method.'''
-    port = int(argv[0]) if argv else 5000
-    http_server = wsgi.WSGIServer(('', port), APP)
-    http_server.serve_forever()
+    if argv:
+        APP.run(host='0.0.0.0', threaded=True, port=int(argv[0]),
+                use_reloader=False)
+    else:
+        APP.run(host='0.0.0.0', threaded=True, use_reloader=False)
 
 
 if __name__ == '__main__':
