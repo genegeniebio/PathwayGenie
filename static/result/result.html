@@ -4,7 +4,7 @@
   		Results
   		<button type="submit" class="pull-right btn btn-default btn-xs"
 			data-ng-click="exportOrder()"
-			data-ng-disabled="!resultsSaved()">Export</button>
+			data-ng-disabled="!connected() || !resultsSaved()">Export</button>
 		<button type="submit" class="pull-right btn btn-default btn-xs"
 			data-ng-click="saveResults()"
 			data-ng-disabled="!connected()">Save</button>

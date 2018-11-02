@@ -23,7 +23,7 @@ resultApp.factory("ResultService", ["$http", "$rootScope", "$window", "ICEServic
 	};
 	
 	obj.exportOrder = function() {
-		$http.post("/export", {"designs": obj.results}).then(
+		$http.post("/export", {"designs": obj.results, "ice": ICEService.ice}).then(
 				function(resp) {
 					var newWindow = $window.open();
 					newWindow.location = resp.data.path;

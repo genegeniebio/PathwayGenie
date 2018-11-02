@@ -27,7 +27,7 @@ from synbiochem.utils.net_utils import NetworkError
 
 import pandas as pd
 from parts_genie import parts
-from pathway_genie import pathway
+from pathway_genie import export, pathway
 
 
 # Configuration:
@@ -165,20 +165,9 @@ def search_uniprot(query):
 @APP.route('/export', methods=['POST'])
 def export_order():
     '''Export order.'''
-    # Form DataFrame from results object:
-
-    # TODO: recursively extract children:
-    df = pd.DataFrame(json.loads(request.data)['designs'])
-    df.rename(columns={'name': 'Name',
-                       'seq': 'Sequence',
-                       'desc': 'Description'}, inplace=True)
-
-    # Get ICE ids:
-    df['Part ID'] = df['links'].apply(lambda link: _get_ice_id(link, 0))
-    df['Cloned ICE ID'] = df['links'].apply(lambda link: _get_ice_id(link, 1))
-
-    # Return selected columns:
-    df = df[['Part ID', 'Cloned ICE ID', 'Name', 'Sequence', 'Description']]
+    ice_client = _connect_ice(request)
+    data = json.loads(request.data)['designs']
+    df = export.export(ice_client, data)
 
     return _save_export(df, str(uuid.uuid4()).replace('-', '_'))
 
@@ -201,14 +190,6 @@ def _connect_ice(req):
     return ICEClient(data['ice']['url'],
                      data['ice']['username'],
                      data['ice']['password'])
-
-
-def _get_ice_id(link, idx):
-    '''Get ICE id.'''
-    if idx < len(link):
-        return get_ice_id(link[idx].split('/')[-1])
-
-    return None
 
 
 def _save_export(df, file_id):
