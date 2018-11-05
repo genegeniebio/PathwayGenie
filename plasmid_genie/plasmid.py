@@ -126,8 +126,9 @@ class PlasmidThread(PathwayThread):
                                               forward,
                                               reag_concs)
 
-        dna = dna_utils.DNA(name=comp['name'],
-                            desc=comp['desc'],
+        # Flip name and description for Dominoes:
+        dna = dna_utils.DNA(name=comp['desc'],
+                            desc=comp['name'],
                             seq=seq,
                             typ=dna_utils.SO_ASS_COMP,
                             forward=True)
