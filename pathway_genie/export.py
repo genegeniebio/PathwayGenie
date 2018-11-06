@@ -48,14 +48,16 @@ def _export_dominoes(ice_client, data):
         entry['ice_ids']['plasmid']['ice_id']).get_metadata()['linkedParts']
         for entry in data]
 
-    parts = [[part['partId'],
-              ice_client.get_ice_entry(part['partId']).get_seq(),
-              part['name'], part['shortDescription']]
-             for parts in all_parts
-             for part in parts]
+    parts = list(set([tuple([part['partId'], part['name'],
+                             part['shortDescription']] +
+                            _get_ice_data(ice_client, part['partId']))
+                      for parts in all_parts
+                      for part in parts]))
 
-    return pd.DataFrame(parts, columns=['Part ID', 'Sequence', 'Name',
-                                        'Description'])
+    df = pd.DataFrame(parts, columns=['Part ID', 'Name', 'Description',
+                                      'Sequence', 'Type'])
+
+    return df.sort_values(by=['Type', 'Part ID'])
 
 
 def _get_ice_id(link, idx):
@@ -64,3 +66,22 @@ def _get_ice_id(link, idx):
         return get_ice_id(link[idx].split('/')[-1])
 
     return None
+
+
+def _get_ice_data(ice_client, ice_id):
+    '''Get ICE data.'''
+    ice_entry = ice_client.get_ice_entry(ice_id)
+
+    metadata = ice_entry.get_metadata()
+
+    typ = None
+
+    if 'parameters' in metadata:
+        types = [parameter['value']
+                 for parameter in metadata['parameters']
+                 if parameter['name'] == 'Type']
+
+        if types:
+            typ = types[0]
+
+    return [ice_entry.get_seq(), typ]
