@@ -21,8 +21,8 @@ class ProssOptimiser(object):
     def __init__(self, ice_parms, taxonomy_id,
                  group_names=None):
         self.__ice_client = \
-            ice_utils.ICEClient(ice_parms[0], ice_parms[1], ice_parms[2],
-                                group_names=group_names)
+            ice_utils.get_ice_client(ice_parms[0], ice_parms[1], ice_parms[2],
+                                     group_names=group_names)
 
         self.__cod_opt = seq_utils.CodonOptimiser(taxonomy_id)
 

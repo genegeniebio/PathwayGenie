@@ -22,7 +22,8 @@ from Bio import Restriction
 from flask import Flask, jsonify, make_response, request, Response
 from requests.exceptions import ConnectionError
 from synbiochem.utils import seq_utils
-from synbiochem.utils.ice_utils import ICEClient, get_ice_id, get_ice_number
+from synbiochem.utils.ice_utils import get_ice_client, get_ice_id, \
+    get_ice_number
 from synbiochem.utils.net_utils import NetworkError
 
 import pandas as pd
@@ -187,9 +188,9 @@ def _connect_ice(req):
     '''Connects to ICE.'''
     data = json.loads(req.data)
 
-    return ICEClient(data['ice']['url'],
-                     data['ice']['username'],
-                     data['ice']['password'])
+    return get_ice_client(data['ice']['url'],
+                          data['ice']['username'],
+                          data['ice']['password'])
 
 
 def _save_export(df, file_id):

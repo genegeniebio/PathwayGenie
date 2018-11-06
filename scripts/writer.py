@@ -22,7 +22,7 @@ def write(in_filename, out_filename,
           typ, comp_columns, group_name, write_seq=False):
     '''Write.'''
     df = pd.read_csv(in_filename)
-    ice_client = ice_utils.ICEClient(ice_url, ice_username, ice_password)
+    ice_client = ice_utils.get_ice_client(ice_url, ice_username, ice_password)
     output = []
 
     for _, row in df.iterrows():

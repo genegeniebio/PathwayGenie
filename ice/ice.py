@@ -9,7 +9,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 # pylint: disable=too-many-arguments
 from synbiochem.utils import dna_utils
-from synbiochem.utils.ice_utils import DNAWriter, ICEClient, ICEEntry
+from synbiochem.utils.ice_utils import DNAWriter, get_ice_client, ICEEntry
 from synbiochem.utils.net_utils import NetworkError
 
 from pathway_genie.utils import PathwayThread
@@ -24,10 +24,10 @@ class IceThread(PathwayThread):
         group_name = self._query['ice'].get('groups', None)
         self.__group_names = [group_name] if group_name else []
 
-        self.__ice_client = ICEClient(query['ice']['url'],
-                                      query['ice']['username'],
-                                      query['ice']['password'],
-                                      group_names=self.__group_names)
+        self.__ice_client = get_ice_client(query['ice']['url'],
+                                           query['ice']['username'],
+                                           query['ice']['password'],
+                                           group_names=self.__group_names)
 
         self.__dna_writer = DNAWriter(self.__ice_client)
 

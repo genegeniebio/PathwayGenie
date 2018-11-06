@@ -22,7 +22,7 @@ class PlasmidThread(PathwayThread):
     def __init__(self, query):
         PathwayThread.__init__(self, query)
 
-        self.__ice_client = ice_utils.ICEClient(
+        self.__ice_client = ice_utils.get_ice_client(
             query['ice']['url'],
             query['ice']['username'],
             query['ice']['password'],
