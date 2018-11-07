@@ -10,7 +10,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=wrong-import-order
 from __future__ import division
 
-from synbiochem.utils import dna_utils, ice_utils, pairwise, seq_utils
+from synbiochem.utils import dna_utils, pairwise, seq_utils
 from synbiochem.utils.seq_utils import get_seq_by_melt_temp
 
 from pathway_genie.utils import PathwayThread
@@ -19,10 +19,10 @@ from pathway_genie.utils import PathwayThread
 class PlasmidThread(PathwayThread):
     '''Runs a PlasmidGenie job.'''
 
-    def __init__(self, query):
+    def __init__(self, query, ice_client_factory):
         PathwayThread.__init__(self, query)
 
-        self.__ice_client = ice_utils.get_ice_client(
+        self.__ice_client = ice_client_factory.get_ice_client(
             query['ice']['url'],
             query['ice']['username'],
             query['ice']['password'],

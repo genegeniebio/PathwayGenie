@@ -11,7 +11,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-locals
 # pylint: disable=wrong-import-order
-from synbiochem.utils import ice_utils
+from synbiochem.utils.ice_utils import ICEClientFactory
 
 from ice.ice import write_ice_entry
 import pandas as pd
@@ -22,7 +22,10 @@ def write(in_filename, out_filename,
           typ, comp_columns, group_name, write_seq=False):
     '''Write.'''
     df = pd.read_csv(in_filename)
-    ice_client = ice_utils.get_ice_client(ice_url, ice_username, ice_password)
+
+    ice_client_factory = ICEClientFactory()
+    ice_client = ice_client_factory.get_ice_client(ice_url, ice_username,
+                                                   ice_password)
     output = []
 
     for _, row in df.iterrows():
@@ -39,3 +42,4 @@ def write(in_filename, out_filename,
     df = df.join(pd.DataFrame(output, index=df.index))
 
     df.to_csv(out_filename, index=False)
+    ice_client_factory.close()

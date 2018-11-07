@@ -22,7 +22,7 @@ from Bio import Restriction
 from flask import Flask, jsonify, make_response, request, Response
 from requests.exceptions import ConnectionError
 from synbiochem.utils import seq_utils
-from synbiochem.utils.ice_utils import get_ice_client, get_ice_id, \
+from synbiochem.utils.ice_utils import ICEClientFactory, get_ice_id, \
     get_ice_number
 from synbiochem.utils.net_utils import NetworkError
 
@@ -40,7 +40,8 @@ _STATIC_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)),
 APP = Flask(__name__, static_folder=_STATIC_FOLDER)
 APP.config.from_object(__name__)
 
-_MANAGER = pathway.PathwayGenie()
+_ICE_CLIENT_FACTORY = ICEClientFactory()
+_MANAGER = pathway.PathwayGenie(_ICE_CLIENT_FACTORY)
 _ORGANISMS = seq_utils.get_codon_usage_organisms(expand=True, verbose=True)
 
 
@@ -188,9 +189,9 @@ def _connect_ice(req):
     '''Connects to ICE.'''
     data = json.loads(req.data)
 
-    return get_ice_client(data['ice']['url'],
-                          data['ice']['username'],
-                          data['ice']['password'])
+    return _ICE_CLIENT_FACTORY.get_ice_client(data['ice']['url'],
+                                              data['ice']['username'],
+                                              data['ice']['password'])
 
 
 def _save_export(df, file_id):

@@ -13,6 +13,7 @@ import sys
 from Bio.Alphabet import generic_dna
 from Bio.Seq import Seq
 from synbiochem.utils import dna_utils, ice_utils, seq_utils
+from synbiochem.utils.ice_utils import ICEClientFactory
 
 
 class ProssOptimiser(object):
@@ -20,11 +21,18 @@ class ProssOptimiser(object):
 
     def __init__(self, ice_parms, taxonomy_id,
                  group_names=None):
+        self.__ice_client_factory = ICEClientFactory()
         self.__ice_client = \
-            ice_utils.get_ice_client(ice_parms[0], ice_parms[1], ice_parms[2],
-                                     group_names=group_names)
+            self.__ice_client_factory.get_ice_client(ice_parms[0],
+                                                     ice_parms[1],
+                                                     ice_parms[2],
+                                                     group_names=group_names)
 
         self.__cod_opt = seq_utils.CodonOptimiser(taxonomy_id)
+
+    def close(self):
+        '''Close.'''
+        self.__ice_client_factory.close()
 
     def generate_variants(self, template_ice_id, variants_aas):
         '''Generate variants.'''
@@ -91,6 +99,7 @@ def main(args):
     '''main method.'''
     optimiser = ProssOptimiser([args[0], args[1], args[2]], args[4], args[6:])
     optimiser.generate_variants(args[3], seq_utils.read_fasta(args[5]))
+    optimiser.close()
 
 
 if __name__ == '__main__':

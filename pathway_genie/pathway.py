@@ -20,7 +20,8 @@ from plasmid_genie.plasmid import PlasmidThread
 class PathwayGenie(object):
     '''Class to run PathwayGenie application.'''
 
-    def __init__(self):
+    def __init__(self, ice_client_factory):
+        self.__ice_client_factory = ice_client_factory
         self.__status = {}
         self.__threads = {}
         self.__writers = {}
@@ -31,7 +32,7 @@ class PathwayGenie(object):
 
         # Do job in new thread, return result when completed:
         job_ids = []
-        threads = _get_threads(query)
+        threads = self.__get_threads(query)
 
         for thread in threads:
             job_id = thread.get_job_id()
@@ -73,6 +74,20 @@ class PathwayGenie(object):
         '''Returns current progress for job id.'''
         return json.dumps(self.__status[job_id])
 
+    def __get_threads(self, query):
+        '''Get threads.'''
+        app = query.get('app', 'undefined')
+
+        if app == 'PartsGenie':
+            return [PartsThread(query, idx)
+                    for idx in range(len(query['designs']))]
+        elif app == 'PlasmidGenie':
+            return [PlasmidThread(query, self.__ice_client_factory)]
+        elif app == 'save':
+            return [ice.ice.IceThread(query, self.__ice_client_factory)]
+
+        raise ValueError('Unknown app: ' + app)
+
 
 class ThreadPool(Thread):
     '''Basic class to run job Threads sequentially.'''
@@ -85,17 +100,3 @@ class ThreadPool(Thread):
         for thread in self.__threads:
             thread.start()
             thread.join()
-
-
-def _get_threads(query):
-    app = query.get('app', 'undefined')
-
-    if app == 'PartsGenie':
-        return [PartsThread(query, idx)
-                for idx in range(len(query['designs']))]
-    elif app == 'PlasmidGenie':
-        return [PlasmidThread(query)]
-    elif app == 'save':
-        return [ice.ice.IceThread(query)]
-
-    raise ValueError('Unknown app: ' + app)
