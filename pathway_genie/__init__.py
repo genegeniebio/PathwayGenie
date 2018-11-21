@@ -30,7 +30,6 @@ import pandas as pd
 from parts_genie import parts
 from pathway_genie import export, pathway
 
-
 # Configuration:
 SECRET_KEY = str(uuid.uuid4())
 
@@ -39,10 +38,14 @@ _STATIC_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                               '../static')
 APP = Flask(__name__, static_folder=_STATIC_FOLDER)
 APP.config.from_object(__name__)
+APP.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 128
 
 _ICE_CLIENT_FACTORY = ICEClientFactory()
 _MANAGER = pathway.PathwayGenie(_ICE_CLIENT_FACTORY)
 _ORGANISMS = seq_utils.get_codon_usage_organisms(expand=True, verbose=True)
+
+DEBUG = False
+TESTING = False
 
 
 @APP.route('/')
