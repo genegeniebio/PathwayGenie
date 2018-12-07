@@ -38,7 +38,7 @@ _STATIC_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                               '../static')
 APP = Flask(__name__, static_folder=_STATIC_FOLDER)
 APP.config.from_object(__name__)
-APP.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 128
+APP.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024
 
 _ICE_CLIENT_FACTORY = ICEClientFactory()
 _MANAGER = pathway.PathwayGenie(_ICE_CLIENT_FACTORY)
