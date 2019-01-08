@@ -48,11 +48,11 @@ def _export_dominoes(ice_client, data):
         entry['ice_ids']['plasmid']['ice_id']).get_metadata()['linkedParts']
         for entry in data]
 
-    parts = list(set([tuple([part['partId'], part['name'],
-                             part['shortDescription']] +
-                            _get_ice_data(ice_client, part['partId']))
-                      for parts in all_parts
-                      for part in parts]))
+    part_data = set([(part['partId'], part['name'], part['shortDescription'])
+                     for parts in all_parts for part in parts])
+
+    parts = [list(part) + _get_ice_data(ice_client, part[0])
+             for part in part_data]
 
     df = pd.DataFrame(parts, columns=['Part ID', 'Name', 'Description',
                                       'Sequence', 'Type'])
