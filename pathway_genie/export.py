@@ -39,11 +39,16 @@ def _export_parts(data):
     df['Cloned ICE ID'] = df['links'].apply(lambda link: _get_ice_id(link, 1))
 
     # Return selected columns:
-    return df[['Part ID', 'Cloned ICE ID', 'Name', 'Sequence', 'Description']]
+    df = df[['Part ID', 'Cloned ICE ID', 'Name', 'Sequence', 'Description']]
+    df.name = 'parts'
+    return [df]
 
 
 def _export_dominoes(ice_client, data):
     '''Export dominoes.'''
+    design_id = '_'.join(list(set([plasmid['parameters']['Design id']
+                                   for plasmid in data])))
+
     all_parts = [ice_client.get_ice_entry(
         entry['ice_ids']['plasmid']['ice_id']).get_metadata()['linkedParts']
         for entry in data]
@@ -54,10 +59,20 @@ def _export_dominoes(ice_client, data):
     parts = [list(part) + _get_ice_data(ice_client, part[0])
              for part in part_data]
 
-    df = pd.DataFrame(parts, columns=['Part ID', 'Name', 'Description',
-                                      'Sequence', 'Type'])
+    dominoes_df = pd.DataFrame(parts, columns=['Part ID', 'Name',
+                                               'Description', 'Sequence',
+                                               'Type'])
 
-    return df.sort_values(by=['Type', 'Part ID'])
+    dominoes_df = dominoes_df.sort_values(by=['Type', 'Part ID'])
+    dominoes_df.name = design_id + '_export'
+
+    mapping_df = pd.DataFrame([[plasmid['name'],
+                                plasmid['ice_ids']['part']['ice_id']]
+                               for plasmid in data], columns=['Name', 'ICE'])
+
+    mapping_df.name = design_id + '_export_mapping'
+
+    return [dominoes_df, mapping_df]
 
 
 def _get_ice_id(link, idx):

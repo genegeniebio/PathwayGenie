@@ -11,15 +11,18 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=no-member
 # pylint: disable=wrong-import-order
 from collections import defaultdict
+from io import BytesIO
 import json
 import os
 import sys
+import tempfile
 import traceback
 import urllib2
 import uuid
+import zipfile
 
 from Bio import Restriction
-from flask import Flask, jsonify, make_response, request, Response
+from flask import Flask, jsonify, make_response, request, Response, send_file
 from requests.exceptions import ConnectionError
 from synbiochem.utils import seq_utils
 from synbiochem.utils.ice_utils import ICEClientFactory, get_ice_id, \
@@ -29,6 +32,7 @@ from synbiochem.utils.net_utils import NetworkError
 import pandas as pd
 from parts_genie import parts
 from pathway_genie import export, pathway
+
 
 # Configuration:
 SECRET_KEY = str(uuid.uuid4())
@@ -172,9 +176,9 @@ def export_order():
     '''Export order.'''
     ice_client = _connect_ice(request)
     data = json.loads(request.data)['designs']
-    df = export.export(ice_client, data)
+    dfs = export.export(ice_client, data)
 
-    return _save_export(df, str(uuid.uuid4()).replace('-', '_'))
+    return _save_export(dfs)
 
 
 @APP.errorhandler(Exception)
@@ -197,14 +201,22 @@ def _connect_ice(req):
                                               data['ice']['password'])
 
 
-def _save_export(df, file_id):
+def _save_export(dfs):
     '''Save export file, returning the url.'''
-    dir_name = os.path.join(_STATIC_FOLDER, 'export')
+    file_id = str(uuid.uuid4()).replace('-', '_')
+    dir_name = os.path.join(os.path.join(_STATIC_FOLDER, 'export'), file_id)
 
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    filename = file_id + '.csv'
-    df.to_csv(os.path.join(dir_name, filename), index=False)
+    for df in dfs:
+        df.to_csv(os.path.join(dir_name, df.name + '.csv'), index=False)
 
-    return json.dumps({'path': 'export/' + filename})
+    zip_file = os.path.join(dir_name + '.zip')
+
+    with zipfile.ZipFile(zip_file, 'w') as zf:
+        for dirpath, _, filenames in os.walk(dir_name):
+            for filename in filenames:
+                zf.write(os.path.join(dirpath, filename), filename)
+
+    return json.dumps({'path': 'export/' + file_id + '.zip'})
