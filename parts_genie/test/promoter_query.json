@@ -1,76 +1,89 @@
 {
-   "app":"PartsGenie",
-   "designs":[
-      {
-        "name":"MmP1-low",
-        "desc":"MmP1-low",
-        "features":[
-           {
-              "typ":"http://purl.obolibrary.org/obo/SO_0001416",
-              "seq":"gaattcaaaagatctgagtcTTGTA",
-              "name":"5' flanking region",
-              "temp_params":{
-                 "fixed":true
-              }
-           },
-           {
-              "typ":"http://purl.obolibrary.org/obo/SO_0000143",
-              "name":"assembly component",
-              "seq":"cgagtatggctgaaataacagccgtctagc",
-              "temp_params":{
-                 "fixed":true
-              }
-           },
-           {
-              "typ":"http://purl.obolibrary.org/obo/SO_0000141",
-              "seq":"aaaaaaaaccccgccctgtcaggggcggggtttttttt",
-              "name":"terminator",
-              "temp_params":{
-                 "fixed":true
-              }
-           },
-           {
-              "typ":"http://purl.obolibrary.org/obo/SO_0000449",
-              "end":300,
-              "name":"random region",
-              "temp_params":{
-                 "fixed":false
-              }
-           },
-           {
-              "typ":"http://purl.obolibrary.org/obo/SO_0000167",
-              "seq":"AtatttgtggcatacttgaattgtgagcgctcacaattAgctgtcaccggatgtgctttccggtctgatgagtccgtgaggacgaaacag",
-              "name":"promoter",
-              "temp_params":{
-                 "fixed":true
-              }
-           },
-           {
-              "typ":"http://purl.obolibrary.org/obo/SO_0000143",
-              "name":"assembly component",
-              "seq":"aacgcatgtacaggattcagttgattggttc",
-              "temp_params":{
-                 "fixed":true
-              }
-           },
-           {
-              "typ":"http://purl.obolibrary.org/obo/SO_0001417",
-              "seq":"TTGTAgactcggatccaaactcgag",
-              "name":"3' flanking region",
-              "temp_params":{
-                 "fixed":true
-              }
-           }
-        ]
-     }
-   ],
-   "filters":{
-      "max_repeats":5,
-      "restr_enzs":["AarI", "BamHI", "BglII", "BsaI", "EcoRI", "MlyI", "XhoI"]
-   },
-   "organism":{
-      "taxonomy_id":"405955",
-      "r_rna":"ACCTCCTTA",
-      "name":"Escherichia coli APEC O1"
-   }
+	"app": "PartsGenie",
+	"designs": [
+		{
+			"name": "MmP1-low",
+			"desc": "MmP1-low",
+			"features": [
+				{
+					"typ": "http://purl.obolibrary.org/obo/SO_0001416",
+					"seq": "gaattcaaaagatctgagtcTTGTA",
+					"name": "5' flanking region",
+					"temp_params": {
+						"fixed": true
+					}
+				},
+				{
+					"typ": "http://purl.obolibrary.org/obo/SO_0000143",
+					"name": "assembly component",
+					"seq": "cgagtatggctgaaataacagccgtctagc",
+					"temp_params": {
+						"fixed": true
+					}
+				},
+				{
+					"typ": "http://purl.obolibrary.org/obo/SO_0000141",
+					"seq": "aaaaaaaaccccgccctgtcaggggcggggtttttttt",
+					"name": "terminator",
+					"temp_params": {
+						"fixed": true
+					}
+				},
+				{
+					"typ": "http://purl.obolibrary.org/obo/SO_0000449",
+					"end": 300,
+					"name": "random region",
+					"temp_params": {
+						"fixed": false
+					}
+				},
+				{
+					"typ": "http://purl.obolibrary.org/obo/SO_0000167",
+					"seq": "AtatttgtggcatacttgaattgtgagcgctcacaattAgctgtcaccggatgtgctttccggtctgatgagtccgtgaggacgaaacag",
+					"name": "promoter",
+					"temp_params": {
+						"fixed": true
+					}
+				},
+				{
+					"typ": "http://purl.obolibrary.org/obo/SO_0000143",
+					"name": "assembly component",
+					"seq": "aacgcatgtacaggattcagttgattggttc",
+					"temp_params": {
+						"fixed": true
+					}
+				},
+				{
+					"typ": "http://purl.obolibrary.org/obo/SO_0001417",
+					"seq": "TTGTAgactcggatccaaactcgag",
+					"name": "3' flanking region",
+					"temp_params": {
+						"fixed": true
+					}
+				}
+			]
+		}
+	],
+	"filters": {
+		"max_repeats": 5,
+		"restr_enzs": [
+			"AarI",
+			"BamHI",
+			"BglII",
+			"BsaI",
+			"EcoRI",
+			"MlyI",
+			"XhoI"
+		],
+		"gc_min": 0.25,
+		"gc_max": 0.65,
+		"local_gc_window": 50,
+		"local_gc_min": 0.15,
+		"local_gc_max": 0.8
+	},
+	"organism": {
+		"taxonomy_id": "405955",
+		"r_rna": "ACCTCCTTA",
+		"name": "Escherichia coli APEC O1"
+	}
 }

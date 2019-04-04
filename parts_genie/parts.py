@@ -21,7 +21,7 @@ from parts_genie import rbs_calculator as rbs_calc
 from parts_genie import vienna_utils as calc
 
 
-class PartsSolution(object):
+class PartsSolution():
     '''Solution for RBS optimisation.'''
 
     def __init__(self, dna, organism, filters):
@@ -105,7 +105,7 @@ class PartsSolution(object):
         dnas = dna_utils.expand(self.__dna)
 
         import json
-        print json.dumps(dnas, indent=2)
+        print(json.dumps(dnas, indent=2))
 
         return dnas
 
@@ -321,7 +321,7 @@ class PartsSolution(object):
         # Get rogue RBS sites:
         cutoff = 0.1
         rogue_rbs = [(pos, terms)
-                     for pos, terms in tir_vals.iteritems()
+                     for pos, terms in tir_vals.items()
                      if pos != rbs['end'] and terms[1] >
                      rbs['parameters']['TIR target'] * cutoff]
 

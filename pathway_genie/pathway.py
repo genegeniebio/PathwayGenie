@@ -17,7 +17,7 @@ from plasmid_genie.plasmid import PlasmidThread
 
 
 # from metabolomics_genie.metabolomics import MetabolomicsThread
-class PathwayGenie(object):
+class PathwayGenie():
     '''Class to run PathwayGenie application.'''
 
     def __init__(self, ice_client_factory):
@@ -81,9 +81,9 @@ class PathwayGenie(object):
         if app == 'PartsGenie':
             return [PartsThread(query, idx)
                     for idx in range(len(query['designs']))]
-        elif app == 'PlasmidGenie':
+        if app == 'PlasmidGenie':
             return [PlasmidThread(query, self.__ice_client_factory)]
-        elif app == 'save':
+        if app == 'save':
             return [ice.ice.IceThread(query, self.__ice_client_factory)]
 
         raise ValueError('Unknown app: ' + app)

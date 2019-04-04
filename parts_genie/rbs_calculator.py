@@ -27,7 +27,7 @@ _RT_EFF = 2.222
 _K = 2500.0
 
 
-class RbsCalculator(object):
+class RbsCalculator():
     '''Class for calculating RBS.'''
 
     def __init__(self, r_rna, calc, temp=37.0):
@@ -497,8 +497,8 @@ class RbsCalculator(object):
                     # start_pos is counting starting from 0 (python)
                     distance_to_start = start_pos - m_rna_nt + 1
                     return distance_to_start - farthest_3_prime_r_rna
-                else:
-                    break
+                # else:
+                break
 
         return float('inf')
 

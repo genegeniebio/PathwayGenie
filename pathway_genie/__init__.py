@@ -14,16 +14,16 @@ from collections import defaultdict
 from io import BytesIO
 import json
 import os
+import ssl
 import sys
 import tempfile
 import traceback
-import urllib2
+from urllib.request import urlopen
 import uuid
 import zipfile
 
 from Bio import Restriction
 from flask import Flask, jsonify, make_response, request, Response, send_file
-from requests.exceptions import ConnectionError
 from synbiochem.utils import seq_utils
 from synbiochem.utils.ice_utils import ICEClientFactory, get_ice_id, \
     get_ice_number
@@ -102,7 +102,9 @@ def get_organisms():
     url = 'https://www.denovodna.com/software/return_species_list?term=' + \
         query['term']
 
-    response = urllib2.urlopen(url)
+    context = ssl._create_unverified_context()
+    response = urlopen(url, context=context)
+
     data = [{'taxonomy_id': _ORGANISMS[term[:term.rfind('(')].strip()],
              'name': term[:term.rfind('(')].strip(),
              'r_rna': term[term.rfind('(') + 1:term.rfind(')')]}
@@ -124,12 +126,12 @@ def connect_ice():
     try:
         _connect_ice(request)
         return json.dumps({'connected': True})
-    except ConnectionError, err:
-        print str(err)
+    except ConnectionError as err:
+        print(str(err))
         message = 'Unable to connect. Is the URL correct?'
         status_code = 503
-    except NetworkError, err:
-        print str(err)
+    except NetworkError as err:
+        print(str(err))
         message = 'Unable to connect. Are the username and password correct?'
         status_code = err.get_status()
 
@@ -148,12 +150,12 @@ def search_ice():
         return json.dumps([result['entryInfo']['partId']
                            for result in resp['results']
                            if data['term'] in result['entryInfo']['partId']])
-    except ConnectionError, err:
-        print str(err)
+    except ConnectionError as err:
+        print(str(err))
         message = 'Unable to connect. Is the URL correct?'
         status_code = 503
-    except NetworkError, err:
-        print str(err)
+    except NetworkError as err:
+        print(str(err))
         message = 'Unable to connect. Are the username and password correct?'
         status_code = err.get_status()
 

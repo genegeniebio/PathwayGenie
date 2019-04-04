@@ -101,8 +101,12 @@ plasmidGenieApp.controller("plasmidGenieCtrl", ["$scope", "ErrorService", "ICESe
 			
 			var designs = []
 			
-			for(var i=0; i < lines.length; i++ ) {
-				tokens = lines[i].split("\t")
+			for(var i=0; i < lines.length; i++) {
+				tokens = lines[i].split(/(\s+)/).filter(
+					function(e) {
+						return e.trim().length > 0;
+						}
+					);
 				designs.push({"name": tokens[0], "design": tokens.slice(1, tokens.length)})
 			}
 			

@@ -63,7 +63,7 @@ class IceThread(PathwayThread):
             else:
                 self._fire_designs_event('finished', iteration,
                                          message='Job completed')
-        except NetworkError, err:
+        except NetworkError as err:
             self._fire_designs_event('error', iteration,
                                      message=err.get_text())
 

@@ -11,7 +11,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-arguments
 
 
-class NuclAcidCalcRunner(object):
+class NuclAcidCalcRunner():
     '''NuclAcidCalcRunner.'''
 
     def __init__(self, calc, temp=37.0):

@@ -37,12 +37,12 @@ class TestRbsCalculator(unittest.TestCase):
             'AAGGCTCAGTATTCCCACTGAG'
 
         dgs = calc.calc_dgs(m_rna)
-        self.assertEqual(dgs.keys(), [41, 74])
+        self.assertEqual(list(dgs.keys()), [41, 74])
         self.assertAlmostEqual(dgs[41][0], -6.088674036389431)
         self.assertAlmostEqual(dgs[74][0], 5.793940143051147)
 
         dgs = calc.calc_dgs(m_rna)
-        self.assertEqual(dgs.keys(), [41, 74])
+        self.assertEqual(list(dgs.keys()), [41, 74])
         self.assertAlmostEqual(dgs[41][0], -6.088674036389431)
         self.assertAlmostEqual(dgs[74][0], 5.793940143051147)
 

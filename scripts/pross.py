@@ -12,11 +12,11 @@ import sys
 
 from Bio.Alphabet import generic_dna
 from Bio.Seq import Seq
-from synbiochem.utils import dna_utils, ice_utils, seq_utils
+from synbiochem.utils import dna_utils, seq_utils
 from synbiochem.utils.ice_utils import ICEClientFactory
 
 
-class ProssOptimiser(object):
+class ProssOptimiser():
     '''Class to optimise designs based on PROSS output.'''
 
     def __init__(self, ice_parms, taxonomy_id,
@@ -37,7 +37,7 @@ class ProssOptimiser(object):
     def generate_variants(self, template_ice_id, variants_aas):
         '''Generate variants.'''
 
-        for variants_aa_name, variant_aa_seq in variants_aas.iteritems():
+        for variants_aa_name, variant_aa_seq in variants_aas.items():
             # Generate new variant ICEEntry:
             ice_entry = self.__ice_client.get_ice_entry(template_ice_id)
             _, cds_feat, cds_aa_seq = _get_cds_feat(ice_entry)
@@ -72,6 +72,8 @@ class ProssOptimiser(object):
                     var_seq[:codon_start] + \
                     self.__cod_opt.get_best_codon(pair[1]) + \
                     var_seq[codon_start + 3:]
+
+        return var_seq
 
 
 def _get_cds_feat(ice_entry):

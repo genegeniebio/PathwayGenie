@@ -13,6 +13,7 @@ import random
 import sys
 import time
 import uuid
+
 import requests
 
 
@@ -34,7 +35,7 @@ _EUTOKEN = '''
 _HOST = 'https://twist-api.twistbioscience-staging.com/'
 
 
-class TwistClient(object):
+class TwistClient():
     '''Class to define client for the Twist API.'''
 
     def __init__(self, email, password, username='manchester_uni_api'):
@@ -90,9 +91,9 @@ class TwistClient(object):
                 resp = self.__get(url, {'scored': 'True',
                                         'id__in': ','.join(ids)})
 
-                if set([datum['id'] for datum in resp]) == set(ids):
+                if {datum['id'] for datum in resp} == set(ids):
                     break
-            except TwistError, exc:
+            except TwistError as exc:
                 errors += 1
 
                 if errors == max_errors:
@@ -219,12 +220,12 @@ def main(args):
     addresses = client.get_addresses()
     payments = client.get_payments()
 
-    print 'Accounts\t' + str(client.get_accounts())
-    print 'Prices\t' + str(client.get_prices())
-    print 'User data\t' + str(client.get_user_data())
-    print 'Addresses\t' + str(addresses)
-    print 'Payments\t' + str(payments)
-    print 'Vectors\t' + str(client.get_vectors())
+    print('Accounts\t' + str(client.get_accounts()))
+    print('Prices\t' + str(client.get_prices()))
+    print('User data\t' + str(client.get_user_data()))
+    print('Addresses\t' + str(addresses))
+    print('Payments\t' + str(payments))
+    print('Vectors\t' + str(client.get_vectors()))
 
     # Produce dummy order:
     sequences = []
@@ -239,7 +240,7 @@ def main(args):
 
     resp = client.submit_constructs(sequences, names)
     ids = [i['id'] for i in resp]
-    print 'Scores\t' + str(client.get_scores(ids))
+    print('Scores\t' + str(client.get_scores(ids)))
 
     quote_id = client.get_quote(ids,
                                 external_id=str(uuid.uuid4()),
@@ -247,11 +248,11 @@ def main(args):
                                 first_name=args[2],
                                 last_name=args[3])
 
-    print 'Quote\t' + str(client.check_quote(quote_id))
+    print('Quote\t' + str(client.check_quote(quote_id)))
 
     if payments:
-        print 'Submission\t' + \
-            str(client.submit_order(quote_id, payments[0]['id']))
+        print('Submission\t' +
+              str(client.submit_order(quote_id, payments[0]['id'])))
 
 
 if __name__ == '__main__':
