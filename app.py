@@ -9,7 +9,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import sys
 
-from pathway_genie import APP
+from pathway_genie.app import APP
 
 
 def main(argv):
