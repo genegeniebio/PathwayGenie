@@ -19,12 +19,11 @@ import uuid
 import zipfile
 
 from Bio import Restriction
+from flask import Flask, jsonify, request, Response
 from synbiochem.utils import seq_utils
 from synbiochem.utils.ice_utils import ICEClientFactory
 from synbiochem.utils.net_utils import NetworkError
 
-from flask import Flask, jsonify, make_response, request, Response, send_file
-from parts_genie import parts
 from pathway_genie import export, pathway
 
 
