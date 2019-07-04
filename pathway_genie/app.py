@@ -12,9 +12,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=wrong-import-order
 import json
 import os
-import ssl
 import traceback
-from urllib.request import urlopen
 import uuid
 import zipfile
 
@@ -89,20 +87,18 @@ def get_groups():
 
 @APP.route('/organisms/', methods=['POST'])
 def get_organisms():
-    '''Gets organisms from search term.'''
+    '''Gets organisms from search term.
+    Current bug means r_rna defaults to that of E. coli, which will affect
+    RBS calculation.'''
+
+    # TODO: limit the _ORGANISMS to prokaryotes.
     query = json.loads(request.data)
 
-    url = 'https://www.denovodna.com/software/return_species_list?term=' + \
-        query['term']
-
-    context = ssl._create_unverified_context()
-    response = urlopen(url, context=context)
-
-    data = [{'taxonomy_id': _ORGANISMS[term[:term.rfind('(')].strip()],
-             'name': term[:term.rfind('(')].strip(),
-             'r_rna': term[term.rfind('(') + 1:term.rfind(')')]}
-            for term in json.loads(response.read())
-            if term[:term.rfind('(')].strip() in _ORGANISMS]
+    data = [{'taxonomy_id': taxonomy_id,
+             'name': name,
+             'r_rna': 'acctcctta'}
+            for name, taxonomy_id in _ORGANISMS.items()
+            if query['term'] in name]
 
     return json.dumps(data)
 
