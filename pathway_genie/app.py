@@ -22,7 +22,7 @@ from synbiochem.utils import seq_utils
 from synbiochem.utils.ice_utils import ICEClientFactory
 from synbiochem.utils.net_utils import NetworkError
 
-from pathway_genie import export, pathway
+from pathway_genie import export, ncbi_taxonomy_utils, pathway
 
 
 # Configuration:
@@ -35,9 +35,19 @@ APP = Flask(__name__, static_folder=_STATIC_FOLDER)
 APP.config.from_object(__name__)
 APP.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024
 
+
+def _get_organisms():
+    '''Get all valid organisms (bacterial with codon usage tables).'''
+    organisms = seq_utils.get_codon_usage_organisms(expand=True, verbose=True)
+    bacterial_ids = ncbi_taxonomy_utils.get_taxonomy_ids('2', 'data')
+    valid_ids = set(organisms.values()).intersection(set(bacterial_ids))
+    return {name: tax_id for name, tax_id in organisms.items()
+            if tax_id in valid_ids}
+
+
 _ICE_CLIENT_FACTORY = ICEClientFactory()
 _MANAGER = pathway.PathwayGenie(_ICE_CLIENT_FACTORY)
-_ORGANISMS = seq_utils.get_codon_usage_organisms(expand=True, verbose=True)
+_ORGANISMS = _get_organisms()
 
 DEBUG = False
 TESTING = False
@@ -90,15 +100,13 @@ def get_organisms():
     '''Gets organisms from search term.
     Updated to assume r_rna corresponds to most prevalent
     See https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6107228/.'''
-
-    # TODO: limit the _ORGANISMS to prokaryotes.
     query = json.loads(request.data)
 
     data = [{'taxonomy_id': taxonomy_id,
              'name': name,
              'r_rna': 'acctccttt'}
             for name, taxonomy_id in _ORGANISMS.items()
-            if query['term'] in name]
+            if query['term'].lower() in name.lower()]
 
     return json.dumps(data)
 
