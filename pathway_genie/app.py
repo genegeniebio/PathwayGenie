@@ -88,15 +88,15 @@ def get_groups():
 @APP.route('/organisms/', methods=['POST'])
 def get_organisms():
     '''Gets organisms from search term.
-    Current bug means r_rna defaults to that of E. coli, which will affect
-    RBS calculation.'''
+    Updated to assume r_rna corresponds to most prevalent
+    See https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6107228/.'''
 
     # TODO: limit the _ORGANISMS to prokaryotes.
     query = json.loads(request.data)
 
     data = [{'taxonomy_id': taxonomy_id,
              'name': name,
-             'r_rna': 'acctcctta'}
+             'r_rna': 'acctccttt'}
             for name, taxonomy_id in _ORGANISMS.items()
             if query['term'] in name]
 
