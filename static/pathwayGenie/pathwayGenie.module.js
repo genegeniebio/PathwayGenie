@@ -1,4 +1,4 @@
-var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "helpApp", "iceApp", "lcrGenieApp", "partsGenieApp", "plasmidGenieApp"]);
+var pathwayGenieApp = angular.module("pathwayGenieApp", ["ngRoute", "helpApp", "iceApp", "partsGenieApp", "plasmidGenieApp"]);
 
 pathwayGenieApp.config(function($routeProvider, $locationProvider) {
 	$routeProvider.when("/", {

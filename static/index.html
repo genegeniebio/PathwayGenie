@@ -1,7 +1,7 @@
 <!doctype html>
 <html data-ng-app="pathwayGenieApp" data-ng-controller="pathwayGenieCtrl as ctrl">
 <head>
-<title>PathwayGenie</title>
+<title>PartsGenie</title>
 <link rel="stylesheet" href="static/style.css">
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
@@ -30,8 +30,6 @@
 <script src="static/ice/ice.module.js"></script>
 <script src="static/ice/ice.service.js"></script>
 <script src="static/ice/ice.ctrl.js"></script>
-<script src="static/lcrGenie/lcrGenie.module.js"></script>		
-<script src="static/lcrGenie/lcrGenie.ctrl.js"></script>
 <script src="static/pathwayGenie/pathwayGenie.module.js"></script>
 <script src="static/pathwayGenie/pathwayGenie.service.js"></script>
 <script src="static/pathwayGenie/pathwayGenie.ctrl.js"></script>
@@ -99,18 +97,7 @@
  								<a href="./plasmidGenie">PlasmidGenie</a>		
  							</li>		
  						</ul>		
- 					</li>		
- 					<li class="dropdown">		
- 						<a href="#" class="dropdown-toggle"		
- 							data-toggle="dropdown" role="button" aria-haspopup="true"		
- 							aria-expanded="false">Build<span class="caret"></span>		
- 						</a>		
- 						<ul class="dropdown-menu">		
- 							<li data-ng-class="{active: ctrl.route.current.app === 'AssemblyGenie'}">		
- 								<a href="./lcrGenie">LcrGenie</a>		
- 							</li>					
- 						</ul>		
- 					</li>	
+ 					</li>			
  				</ul>
 	    			<div class="nav navbar-nav navbar-right">
 	    			    	<button class="btn btn-primary navbar-btn" role="button"

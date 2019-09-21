@@ -1,1 +1,0 @@
-var lcrGenieApp = angular.module("lcrGenieApp", []);
