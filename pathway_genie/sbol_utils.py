@@ -137,7 +137,7 @@ def _get_design(uniprot_id):
         },
         "desc": "",
         "links": ["http://identifiers.org/uniprot/%s" % uniprot_id]
-    },
+    }
 
     design["features"] = [flank, rbs, cds, flank]
 

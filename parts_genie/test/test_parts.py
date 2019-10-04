@@ -15,6 +15,7 @@ import time
 import unittest
 
 from parts_genie.parts import PartsThread
+from pathway_genie import sbol_utils
 
 
 class TestPartsThread(unittest.TestCase):
@@ -36,6 +37,17 @@ class TestPartsThread(unittest.TestCase):
         '''Tests submit method with simple query.'''
         self.__test_submit('multiple_query.json')
 
+    def test_submit_sbol(self):
+        '''Tests submit method with sbol documents.'''
+        filenames = ['plasmid01.xml',
+                     'plasmid02.xml',
+                     'plasmid03.xml']
+
+        query = sbol_utils.to_query(
+            [_get_filename(filename) for filename in filenames])
+
+        self.__test_submit_query(query)
+
     def event_fired(self, event):
         '''Responds to event being fired.'''
         self.__status = event['update']['status']
@@ -49,6 +61,10 @@ class TestPartsThread(unittest.TestCase):
         with open(filename) as fle:
             query = json.load(fle)
 
+        self.__test_submit_query(query)
+
+    def __test_submit_query(self, query):
+        '''Tests submit method.'''
         # Do job in new thread, return result when completed:
         thread = PartsThread(query, idx=0, verbose=True)
         thread.add_listener(self)
@@ -63,6 +79,12 @@ class TestPartsThread(unittest.TestCase):
             time.sleep(1)
 
         self.assertEqual(self.__status, 'finished')
+
+
+def _get_filename(filename):
+    '''Get filename.'''
+    directory = os.path.dirname(os.path.realpath(__file__))
+    return os.path.join(directory, filename)
 
 
 if __name__ == "__main__":
