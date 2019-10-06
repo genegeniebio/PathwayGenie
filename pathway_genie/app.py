@@ -12,17 +12,19 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=wrong-import-order
 import json
 import os
+import tempfile
 import traceback
 import uuid
 import zipfile
 
 from Bio import Restriction
 from flask import Flask, jsonify, request, Response
+from werkzeug.utils import secure_filename
+
+from pathway_genie import export, ncbi_taxonomy_utils, pathway
 from synbiochem.utils import seq_utils
 from synbiochem.utils.ice_utils import ICEClientFactory
 from synbiochem.utils.net_utils import NetworkError
-
-from pathway_genie import export, ncbi_taxonomy_utils, pathway
 
 
 # Configuration:
@@ -31,9 +33,11 @@ SECRET_KEY = str(uuid.uuid4())
 # Create application:
 _STATIC_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                               '../static')
+
 APP = Flask(__name__, static_folder=_STATIC_FOLDER)
 APP.config.from_object(__name__)
 APP.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024
+APP.config['UPLOAD_FOLDER'] = tempfile.gettempdir()
 
 
 def _get_organisms():
@@ -70,6 +74,20 @@ def get_path(path):
 def submit():
     '''Responds to submission.'''
     return json.dumps({'job_ids': _MANAGER.submit(request.data)})
+
+
+@APP.route('/submit_sbol', methods=['POST'])
+def submit_sbol():
+    '''Responds to submission.'''
+    filenames = []
+
+    for file in request.files.getlist('sbol'):
+        filename = secure_filename(file.filename)
+        filename = os.path.join(APP.config['UPLOAD_FOLDER'], filename)
+        file.save(filename)
+        filenames.append(filename)
+
+    return json.dumps({'job_ids': _MANAGER.submit(filenames, True)})
 
 
 @APP.route('/progress/<job_id>')

@@ -13,6 +13,7 @@ import time
 
 import ice.ice
 from parts_genie.parts import PartsThread
+from pathway_genie import sbol_utils
 from plasmid_genie.plasmid import PlasmidThread
 
 
@@ -26,9 +27,12 @@ class PathwayGenie():
         self.__threads = {}
         self.__writers = {}
 
-    def submit(self, data):
+    def submit(self, data, sbol=False):
         '''Responds to submission.'''
-        query = json.loads(data)
+        if sbol:
+            query = _get_query(data)
+        else:
+            query = json.loads(data)
 
         # Do job in new thread, return result when completed:
         job_ids = []
@@ -100,3 +104,8 @@ class ThreadPool(Thread):
         for thread in self.__threads:
             thread.start()
             thread.join()
+
+
+def _get_query(files):
+    '''Get query.'''
+    return sbol_utils.to_query(files)
