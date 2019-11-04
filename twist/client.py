@@ -18,18 +18,11 @@ import requests
 
 
 _APITOKEN = '''
-    eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjI2Y2QzNmU3LTBiNWEtNGUwMC1h
-    NTc5LWE5ZWYxYzMxOGJiNiIsInVzZXJfaWQiOiJhZmQ0MTdhNi02YjUwLTQ3ODEtYWNjMC00M
-    mJlNjhiYmEyZGYiLCJ1c2VybmFtZSI6Im1hbmNoZXN0ZXJfdW5pX2FwaSIsImV4cCI6MTYxMT
-    QxMzUwNH0.WtfTiuBhWWxxQCgqzk5v8uoY3bbWKYoAfKlobDw9gvs
+    *
     '''
 
 _EUTOKEN = '''
-    eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6ImE0azBtMDAwMDAwOFJFYUFBTSIs
-    ImVtYWlsIjoibmVpbC5zd2FpbnN0b25AbWFuY2hlc3Rlci5hYy51ayIsImFjY291bnQiOiIwM
-    DEzMTAwMDAxY1NDRVRBQTQiLCJhY2NvdW50X2FkbWluIjp0cnVlLCJyZWFkIjp0cnVlLCJ3cm
-    l0ZSI6dHJ1ZSwiZXhwIjoxNjAyNzczNzM0fQ.Ix1BMjpfufnqXMd8VXotm4Pimq10IBk9sZgA
-    N-29bBo
+    *
     '''
 
 _HOST = 'https://twist-api.twistbioscience-staging.com/'
