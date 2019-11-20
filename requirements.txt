@@ -1,5 +1,4 @@
 cython
 Flask
 pandas
-pysbol
 synbiochem-py
