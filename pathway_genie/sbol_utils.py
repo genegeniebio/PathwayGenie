@@ -9,7 +9,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import sys
 
-# from sbol import Document
+from sbol import Document
 from synbiochem.utils.seq_utils import get_uniprot_values
 
 _CDS_SO = 'http://identifiers.org/so/SO:0000316'
@@ -24,8 +24,7 @@ def to_query(filenames):
 
 def _parse(filenames):
     '''Parse SBOL documents.'''
-    # docs = [Document() for _ in filenames]
-    docs = []
+    docs = [Document() for _ in filenames]
 
     for doc, filename in zip(docs, filenames):
         doc.read(filename)
