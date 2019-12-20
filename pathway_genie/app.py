@@ -88,6 +88,9 @@ def submit_sbol():
         filenames.append(filename)
         print(filename)
 
+        with open(filename, 'r') as f:
+            print(f.read())
+
     return json.dumps({'job_ids': _MANAGER.submit(filenames, True)})
 
 
