@@ -1,7 +1,4 @@
 cython
-idna
 Flask
-pandas
-pyOpenSSL
 pySBOL
 synbiochem-py
