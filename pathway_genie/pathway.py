@@ -108,4 +108,6 @@ class ThreadPool(Thread):
 
 def _get_query(files):
     '''Get query.'''
-    return sbol_utils.to_query(files)
+    query = sbol_utils.to_query(files)
+    print(query)
+    return query

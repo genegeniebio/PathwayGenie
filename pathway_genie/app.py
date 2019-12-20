@@ -19,12 +19,12 @@ import zipfile
 
 from Bio import Restriction
 from flask import Flask, jsonify, request, Response
-from werkzeug.utils import secure_filename
-
-from pathway_genie import export, ncbi_taxonomy_utils, pathway
 from synbiochem.utils import seq_utils
 from synbiochem.utils.ice_utils import ICEClientFactory
 from synbiochem.utils.net_utils import NetworkError
+from werkzeug.utils import secure_filename
+
+from pathway_genie import export, ncbi_taxonomy_utils, pathway
 
 
 # Configuration:
@@ -86,6 +86,7 @@ def submit_sbol():
         filename = os.path.join(APP.config['UPLOAD_FOLDER'], filename)
         file.save(filename)
         filenames.append(filename)
+        print(filename)
 
     return json.dumps({'job_ids': _MANAGER.submit(filenames, True)})
 
