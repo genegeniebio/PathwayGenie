@@ -24,7 +24,7 @@ docker run -d \
     jrcs/letsencrypt-nginx-proxy-companion
 
 docker run --name pathwaygenie -d -p :5000 \
-    -e VIRTUAL_HOST=parts.synbiochem.co.uk \
+    -e VIRTUAL_HOST=parts.genemill.liv.ac.uk \
     -e LETSENCRYPT_EMAIL=neil.swainston@liverpool.ac.uk \
-    -e LETSENCRYPT_HOST=parts.synbiochem.co.uk \
+    -e LETSENCRYPT_HOST=parts.genemill.liv.ac.uk \
     partsgenie
