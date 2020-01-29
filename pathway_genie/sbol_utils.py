@@ -9,7 +9,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import sys
 
-from sbol import Document
+from sbol import Document, SO_CDS, SO_RBS
 from synbiochem.utils import dna_utils
 from synbiochem.utils.seq_utils import get_uniprot_values
 
@@ -63,68 +63,71 @@ def _get_design(doc, comp_def):
                          for c in comp_def.components]:
         design['features'].append(_get_feature(sub_comp_def))
 
-    # Flanking region:
-    flank = {
-        'typ': dna_utils.SO_ASS_COMP,
-        'name': 'Sequence of defined melting temperature',
-        'seq': '',
-        'parameters': {
-            'Tm target': 70
-        },
-        'temp_params': {
-            'fixed': True,
-            'required': ['name', 'tm'],
-            'valid': True,
-            'id': '_flank_id'
-        }
-    }
-
-    # RBS:
-    rbs = {
-        'typ': dna_utils.SO_RBS,
-        'name': 'RBS',
-        'end': 60,
-        'parameters': {
-            'TIR target': 15000
-        },
-        'temp_params': {
-            'fixed': False,
-            'required': ['name', 'tir'],
-            'min_end': 35,
-            'max_end': 10000,
-            'valid': True,
-            'id': '_rbs_id'
-        }
-    }
-
-    # CDS:
-    uniprot_vals = get_uniprot_values([uniprot_id], ['sequence'])
-
-    if uniprot_id not in uniprot_vals:
-        raise ValueError('Uniprot id not found: %s' % uniprot_id)
-
-    cds = {
-        'typ': dna_utils.SO_CDS,
-        'name': uniprot_id,
-        'temp_params': {
-            'fixed': False,
-            'required': ['name', 'prot'],
-            'valid': True,
-            'id': '_cds_id',
-            'aa_seq': uniprot_vals[uniprot_id]['Sequence'],
-            'orig_seq': uniprot_vals[uniprot_id]['Sequence']
-        },
-        'desc': '',
-        'links': ['http://identifiers.org/uniprot/%s' % uniprot_id]
-    }
-
-    design['features'] = [flank, rbs, cds, flank]
-
     return design
 
 
 def _get_feature(comp_def):
     '''Get feature.'''
+    if dna_utils.SO_ASS_COMP in comp_def.roles:
+        # Assembly component:
+        return {
+            'typ': dna_utils.SO_ASS_COMP,
+            'name': comp_def.identity,
+            'seq': '',
+            'parameters': {
+                'Tm target': 70
+            },
+            'temp_params': {
+                'fixed': True,
+                'required': ['name', 'tm'],
+                'valid': True,
+                'id': comp_def.displayId
+            }
+        }
+
+    if SO_RBS in comp_def.roles:
+        # RBS:
+        return {
+            'typ': dna_utils.SO_RBS,
+            'name': comp_def.identity,
+            'end': 60,
+            'parameters': {
+                'TIR target': float(comp_def.displayId.split('_')[1])
+            },
+            'temp_params': {
+                'fixed': False,
+                'required': ['name', 'tir'],
+                'min_end': 35,
+                'max_end': 10000,
+                'valid': True,
+                'id': comp_def.displayId
+            }
+        }
+
+    if SO_CDS in comp_def.roles:
+        # CDS:
+        uniprot_id = comp_def.displayId.split('_')[0]
+        uniprot_vals = get_uniprot_values([uniprot_id], ['sequence'])
+
+        if uniprot_id not in uniprot_vals:
+            raise ValueError('Uniprot id not found: %s' % uniprot_id)
+
+        return {
+            'typ': dna_utils.SO_CDS,
+            'name': comp_def.identity,
+            'temp_params': {
+                'fixed': False,
+                'required': ['name', 'prot'],
+                'valid': True,
+                'id': comp_def.displayId,
+                'aa_seq': uniprot_vals[uniprot_id]['Sequence'],
+                'orig_seq': uniprot_vals[uniprot_id]['Sequence']
+            },
+            'desc': '',
+            'links': ['http://identifiers.org/uniprot/%s' % uniprot_id]
+        }
+
+    raise ValueError('Invalid roles in component definition: %s' % comp_def)
 
 
 def main(args):
