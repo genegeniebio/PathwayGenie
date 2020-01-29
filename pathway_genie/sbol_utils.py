@@ -10,52 +10,27 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import sys
 
 from sbol import Document
+from synbiochem.utils import dna_utils
 from synbiochem.utils.seq_utils import get_uniprot_values
 
-_CDS_SO = 'http://identifiers.org/so/SO:0000316'
 
-
-def to_query(filenames):
+def to_query(filename):
     '''Convert SBOL documents to PartsGenie query.'''
-    docs = _parse(filenames)
-    uniprot_docs = _get_uniprot_docs(docs)
-    return _to_query(uniprot_docs)
+    doc = Document()
+    doc.read(filename)
+    return _to_query(doc)
 
 
-def _parse(filenames):
-    '''Parse SBOL documents.'''
-    docs = [Document() for _ in filenames]
-
-    for doc, filename in zip(docs, filenames):
-        doc.read(filename)
-
-    return docs
-
-
-def _get_uniprot_docs(docs):
-    '''Get uniprot docs.'''
-    uniprot_docs = {}
-
-    for doc in docs:
-        for comp_def in doc.componentDefinitions:
-            if _CDS_SO in comp_def.roles:
-                uniprot_docs[comp_def.description] = comp_def.identity
-
-    return uniprot_docs
-
-
-def _to_query(uniprot_docs):
+def _to_query(doc):
     '''Get query.'''
     query = {}
     query['app'] = 'PartsGenie'
 
     query['designs'] = []
 
-    for uniprot_id, sbol_comp_def in uniprot_docs.items():
-        try:
-            query['designs'].append(_get_design(uniprot_id, sbol_comp_def))
-        except ValueError:
-            pass
+    for comp_def in doc.componentDefinitions:
+        if dna_utils.SO_GENE in comp_def.roles:
+            query['designs'].append(_get_design(doc, comp_def))
 
     query['filters'] = {
         'max_repeats': 5,
@@ -77,15 +52,20 @@ def _to_query(uniprot_docs):
     return query
 
 
-def _get_design(uniprot_id, sbol_comp_def):
+def _get_design(doc, comp_def):
     '''Get design.'''
     design = {}
-    design['name'] = 'Part'
-    design['desc'] = sbol_comp_def
+    design['name'] = comp_def.displayId
+    design['desc'] = comp_def.identity
+    design['features'] = []
+
+    for sub_comp_def in [doc.getComponentDefinition(c.definition)
+                         for c in comp_def.components]:
+        design['features'].append(_get_feature(sub_comp_def))
 
     # Flanking region:
     flank = {
-        'typ': 'http://purl.obolibrary.org/obo/SO_0000143',
+        'typ': dna_utils.SO_ASS_COMP,
         'name': 'Sequence of defined melting temperature',
         'seq': '',
         'parameters': {
@@ -101,7 +81,7 @@ def _get_design(uniprot_id, sbol_comp_def):
 
     # RBS:
     rbs = {
-        'typ': 'http://purl.obolibrary.org/obo/SO_0000139',
+        'typ': dna_utils.SO_RBS,
         'name': 'RBS',
         'end': 60,
         'parameters': {
@@ -124,7 +104,7 @@ def _get_design(uniprot_id, sbol_comp_def):
         raise ValueError('Uniprot id not found: %s' % uniprot_id)
 
     cds = {
-        'typ': 'http://purl.obolibrary.org/obo/SO_0000316',
+        'typ': dna_utils.SO_CDS,
         'name': uniprot_id,
         'temp_params': {
             'fixed': False,
@@ -143,10 +123,14 @@ def _get_design(uniprot_id, sbol_comp_def):
     return design
 
 
+def _get_feature(comp_def):
+    '''Get feature.'''
+
+
 def main(args):
     '''main method.'''
     import json
-    query = to_query(args)
+    query = to_query(args[0])
     print(json.dumps(query, indent=4))
 
 
