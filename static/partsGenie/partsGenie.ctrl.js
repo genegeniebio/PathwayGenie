@@ -43,7 +43,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 
 	self.templates = [
 		{
-			typ: "http://purl.obolibrary.org/obo/SO_0000001",
+			typ: "http://identifiers.org/so/SO:0000001",
 			name: "Defined sequence",
 			seq: "",
 			temp_params: {
@@ -54,7 +54,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 			}
 		},
 		{
-			typ: "http://purl.obolibrary.org/obo/SO_0000449",
+			typ: "http://identifiers.org/so/SO:0000449",
 			end: 100,
 			name: "Randomised sequence",
 			temp_params: {
@@ -67,7 +67,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 			}
 		},
 		{
-			typ: "http://purl.obolibrary.org/obo/SO_0000143",
+			typ: "http://identifiers.org/so/SO:0000143",
 			name: "Sequence of defined melting temperature",
 			seq: "",
 			parameters: {
@@ -81,7 +81,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 			}
 		},
 		{
-			typ: "http://purl.obolibrary.org/obo/SO_0000296",
+			typ: "http://identifiers.org/so/SO:0000296",
 			name: "Origin of replication",
 			seq: "",
 			temp_params: {
@@ -92,7 +92,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 			}
 		},
 		{
-			typ: "http://purl.obolibrary.org/obo/SO_0000167",
+			typ: "http://identifiers.org/so/SO:0000167",
 			name: "Promoter",
 			seq: "",
 			temp_params: {
@@ -103,7 +103,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 			}
 		},
 		{
-			typ: "http://purl.obolibrary.org/obo/SO_0000139",
+			typ: "http://identifiers.org/so/SO:0000139",
 			name:"RBS",
 			end: 60,
 			parameters: {
@@ -119,7 +119,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 			}
 		},
 		{
-			typ: "http://purl.obolibrary.org/obo/SO_0000316",
+			typ: "http://identifiers.org/so/SO:0000316",
 			name: "CDS",
 			temp_params: {
 				fixed: false,
@@ -129,7 +129,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 			}
 		},
 		{
-			typ: "http://purl.obolibrary.org/obo/SO_0000316",
+			typ: "http://identifiers.org/so/SO:0000316",
 			name: "Fixed coding sequence",
 			temp_params: {
 				fixed: true,
@@ -139,7 +139,7 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 			}
 		},
 		{
-			typ: "http://purl.obolibrary.org/obo/SO_0000141",
+			typ: "http://identifiers.org/so/SO:0000141",
 			name: "Terminator",
 			seq: "",
 			temp_params: {
@@ -223,8 +223,8 @@ partsGenieApp.controller("partsGenieCtrl", ["$scope", "$uibModal", "ErrorService
 			design = self.query.designs[i];
 		
 			for(var j = 0; j < design.features.length; j++) {
-				if(design.features[j].typ == "http://purl.obolibrary.org/obo/SO_0000139"
-					|| (design.features[j].typ == "http://purl.obolibrary.org/obo/SO_0000316"
+				if(design.features[j].typ == "http://identifiers.org/so/SO:0000139"
+					|| (design.features[j].typ == "http://identifiers.org/so/SO:0000316"
 						&& !design.features[j].temp_params.fixed)) {
 					return true;
 				}

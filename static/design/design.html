@@ -10,7 +10,7 @@
 			dnd-effect-allowed="copy"
 			uib-tooltip="{{feature.name}}"
 			dnd-dragstart="copyFeature({args: feature})">
-			<div class="feature SO{{feature.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}">
+			<div class="feature SO{{feature.typ.replace('http://identifiers.org/so/SO:', '')}}">
 			</div>
 		</button>
 		<div class="pull-right"
@@ -41,7 +41,7 @@
 						data-ng-class="{selected: selected() === feature, invalid: !feature.temp_params.valid}"
 						data-ng-click="toggleSelected({args: feature})"
 						data-ng-form
-						class="dropped feature SO{{feature.typ.replace('http://purl.obolibrary.org/obo/SO_', '')}}"
+						class="dropped feature SO{{feature.typ.replace('http://identifiers.org/so/SO:', '')}}"
 						uib-tooltip="{{feature.name}}"
 						dnd-type="'feature'"
 						dnd-draggable="feature"
@@ -52,7 +52,7 @@
 						</div>
 						<div class="glyphicon glyphicon-copy pull-left glyphicon-grey glyphicon-small"
 							data-ng-click="bulkUniprot({args: $index})"
-							data-ng-if="feature.typ == 'http://purl.obolibrary.org/obo/SO_0000316' && !feature.temp_params.fixed">
+							data-ng-if="feature.typ == 'http://identifiers.org/so/SO:0000316' && !feature.temp_params.fixed">
 						</div>
 					</div>
 				</div>

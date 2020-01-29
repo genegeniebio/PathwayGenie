@@ -7,8 +7,10 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=consider-using-set-comprehension
 # pylint: disable=invalid-name
 # pylint: disable=wrong-import-order
+from synbiochem.utils import dna_utils
 from synbiochem.utils.ice_utils import get_ice_id
 
 import pandas as pd
@@ -17,7 +19,7 @@ import pandas as pd
 def export(ice_client, data):
     '''Export.'''
     source = 'plasmid' \
-        if data[0]['typ'] == 'http://purl.obolibrary.org/obo/SO_0000637' \
+        if data[0]['typ'] == dna_utils.SO_PLASMID \
         else 'parts'
 
     if source == 'plasmid':
