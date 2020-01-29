@@ -28,9 +28,9 @@ def _to_query(doc):
 
     query['designs'] = []
 
-    for comp_def in doc.componentDefinitions:
-        if dna_utils.SO_GENE in comp_def.roles:
-            query['designs'].append(_get_design(doc, comp_def))
+    for comp_def in [c for c in doc.componentDefinitions
+                     if dna_utils.SO_GENE in c.roles]:
+        query['designs'].append(_get_design(doc, comp_def))
 
     query['filters'] = {
         'max_repeats': 5,
