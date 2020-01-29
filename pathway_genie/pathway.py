@@ -17,7 +17,6 @@ from pathway_genie import sbol_utils
 from plasmid_genie.plasmid import PlasmidThread
 
 
-# from metabolomics_genie.metabolomics import MetabolomicsThread
 class PathwayGenie():
     '''Class to run PathwayGenie application.'''
 
@@ -106,8 +105,8 @@ class ThreadPool(Thread):
             thread.join()
 
 
-def _get_query(files):
+def _get_query(filenames):
     '''Get query.'''
-    query = sbol_utils.to_query(files)
+    query = sbol_utils.to_query(filenames[0])
     print(query)
     return query
