@@ -13,7 +13,7 @@ import os
 import sys
 import tarfile
 import tempfile
-import requests
+import urllib
 
 
 def get_taxonomy_ids(parent_id, out_dir):
@@ -58,11 +58,7 @@ def _get_file(out_dir):
 
     if not os.path.exists(path):
         url_dir = 'ftp://ftp.ncbi.nih.gov/pub/taxonomy/'
-
-        resp = requests.get('%s%s' % (url_dir, filename), allow_redirects=True)
-
-        with open(path, 'w') as target_file:
-            target_file.write_bytes(resp.content)
+        urllib.request.urlretrieve('%s%s' % (url_dir, filename), path)
 
     return path
 
