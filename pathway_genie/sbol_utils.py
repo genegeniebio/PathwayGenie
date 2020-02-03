@@ -45,7 +45,7 @@ def _to_query(doc):
 
     query['organism'] = {
         'taxonomy_id': '37762',
-        'name': 'Escherichia coli',
+        # 'name': 'Escherichia coli',
         'r_rna': 'acctccttt'
     }
 
