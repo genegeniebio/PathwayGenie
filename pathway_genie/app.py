@@ -91,7 +91,10 @@ def submit_sbol():
         with open(filename, 'r') as f:
             print(f.read())
 
-    return json.dumps({'job_ids': _MANAGER.submit(filenames, True)})
+    taxonomy_id = request.form['taxonomy_id']
+
+    return json.dumps({'job_ids':
+                       _MANAGER.submit(filenames, taxonomy_id, True)})
 
 
 @APP.route('/progress/<job_id>')

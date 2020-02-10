@@ -26,10 +26,10 @@ class PathwayGenie():
         self.__threads = {}
         self.__writers = {}
 
-    def submit(self, data, sbol=False):
+    def submit(self, data, taxonomy_id=None, sbol=False):
         '''Responds to submission.'''
         if sbol:
-            query = _get_query(data)
+            query = _get_query(data, taxonomy_id)
         else:
             query = json.loads(data)
 
@@ -105,8 +105,8 @@ class ThreadPool(Thread):
             thread.join()
 
 
-def _get_query(filenames):
+def _get_query(filenames, taxonomy_id):
     '''Get query.'''
-    query = sbol_utils.to_query(filenames[0])
+    query = sbol_utils.to_query(filenames[0], taxonomy_id)
     print(query)
     return query
