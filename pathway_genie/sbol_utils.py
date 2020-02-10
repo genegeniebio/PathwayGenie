@@ -7,21 +7,19 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-import sys
-
 from sbol import Document, SO_CDS, SO_RBS
 from synbiochem.utils import dna_utils
 from synbiochem.utils.seq_utils import get_uniprot_values
 
 
-def to_query(filename):
+def to_query(filename, taxonomy_id):
     '''Convert SBOL documents to PartsGenie query.'''
     doc = Document()
     doc.read(filename)
-    return _to_query(doc)
+    return _to_query(doc, taxonomy_id)
 
 
-def _to_query(doc):
+def _to_query(doc, taxonomy_id):
     '''Get query.'''
     query = {}
     query['app'] = 'PartsGenie'
@@ -44,8 +42,7 @@ def _to_query(doc):
     }
 
     query['organism'] = {
-        'taxonomy_id': '37762',
-        # 'name': 'Escherichia coli',
+        'taxonomy_id': taxonomy_id,
         'r_rna': 'acctccttt'
     }
 
@@ -128,14 +125,3 @@ def _get_feature(comp_def):
         }
 
     raise ValueError('Invalid roles in component definition: %s' % comp_def)
-
-
-def main(args):
-    '''main method.'''
-    import json
-    query = to_query(args[0])
-    print(json.dumps(query, indent=4))
-
-
-if __name__ == '__main__':
-    main(sys.argv[1:])

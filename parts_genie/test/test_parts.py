@@ -37,16 +37,14 @@ class TestPartsThread(unittest.TestCase):
         '''Tests submit method with simple query.'''
         self.__test_submit('multiple_query.json')
 
-    def test_submit_sbol(self):
+    def test_submit_sbol(self, taxonomy_id='37762'):
         '''Tests submit method with sbol documents.'''
-        filenames = ['plasmid01.xml',
-                     'plasmid02.xml',
-                     'plasmid03.xml']
+        filenames = ['sbol_no_rbs.xml',
+                     'sbol_rbs.xml']
 
-        query = sbol_utils.to_query(
-            [_get_filename(filename) for filename in filenames])
-
-        self.__test_submit_query(query)
+        for filename in filenames:
+            query = sbol_utils.to_query(_get_filename(filename), taxonomy_id)
+            self.__test_submit_query(query)
 
     def event_fired(self, event):
         '''Responds to event being fired.'''

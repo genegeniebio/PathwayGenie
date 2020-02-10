@@ -6,7 +6,7 @@
 			"desc": "",
 			"features": [
 				{
-					"typ": "http://purl.obolibrary.org/obo/SO_0000139",
+					"typ": "http://identifiers.org/so/SO:0000139",
 					"end": 60,
 					"name": "ribosome entry site",
 					"parameters": {
@@ -17,10 +17,10 @@
 					}
 				},
 				{
-					"typ": "http://purl.obolibrary.org/obo/SO_0000316",
+					"typ": "http://identifiers.org/so/SO:0000316",
 					"options": [
 						{
-							"typ": "http://purl.obolibrary.org/obo/SO_0000316",
+							"typ": "http://identifiers.org/so/SO:0000316",
 							"name": "GFP",
 							"temp_params": {
 								"aa_seq": "MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTFSYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITHGMDELYK",
@@ -36,7 +36,7 @@
 			"desc": "",
 			"features": [
 				{
-					"typ": "http://purl.obolibrary.org/obo/SO_0000139",
+					"typ": "http://identifiers.org/so/SO:0000139",
 					"end": 40,
 					"name": "ribosome entry site",
 					"parameters": {
@@ -47,10 +47,10 @@
 					}
 				},
 				{
-					"typ": "http://purl.obolibrary.org/obo/SO_0000316",
+					"typ": "http://identifiers.org/so/SO:0000316",
 					"options": [
 						{
-							"typ": "http://purl.obolibrary.org/obo/SO_0000316",
+							"typ": "http://identifiers.org/so/SO:0000316",
 							"name": "KSI",
 							"temp_params": {
 								"aa_seq": "MNLPTAQEVQGLMARYIELVDVGDIEAIVQMYADDATVEDPFGQPPIHGREQIAAFYRQGLGGGKVRACLTGPVRASHNGCGAMPFRVEMVWNGQPCALDVIDVMRFDEHGRIQTMQAYWSEVNLSVREPQ",

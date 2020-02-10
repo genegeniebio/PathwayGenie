@@ -6,7 +6,7 @@
 			"desc": "",
 			"features": [
 				{
-					"typ": "http://purl.obolibrary.org/obo/SO_0001416",
+					"typ": "http://identifiers.org/so/SO:0001416",
 					"seq": "",
 					"name": "5' flanking region",
 					"temp_params": {
@@ -14,7 +14,7 @@
 					}
 				},
 				{
-					"typ": "http://purl.obolibrary.org/obo/SO_0000143",
+					"typ": "http://identifiers.org/so/SO:0000143",
 					"name": "assembly component",
 					"parameters": {
 						"Tm target": 70
@@ -24,7 +24,7 @@
 					}
 				},
 				{
-					"typ": "http://purl.obolibrary.org/obo/SO_0000139",
+					"typ": "http://identifiers.org/so/SO:0000139",
 					"end": 60,
 					"name": "ribosome entry site",
 					"parameters": {
@@ -35,10 +35,10 @@
 					}
 				},
 				{
-					"typ": "http://purl.obolibrary.org/obo/SO_0000316",
+					"typ": "http://identifiers.org/so/SO:0000316",
 					"options": [
 						{
-							"typ": "http://purl.obolibrary.org/obo/SO_0000316",
+							"typ": "http://identifiers.org/so/SO:0000316",
 							"name": "coding sequence",
 							"temp_params": {
 								"aa_seq": "MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTFSYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITHGMDELYK",
@@ -48,7 +48,7 @@
 					]
 				},
 				{
-					"typ": "http://purl.obolibrary.org/obo/SO_0001417",
+					"typ": "http://identifiers.org/so/SO:0001417",
 					"seq": "",
 					"name": "3' flanking region",
 					"temp_params": {
