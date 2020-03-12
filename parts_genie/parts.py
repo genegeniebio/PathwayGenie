@@ -102,12 +102,7 @@ class PartsSolution():
 
     def get_result(self):
         '''Return result of solution.'''
-        dnas = dna_utils.expand(self.__dna)
-
-        import json
-        print(json.dumps(dnas, indent=2))
-
-        return dnas
+        return dna_utils.expand(self.__dna)
 
     def get_energy(self, dna=None):
         '''Gets the (simulated annealing) energy.'''

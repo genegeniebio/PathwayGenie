@@ -86,10 +86,6 @@ def submit_sbol():
         filename = os.path.join(APP.config['UPLOAD_FOLDER'], filename)
         file.save(filename)
         filenames.append(filename)
-        print(filename)
-
-        with open(filename, 'r') as f:
-            print(f.read())
 
     taxonomy_id = request.form['taxonomy_id']
 
@@ -149,11 +145,9 @@ def connect_ice():
         _connect_ice(request)
         return json.dumps({'connected': True})
     except ConnectionError as err:
-        print(str(err))
         message = 'Unable to connect. Is the URL correct?'
         status_code = 503
     except NetworkError as err:
-        print(str(err))
         message = 'Unable to connect. Are the username and password correct?'
         status_code = err.get_status()
 
@@ -173,11 +167,9 @@ def search_ice():
                            for result in resp['results']
                            if data['term'] in result['entryInfo']['partId']])
     except ConnectionError as err:
-        print(str(err))
         message = 'Unable to connect. Is the URL correct?'
         status_code = 503
     except NetworkError as err:
-        print(str(err))
         message = 'Unable to connect. Are the username and password correct?'
         status_code = err.get_status()
 
