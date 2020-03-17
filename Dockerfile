@@ -16,4 +16,4 @@ RUN curl -fsSL https://www.tbi.univie.ac.at/RNA/download/sourcecode/2_4_x/$VIENN
 	&& pip install --upgrade pip \
 	&& pip install -r requirements.txt --upgrade
 
-CMD ["python", "-u", "app.py"]
+CMD ["python", "-u", "main.py"]
