@@ -8,10 +8,11 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=invalid-name
+# pylint: disable=relative-beyond-top-level
 # pylint: disable=too-many-arguments
 import sys
 
-from scripts.writer import write
+from .writer import write
 
 
 def do_write(in_filename, out_filename, ice_url, ice_username, ice_password,
