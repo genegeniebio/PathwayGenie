@@ -293,7 +293,8 @@ class PartsSolution():
 
     def __calc_tirs(self, rbs, cds):
         '''Performs TIR calculations.'''
-        tir_vals = self.__calc.calc_dgs(rbs['seq'] + cds['seq'])
+        tir_vals = self.__calc.calc_dgs(rbs['seq'] + cds['seq'],
+                                        len(rbs['seq']))
 
         cds['temp_params']['tir_vals'] = tir_vals
 

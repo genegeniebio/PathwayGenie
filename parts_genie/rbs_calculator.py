@@ -26,6 +26,12 @@ _START_CODON_PATT = r'(?=([ACGT]TG))'
 _RT_EFF = 2.222
 _K = 2500.0
 
+_START_CODON_ENERGIES = {'ATG': -1.194, 'GTG': -0.0748, 'TTG': -0.0435,
+                         'CTG': -0.03406}
+
+_MEAN_SYART_CODON_ENERGY = \
+    sum(_START_CODON_ENERGIES.values()) / len(_START_CODON_ENERGIES)
+
 
 class RbsCalculator():
     '''Class for calculating RBS.'''
@@ -36,7 +42,7 @@ class RbsCalculator():
         self.__optimal_spacing = 5
         self.__cutoff = 35
 
-    def calc_dgs(self, m_rna, limit=float('inf')):
+    def calc_dgs(self, m_rna, cds_start=float('NaN'), limit=float('inf')):
         ''''Calculates each dg term in the free energy model and sums them to
         create dg_total.'''
         m_rna = m_rna.upper()
@@ -45,10 +51,15 @@ class RbsCalculator():
         dgs_tirs = []
         count = 0
 
-        for match in re.finditer(_START_CODON_PATT, m_rna):
+        # Ensure CDS start position is added (not all CDS start with a
+        # _START_CODON_PATT):
+        all_start_pos = {match.start()
+                         for match in re.finditer(_START_CODON_PATT, m_rna)}
 
-            start_pos = match.start()
+        if math.isfinite(cds_start):
+            all_start_pos.add(cds_start)
 
+        for start_pos in all_start_pos:
             try:
                 d_g = self.__calc_dg(m_rna, start_pos)
 
@@ -148,9 +159,9 @@ class RbsCalculator():
             dangles = 'all'
 
         # Start codon energy:
-        start_codon_energies = {'ATG': -1.194, 'GTG': -0.0748, 'TTG': -0.0435,
-                                'CTG': -0.03406}
-        dg_start = start_codon_energies[m_rna[start_pos:start_pos + 3]]
+
+        dg_start = _START_CODON_ENERGIES.get(m_rna[start_pos:start_pos + 3],
+                                             _MEAN_SYART_CODON_ENERGY)
 
         # Energy of m_rna folding:
         [dg_m_rna, _, _] = \
